@@ -6,3 +6,28 @@ body {
   font-family: 'Inter', sans-serif;
   transition: background-color 0.3s, color 0.3s;
 }
+
+/* === Shooting Comets Animation === */
+@keyframes cometMove {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-100vh) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.comet {
+  position: absolute;
+  width: 4px;
+  height: 80px;
+  background: linear-gradient(to bottom, white, transparent);
+  opacity: 0;
+  animation-name: cometMove;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  border-radius: 9999px;
+  pointer-events: none;
+}

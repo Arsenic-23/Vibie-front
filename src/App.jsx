@@ -10,6 +10,7 @@ import MainLayout from './layouts/MainLayout';
 function App() {
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLandingPage, setIsLandingPage] = useState(true); // Track if we are on the landing page
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,16 +26,23 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route element={<MainLayout />}>
-        <Route path="/home" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/explore" element={<Explore />} /> {/* Explore instead of Hits */}
-        <Route 
-          path="/profile" 
-          element={isAuthenticated ? <Profile /> : <Navigate to="/" replace />} 
-        />
-      </Route>
+      {/* Landing page route */}
+      <Route path="/" element={<Landing setIsLandingPage={setIsLandingPage} />} />
+
+      {/* Protect the other routes if on the landing page */}
+      {isLandingPage ? (
+        <Route path="*" element={<Navigate to="/" replace />} />
+      ) : (
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/explore" element={<Explore />} /> {/* Explore instead of Hits */}
+          <Route 
+            path="/profile" 
+            element={isAuthenticated ? <Profile /> : <Navigate to="/" replace />} 
+          />
+        </Route>
+      )}
     </Routes>
   );
 }

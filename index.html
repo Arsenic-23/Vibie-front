@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth overflow-hidden">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -28,9 +28,11 @@
     />
 
     <style>
-      html, body {
+      html,
+      body {
         overscroll-behavior: none;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: visible;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -44,7 +46,8 @@
         overscroll-behavior: none;
       }
 
-      button, a {
+      button,
+      a {
         touch-action: manipulation;
       }
     </style>

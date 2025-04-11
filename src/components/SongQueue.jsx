@@ -68,14 +68,12 @@ export default function SongQueue({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      {/* Blurred Background */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-md transition-opacity duration-300"
+        className="absolute inset-0 bg-black/50 backdrop-blur-md"
         onClick={onClose}
       />
 
-      {/* Queue Modal */}
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 animate-slide-up max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 max-h-[90vh] overflow-y-auto animate-slide-up">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Upcoming Songs</h3>
           <button
@@ -120,34 +118,35 @@ function SortableSongItem({ id, song, isCurrent, onRemove }) {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition || 'transform 0.2s ease',
   };
 
   return (
     <motion.li
       ref={setNodeRef}
-      layout
       {...attributes}
       {...listeners}
+      layout
       style={style}
-      className={`p-4 rounded-xl shadow flex items-center space-x-4 transition duration-300 cursor-grab active:cursor-grabbing ${
-        isCurrent
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white'
-      }`}
-      initial={{ opacity: 0, x: 50 }}
+      initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -150 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      whileTap={{ scale: 0.97 }}
       drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
       onDragEnd={(event, info) => {
         if (info.offset.x < -100) onRemove();
       }}
+      className={`p-4 rounded-xl shadow-md flex items-center space-x-4 cursor-grab ${
+        isCurrent
+          ? 'bg-blue-500 text-white'
+          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+      } ${isDragging ? 'shadow-lg scale-[1.01]' : ''}`}
     >
       <img
         src={song.thumbnail}

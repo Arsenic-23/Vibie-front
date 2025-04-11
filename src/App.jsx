@@ -3,21 +3,19 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Search from './pages/Search';
-import Hits from './pages/Hits';
+import Explore from './pages/Explore'; // Import Explore instead of Hits
 import Profile from './pages/Profile';
 import MainLayout from './layouts/MainLayout';
 
 function App() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Sample auth state, replace with actual logic
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Sample check for authentication status (replace with actual logic)
   const checkAuth = () => {
-    // Example logic - replace with actual check (localStorage, cookies, etc.)
     return localStorage.getItem('authToken') !== null;
   };
 
@@ -31,8 +29,7 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/hits" element={<Hits />} />
-        {/* Profile Route with Authentication Guard */}
+        <Route path="/explore" element={<Explore />} /> {/* Explore instead of Hits */}
         <Route 
           path="/profile" 
           element={isAuthenticated ? <Profile /> : <Navigate to="/" replace />} 

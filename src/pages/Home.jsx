@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
@@ -14,13 +15,12 @@ export default function Home() {
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
-  // Long press functionality
   useEffect(() => {
     const setupLongPress = (ref, onLongPress) => {
       let pressTimer = null;
 
       const handlePressStart = () => {
-        pressTimer = setTimeout(() => onLongPress(), 500); // 500ms
+        pressTimer = setTimeout(() => onLongPress(), 500);
       };
 
       const handlePressEnd = () => {
@@ -56,17 +56,16 @@ export default function Home() {
     };
   }, []);
 
-  // Hide navigation when modals are open
   const popupVisible = showQueue || showVibers;
 
   return (
-    <div className="min-h-screen pb-20 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden">
+    <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <button
             ref={vibersBtnRef}
-            className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full shadow-md text-sm font-medium hover:scale-105 transition-transform"
+            className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform"
             onClick={() => setShowVibers(true)}
           >
             <Users size={16} />
@@ -77,16 +76,16 @@ export default function Home() {
         <img
           src="https://placehold.co/40x40"
           alt="Profile"
-          className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 transition-transform duration-200 hover:scale-105 cursor-pointer"
+          className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
           onClick={() => setShowProfile(!showProfile)}
         />
       </div>
 
       {/* Profile Section */}
       {showProfile && (
-        <div className="absolute top-16 left-4 z-30 w-64 bg-white dark:bg-gray-900 p-4 rounded-3xl shadow-lg">
-          <h3 className="text-xl font-bold mb-2">Profile</h3>
-          <p className="text-sm">This is the profile section</p>
+        <div className="absolute top-16 left-4 z-30 w-64 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-3xl shadow-2xl">
+          <h3 className="text-xl font-bold mb-1">Profile</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Your user information goes here.</p>
         </div>
       )}
 
@@ -94,7 +93,7 @@ export default function Home() {
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-md"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowVibers(false)}
           />
           <VibersPopup onClose={() => setShowVibers(false)} />
@@ -104,7 +103,7 @@ export default function Home() {
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-md"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowQueue(false)}
           />
           <SongQueue onClose={() => setShowQueue(false)} />
@@ -112,21 +111,20 @@ export default function Home() {
       )}
 
       {/* Song Art */}
-      <div className="flex flex-col items-center my-6">
-        <div className="w-full max-w-sm h-[45vh] rounded-3xl shadow-2xl overflow-hidden mb-4">
+      <div className="flex flex-col items-center mt-4">
+        <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
           <img
             src="https://placehold.co/600x600"
-            alt="Current Song"
+            alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <h2 className="text-2xl font-bold mb-1 text-center">Song Title</h2>
-        <p className="text-base text-gray-500 dark:text-gray-300 text-center">
-          Artist Name
-        </p>
+        <h2 className="text-2xl font-bold text-center mb-1">Song Title</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
       </div>
 
-      <div className="mb-16">
+      {/* Controls */}
+      <div className="my-6">
         <SongControls size="large" />
       </div>
 
@@ -136,7 +134,7 @@ export default function Home() {
           <button
             ref={queueBtnRef}
             onClick={() => setShowQueue(true)}
-            className="flex items-center space-x-2 bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-full shadow-md text-sm font-medium hover:scale-105 transition-transform"
+            className="flex items-center space-x-2 px-4 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
           >
             <ListMusic size={16} />
             <span>Queue</span>
@@ -144,7 +142,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Bottom Nav */}
+      {/* Bottom Navigation */}
       {!popupVisible && <NavigationBar />}
     </div>
   );

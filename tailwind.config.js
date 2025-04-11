@@ -23,6 +23,9 @@ export default {
           '100%': { transform: 'rotate(360deg)' },
         },
       },
+      perspective: {
+        1000: '1000px',
+      },
     },
   },
   plugins: [],

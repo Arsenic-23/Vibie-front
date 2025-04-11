@@ -20,7 +20,7 @@ function generateComets(num) {
   }));
 }
 
-export default function Landing() {
+export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speedStage, setSpeedStage] = useState(0);
@@ -30,7 +30,8 @@ export default function Landing() {
 
   const handleJoin = () => {
     window.navigator.vibrate?.(30);
-    navigate('/home');
+    setIsLandingPage(false); // Unlock the app for navigation
+    navigate('/home'); // Navigate to the home page
   };
 
   useEffect(() => {

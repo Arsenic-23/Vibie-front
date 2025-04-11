@@ -14,6 +14,15 @@ export default {
         primary: '#7C3AED',
         secondary: '#6366F1',
       },
+      animation: {
+        spinSlow: 'spinSlow 20s linear infinite',
+      },
+      keyframes: {
+        spinSlow: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
     },
   },
   plugins: [],

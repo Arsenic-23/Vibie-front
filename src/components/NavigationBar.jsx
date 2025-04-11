@@ -22,13 +22,13 @@ export default function NavigationBar() {
       className="fixed bottom-3 left-1/2 transform -translate-x-1/2
       bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900
       text-neutral-900 dark:text-neutral-100
-      shadow-xl rounded-3xl px-6 py-2
-      flex justify-around items-center z-50 w-[80%] max-w-sm
-      backdrop-blur-lg border-2 border-neutral-300 dark:border-neutral-600
+      shadow-xl rounded-2xl px-5 py-1.5
+      flex justify-around items-center z-50 w-[75%] max-w-sm
+      backdrop-blur-lg border border-neutral-300 dark:border-neutral-600
       transition-all duration-300"
     >
       <NavItem
-        icon={<Home size={20} strokeWidth={2.5} />}
+        icon={<Home size={18} strokeWidth={2.2} />}
         label="Home"
         path="/home"
         currentPath={location.pathname}
@@ -37,7 +37,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Search size={20} strokeWidth={2.5} />}
+        icon={<Search size={18} strokeWidth={2.2} />}
         label="Search"
         path="/search"
         currentPath={location.pathname}
@@ -46,7 +46,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Compass size={20} strokeWidth={2.5} />}
+        icon={<Compass size={18} strokeWidth={2.2} />}
         label="Explore"
         path="/explore"
         currentPath={location.pathname}
@@ -55,7 +55,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<User size={20} strokeWidth={2.5} />}
+        icon={<User size={18} strokeWidth={2.2} />}
         label="Profile"
         path="/profile"
         currentPath={location.pathname}
@@ -86,7 +86,7 @@ function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, o
       onTouchEnd={onLongPressEnd}
       className={`flex flex-col items-center transition-all duration-300 ${
         isActive
-          ? 'text-primary dark:text-white scale-110 font-semibold drop-shadow-xl'
+          ? 'text-primary dark:text-white scale-105 font-medium drop-shadow'
           : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
       }`}
     >

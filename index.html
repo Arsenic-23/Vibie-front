@@ -2,11 +2,17 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="description" content="VIBIE - Stream music together in real time." />
     <meta name="theme-color" content="#6a11cb" />
     <meta property="og:title" content="VIBIE" />
-    <meta property="og:description" content="Stream music together in real time. Feel the vibe. Live the music." />
+    <meta
+      property="og:description"
+      content="Stream music together in real time. Feel the vibe. Live the music."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/logo.png" />
     <meta property="og:url" content="https://your-domain.com" />
@@ -20,6 +26,20 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700;900&display=swap"
       rel="stylesheet"
     />
+
+    <style>
+      html, body {
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-text-size-adjust: 100%;
+        touch-action: manipulation;
+      }
+
+      button, a {
+        touch-action: manipulation;
+      }
+    </style>
   </head>
   <body class="bg-white dark:bg-black text-black dark:text-white font-['Poppins'] transition-colors duration-500">
     <div id="root"></div>

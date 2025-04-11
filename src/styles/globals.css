@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom fonts or animations can go below */
+body {
+  font-family: 'Inter', sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+  /* Force background color */
+  background-color: #ffffff !important; /* Default to white for light mode */
+}
+
+/* Dark mode background override */
+body.dark {
+  background-color: #000000 !important; /* Force black background in dark mode */
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+img {
+  object-fit: cover;
+}
+
+/* Slide-up animation for queue popup */
+@layer utilities {
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+  }
+}

@@ -58,7 +58,7 @@ export default function Landing() {
         <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
         <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
-
+        
         {/* Shooting comets */}
         {comets.map((comet) => (
           <div
@@ -69,7 +69,6 @@ export default function Landing() {
               left: comet.left,
               animationDelay: comet.delay,
               animationDuration: comet.duration,
-              opacity: 1,
             }}
           />
         ))}

@@ -13,6 +13,9 @@ const thumbnails = [
 export default function Landing() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [speedStage, setSpeedStage] = useState(0);
+
+  const speedMap = [2500, 1500, 1000]; // Slow → Fast → Normal
 
   const handleJoin = () => {
     window.navigator.vibrate?.(30);
@@ -20,23 +23,38 @@ export default function Landing() {
   };
 
   useEffect(() => {
+    let currentStage = 0;
+    const advanceStage = () => {
+      currentStage = (currentStage + 1) % speedMap.length;
+      setSpeedStage(currentStage);
+    };
+    const stageInterval = setInterval(advanceStage, 8000);
+    return () => clearInterval(stageInterval);
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % thumbnails.length);
-    }, 2000);
+    }, speedMap[speedStage]);
     return () => clearInterval(interval);
-  }, []);
+  }, [speedStage]);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-black via-[#1f1f1f] to-[#3a3a3a] opacity-90 backdrop-blur-xl" />
+      {/* Fancy layered background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0d0d0d] to-[#1a1a1a] opacity-95" />
+        <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
+        <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
+      </div>
 
-      {/* Curved thumbnail carousel */}
+      {/* 3D carousel */}
       <div className="absolute top-20 w-full flex justify-center z-10 h-[260px] perspective-[1200px]">
         <div className="relative w-[320px] h-[260px] transform-style-preserve-3d">
           {thumbnails.map((thumb, i) => {
             const offset = (i - currentIndex + thumbnails.length) % thumbnails.length;
-            const angle = offset * 40; // Adjust for how spread out they are
+            const angle = offset * 40;
             const zIndex = thumbnails.length - offset;
             const opacity = offset === 0 ? 1 : 0.3;
 
@@ -68,7 +86,7 @@ export default function Landing() {
         </span>
       </h1>
 
-      {/* Join Button */}
+      {/* Join button */}
       <button
         onClick={handleJoin}
         className="z-20 bg-white/10 text-white font-semibold px-10 py-4 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300"

@@ -10,12 +10,23 @@ const thumbnails = [
   "/images/image6.jpg",
 ];
 
+function generateComets(num) {
+  return Array.from({ length: num }, (_, i) => ({
+    id: i,
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 10}s`,
+    duration: `${1 + Math.random() * 2}s`,
+  }));
+}
+
 export default function Landing() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speedStage, setSpeedStage] = useState(0);
+  const [comets] = useState(generateComets(8)); // More = more comets
 
-  const speedMap = [2500, 1500, 1000]; // Slow → Fast → Normal
+  const speedMap = [2500, 1500, 1000];
 
   const handleJoin = () => {
     window.navigator.vibrate?.(30);
@@ -39,25 +50,6 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, [speedStage]);
 
-  // Create comets dynamically
-  useEffect(() => {
-    const createComet = () => {
-      const comet = document.createElement('div');
-      comet.classList.add('comet');
-      comet.style.top = `${Math.random() * 100}vh`; // Random start position
-      comet.style.left = `${Math.random() * 100}vw`; // Random start position
-      document.body.appendChild(comet);
-
-      // Remove comet after animation
-      setTimeout(() => {
-        comet.remove();
-      }, 2000); // Match animation duration
-    };
-
-    const cometInterval = setInterval(createComet, 300); // Generate comets every 300ms
-    return () => clearInterval(cometInterval);
-  }, []);
-
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
       {/* Fancy layered background */}
@@ -66,11 +58,25 @@ export default function Landing() {
         <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
         <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
+        
+        {/* Shooting comets */}
+        {comets.map((comet) => (
+          <div
+            key={comet.id}
+            className="comet"
+            style={{
+              top: comet.top,
+              left: comet.left,
+              animationDelay: comet.delay,
+              animationDuration: comet.duration,
+            }}
+          />
+        ))}
       </div>
 
       {/* 3D carousel */}
-      <div className="absolute top-20 w-full flex justify-center z-10 h-[260px] perspective-[1200px]">
-        <div className="relative w-[320px] h-[260px] transform-style-preserve-3d">
+      <div className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]">
+        <div className="relative w-[400px] h-[320px] transform-style-preserve-3d">
           {thumbnails.map((thumb, i) => {
             const offset = (i - currentIndex + thumbnails.length) % thumbnails.length;
             const angle = offset * 40;
@@ -82,11 +88,11 @@ export default function Landing() {
                 key={i}
                 src={thumb}
                 alt={`thumb-${i}`}
-                className="absolute w-[220px] h-[220px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
+                className="absolute w-[260px] h-[260px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
                 style={{
                   transform: `
                     rotateY(${angle}deg)
-                    translateZ(400px)
+                    translateZ(500px)
                   `,
                   transformOrigin: 'center center',
                   zIndex,

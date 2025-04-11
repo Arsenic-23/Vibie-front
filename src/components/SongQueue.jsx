@@ -1,20 +1,4 @@
 import React, { useState } from 'react';
-import {
-  DndContext,
-  closestCenter,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  KeyboardSensor,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SongQueue({ onClose }) {
@@ -47,21 +31,6 @@ export default function SongQueue({ onClose }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = ({ active, over }) => {
-    if (active.id !== over?.id) {
-      const oldIndex = queue.findIndex((s) => s.id === active.id);
-      const newIndex = queue.findIndex((s) => s.id === over.id);
-      setQueue((q) => arrayMove(q, oldIndex, newIndex));
-    }
-  };
-
   const handleRemove = (id) => {
     setQueue((prev) => prev.filter((s) => s.id !== id));
   };
@@ -85,68 +54,46 @@ export default function SongQueue({ onClose }) {
           </button>
         </div>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={queue.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-            <ul className="space-y-4">
-              <AnimatePresence>
-                {queue.map((song, index) => (
-                  <SortableSongItem
-                    key={song.id}
-                    id={song.id}
-                    song={song}
-                    isCurrent={index === currentIndex}
-                    onRemove={() => handleRemove(song.id)}
-                  />
-                ))}
-              </AnimatePresence>
-            </ul>
-          </SortableContext>
-        </DndContext>
+        <ul className="space-y-4">
+          <AnimatePresence>
+            {queue.map((song, index) => (
+              <SwipeableSongItem
+                key={song.id}
+                song={song}
+                isCurrent={index === currentIndex}
+                onRemove={() => handleRemove(song.id)}
+              />
+            ))}
+          </AnimatePresence>
+        </ul>
       </div>
     </div>
   );
 }
 
-function SortableSongItem({ id, song, isCurrent, onRemove }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 0.2s ease',
-  };
-
+function SwipeableSongItem({ song, isCurrent, onRemove }) {
   return (
     <motion.li
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       layout
-      style={style}
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -150 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       whileTap={{ scale: 0.97 }}
       drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.5}
       onDragEnd={(event, info) => {
-        if (info.offset.x < -100) onRemove();
+        if (info.offset.x < -100) {
+          navigator.vibrate?.(100); // vibrate on swipe left
+          onRemove();
+        }
       }}
       className={`p-4 rounded-xl shadow-md flex items-center space-x-4 cursor-grab ${
         isCurrent
           ? 'bg-blue-500 text-white'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-      } ${isDragging ? 'shadow-lg scale-[1.01]' : ''}`}
+      }`}
     >
       <img
         src={song.thumbnail}
@@ -158,7 +105,7 @@ function SortableSongItem({ id, song, isCurrent, onRemove }) {
         <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
           {song.artist}
         </p>
-        <p className="text-[10px] text-gray-400 mt-1">Drag to reorder / Swipe left to remove</p>
+        <p className="text-[10px] text-gray-400 mt-1">Swipe left to remove</p>
       </div>
     </motion.li>
   );

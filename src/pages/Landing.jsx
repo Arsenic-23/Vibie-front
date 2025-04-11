@@ -2,14 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Thumbnail images (replace with your actual song thumbnails if needed)
 const thumbnails = [
-  'https://via.placeholder.com/80?text=Vibe',
-  'https://via.placeholder.com/80?text=Drop',
-  'https://via.placeholder.com/80?text=Beat',
-  'https://via.placeholder.com/80?text=Tune',
-  'https://via.placeholder.com/80?text=Bass',
-  'https://via.placeholder.com/80?text=Flow',
+  "https://i.scdn.co/image/ab67616d0000b2735f6e5db9dfe9e659cf7f6b88",
+  "https://i.scdn.co/image/ab67616d0000b2734173a7ae91b73db5c2fefbbb",
+  "https://i.scdn.co/image/ab67616d0000b273ff9c49881fa6b79e7be04f5c",
+  "https://i.scdn.co/image/ab67616d0000b273b4b8cc41e582b2f50f6689a7",
+  "https://i.scdn.co/image/ab67616d0000b273a08ef9c3e2dbd3118099dc3f",
+  "https://i.scdn.co/image/ab67616d0000b2734d3b56a37e3fc0c2976277d3",
+  "https://i.scdn.co/image/ab67616d0000b2737b865a00656f303a7f173f07",
+  "https://i.scdn.co/image/ab67616d0000b273a68b8c39d4cbf5b389d6e203",
+  "https://i.scdn.co/image/ab67616d0000b273d43b41a54a716f0d7b9a8d95",
+  "https://i.scdn.co/image/ab67616d0000b2737f8eb1317c6615f573d56c59",
+  "https://i.scdn.co/image/ab67616d0000b2731d04e23c85cf5c8b41e07610",
+  "https://i.scdn.co/image/ab67616d0000b273f43b48d5ed870ec74cb4f772",
+  "https://i.scdn.co/image/ab67616d0000b2732fcecb0b578a1bd77e17216f",
+  "https://i.scdn.co/image/ab67616d0000b273e3ed86a1d4469ff2c6a9cb80",
+  "https://i.scdn.co/image/ab67616d0000b273087fa20dc1de6c9efce04f88",
 ];
 
 const generateThumbnail = () => {
@@ -37,7 +45,7 @@ export default function Landing() {
   const [floating, setFloating] = useState([]);
 
   const handleJoin = () => {
-    window.navigator.vibrate?.(30); // Vibration
+    window.navigator.vibrate?.(30);
     navigate('/home');
   };
 
@@ -57,23 +65,9 @@ export default function Landing() {
           <motion.img
             key={item.id}
             src={item.src}
-            initial={{
-              x: item.startX,
-              y: item.startY,
-              opacity: 0,
-              scale: 0.6,
-            }}
-            animate={{
-              x: item.endX,
-              y: item.endY,
-              opacity: [0, 0.9, 0],
-              scale: [0.6, 1.1, 0.6],
-            }}
-            transition={{
-              duration: item.duration,
-              delay: item.delay,
-              ease: 'easeInOut',
-            }}
+            initial={{ x: item.startX, y: item.startY, opacity: 0, scale: 0.6 }}
+            animate={{ x: item.endX, y: item.endY, opacity: [0, 0.9, 0], scale: [0.6, 1.1, 0.6] }}
+            transition={{ duration: item.duration, delay: item.delay, ease: 'easeInOut' }}
             style={{
               position: 'absolute',
               width: item.size,
@@ -114,7 +108,7 @@ export default function Landing() {
         Stream music together in real-time. Feel the vibe. Live the music.
       </motion.p>
 
-      {/* Join the Vibe button with neon glow and depth */}
+      {/* Join Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         whileHover={{
@@ -130,7 +124,7 @@ export default function Landing() {
         </span>
       </motion.button>
 
-      {/* Background animated blobs */}
+      {/* Animated Blobs */}
       <motion.div className="absolute w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse -top-32 -left-20" />
       <motion.div className="absolute w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse top-32 -right-20" />
       <motion.div className="absolute w-72 h-72 bg-yellow-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse bottom-10 left-1/2 -translate-x-1/2" />

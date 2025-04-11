@@ -18,7 +18,13 @@ export default function NavigationBar() {
   };
 
   return (
-    <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-700 via-purple-700 to-pink-600 shadow-xl rounded-full px-6 py-2 flex justify-around items-center z-50 w-[85%] max-w-sm backdrop-blur-md border border-white/10">
+    <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
+      bg-white dark:bg-black 
+      text-black dark:text-white 
+      shadow-xl rounded-full px-6 py-2 
+      flex justify-around items-center z-50 w-[85%] max-w-sm 
+      backdrop-blur-md border border-black/10 dark:border-white/10 
+      transition-colors duration-300">
       <NavItem
         icon={<Home size={20} strokeWidth={2.2} />}
         label="Home"
@@ -78,8 +84,8 @@ function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, o
       onTouchEnd={onLongPressEnd}
       className={`flex flex-col items-center transition-all duration-300 ${
         isActive
-          ? 'text-white scale-110 drop-shadow-md'
-          : 'text-gray-300 hover:text-white'
+          ? 'text-black dark:text-white scale-110 drop-shadow-md'
+          : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
       }`}
     >
       {icon}

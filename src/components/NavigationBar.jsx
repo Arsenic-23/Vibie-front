@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Home, Search, Compass, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -22,8 +23,8 @@ export default function NavigationBar() {
       className="fixed bottom-3 left-1/2 transform -translate-x-1/2
       bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900
       text-neutral-900 dark:text-neutral-100
-      shadow-xl rounded-2xl px-5 py-1.5
-      flex justify-around items-center z-50 w-[75%] max-w-sm
+      shadow-xl rounded-xl px-4 py-1.5
+      flex justify-around items-center z-50 w-[70%] max-w-sm
       backdrop-blur-lg border border-neutral-300 dark:border-neutral-600
       transition-all duration-300"
     >

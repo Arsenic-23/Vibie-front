@@ -20,15 +20,15 @@ export default function NavigationBar() {
   return (
     <nav
       className="fixed bottom-3 left-1/2 transform -translate-x-1/2
-      bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950
+      bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900
       text-neutral-900 dark:text-neutral-100
-      shadow-xl rounded-full px-2 py-1
-      flex justify-between items-center z-50 w-[90%] max-w-xs
-      backdrop-blur-lg border border-neutral-300 dark:border-neutral-700
+      shadow-xl rounded-2xl px-5 py-1.5
+      flex justify-around items-center z-50 w-[75%] max-w-sm
+      backdrop-blur-lg border border-neutral-300 dark:border-neutral-600
       transition-all duration-300"
     >
       <NavItem
-        icon={<Home size={16} strokeWidth={2} />}
+        icon={<Home size={18} strokeWidth={2.2} />}
         label="Home"
         path="/home"
         currentPath={location.pathname}
@@ -37,7 +37,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Search size={16} strokeWidth={2} />}
+        icon={<Search size={18} strokeWidth={2.2} />}
         label="Search"
         path="/search"
         currentPath={location.pathname}
@@ -46,7 +46,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Compass size={16} strokeWidth={2} />}
+        icon={<Compass size={18} strokeWidth={2.2} />}
         label="Explore"
         path="/explore"
         currentPath={location.pathname}
@@ -55,7 +55,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<User size={16} strokeWidth={2} />}
+        icon={<User size={18} strokeWidth={2.2} />}
         label="Profile"
         path="/profile"
         currentPath={location.pathname}

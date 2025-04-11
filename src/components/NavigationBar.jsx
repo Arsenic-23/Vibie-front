@@ -18,13 +18,15 @@ export default function NavigationBar() {
   };
 
   return (
-    <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-      bg-white dark:bg-black 
-      text-black dark:text-white 
-      shadow-xl rounded-full px-6 py-2 
-      flex justify-around items-center z-50 w-[85%] max-w-sm 
-      backdrop-blur-md border border-black/10 dark:border-white/10 
-      transition-colors duration-300">
+    <nav
+      className="fixed bottom-4 left-1/2 transform -translate-x-1/2
+      bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900
+      text-neutral-800 dark:text-neutral-200
+      shadow-lg rounded-full px-6 py-2
+      flex justify-around items-center z-50 w-[85%] max-w-sm
+      backdrop-blur-md border border-neutral-300 dark:border-neutral-700
+      transition-all duration-300"
+    >
       <NavItem
         icon={<Home size={20} strokeWidth={2.2} />}
         label="Home"
@@ -63,7 +65,7 @@ export default function NavigationBar() {
       />
 
       {popup && (
-        <div className="absolute bottom-14 bg-black text-white px-3 py-1.5 rounded-md text-xs opacity-90 shadow-md transition-all duration-300">
+        <div className="absolute bottom-14 bg-black/80 dark:bg-white/10 text-white dark:text-white px-3 py-1.5 rounded-md text-xs opacity-90 shadow-md transition-all duration-300">
           {popup}
         </div>
       )}
@@ -84,7 +86,7 @@ function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, o
       onTouchEnd={onLongPressEnd}
       className={`flex flex-col items-center transition-all duration-300 ${
         isActive
-          ? 'text-black dark:text-white scale-110 drop-shadow-md'
+          ? 'text-primary dark:text-white scale-110 drop-shadow-md'
           : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
       }`}
     >

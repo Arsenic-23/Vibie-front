@@ -22,51 +22,62 @@ export default function Landing() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % thumbnails.length);
-    }, 3000); // Speed up transitions
+    }, 2000); // Change speed here
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-black relative overflow-hidden text-white text-center px-4">
+    <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
+      {/* Glassy gradient background */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-black via-[#1f1f1f] to-[#3a3a3a] opacity-90 backdrop-blur-xl" />
 
-      {/* Blurred glassy background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] opacity-90 backdrop-blur-lg z-0"></div>
+      {/* Sliding thumbnail animation stack */}
+      <div className="absolute top-20 w-full flex justify-center z-10 h-[260px]">
+        <div className="relative w-[320px] h-[260px] overflow-hidden">
+          {thumbnails.map((thumb, i) => {
+            const offset = (i - currentIndex + thumbnails.length) % thumbnails.length;
+            const xOffset = offset * 30;
+            const zIndex = thumbnails.length - offset;
+            const opacity = offset === 0 ? 1 : 0.3;
 
-      {/* Rotating thumbnails */}
-      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 flex space-x-6 z-10">
-        {thumbnails.map((thumb, i) => (
-          <img
-            key={i}
-            src={thumb}
-            alt={`thumb-${i}`}
-            className={`w-20 h-20 rounded-xl shadow-lg animate-[spin_5s_linear_infinite] transition-opacity duration-500 ${
-              currentIndex === i ? 'opacity-100' : 'opacity-50'
-            }`}
-          />
-        ))}
+            return (
+              <img
+                key={i}
+                src={thumb}
+                alt={`thumb-${i}`}
+                className="absolute w-[280px] h-[280px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
+                style={{
+                  transform: `translateX(${xOffset}px) scale(${1 - offset * 0.05})`,
+                  zIndex,
+                  opacity,
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="z-10 mt-60 sm:mt-80">
-        <h1 className="text-6xl sm:text-7xl font-extrabold tracking-widest mb-6 font-['Poppins'] drop-shadow-xl">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400">
-            VIBIE
-          </span>
-        </h1>
+      {/* Logo */}
+      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[400px] mb-6 font-['Poppins'] drop-shadow-2xl">
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400">
+          VIBIE
+        </span>
+      </h1>
 
-        <p className="text-lg font-light mb-10 max-w-md text-white/80">
-          Stream music together in real-time. Feel the vibe. Live the music.
-        </p>
+      {/* Tagline */}
+      <p className="z-20 text-lg font-light mb-10 max-w-md text-white/80">
+        Stream music together in real-time. Feel the vibe. Live the music.
+      </p>
 
-        <button
-          onClick={handleJoin}
-          className="bg-white/10 text-white font-semibold px-10 py-4 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300"
-        >
-          <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
-            Join the Vibe
-          </span>
-        </button>
-      </div>
+      {/* Join Button */}
+      <button
+        onClick={handleJoin}
+        className="z-20 bg-white/10 text-white font-semibold px-10 py-4 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300"
+      >
+        <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
+          Join the Vibe
+        </span>
+      </button>
     </div>
   );
 }

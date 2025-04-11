@@ -1,31 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-export default function Hits() {
-  const [topSongs, setTopSongs] = useState([]);
+const hits = [
+  {
+    title: "Blinding Lights",
+    artist: "The Weeknd",
+    cover: "https://i.scdn.co/image/ab67616d0000b273bfbefb8d9c73f4e7b44c3c2c",
+  },
+  {
+    title: "Levitating",
+    artist: "Dua Lipa",
+    cover: "https://i.scdn.co/image/ab67616d0000b273659f38050b0f6b5b3cb4dbbb",
+  },
+  {
+    title: "Save Your Tears",
+    artist: "The Weeknd",
+    cover: "https://i.scdn.co/image/ab67616d0000b273dc1a7603b5f38f5e50020e5c",
+  },
+  {
+    title: "As It Was",
+    artist: "Harry Styles",
+    cover: "https://i.scdn.co/image/ab67616d0000b27355521b5f27b96c3e3d99d70c",
+  },
+];
 
-  useEffect(() => {
-    // Simulated API fetch for now
-    setTimeout(() => {
-      setTopSongs([
-        { title: 'Flowers', artist: 'Miley Cyrus' },
-        { title: 'Blinding Lights', artist: 'The Weeknd' },
-        { title: 'As It Was', artist: 'Harry Styles' },
-        { title: 'Levitating', artist: 'Dua Lipa' },
-      ]);
-    }, 1000);
-  }, []);
-
+export default function Explore() {
   return (
-    <div className="px-4 pt-6">
-      <h2 className="text-2xl font-bold mb-4">Top Hits</h2>
-      <ul className="space-y-3">
-        {topSongs.map((song, idx) => (
-          <li key={idx} className="p-3 rounded-xl shadow dark:bg-gray-800 bg-gray-100">
-            <h3 className="font-semibold">{song.title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-300">{song.artist}</p>
-          </li>
+    <div className="p-4 pb-24">
+      <h1 className="text-3xl font-extrabold text-white mb-4">Top Hits</h1>
+      <div className="grid grid-cols-2 gap-4">
+        {hits.map((song, idx) => (
+          <div
+            key={idx}
+            className="bg-white/5 backdrop-blur-md p-3 rounded-xl hover:scale-105 transition-transform duration-300 cursor-pointer"
+          >
+            <img
+              src={song.cover}
+              alt={song.title}
+              className="rounded-lg w-full aspect-square object-cover mb-3"
+            />
+            <div className="text-white text-sm font-semibold truncate">{song.title}</div>
+            <div className="text-gray-400 text-xs truncate">{song.artist}</div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import React, { useContext } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { ThemeContext } from "../context/ThemeContext";
@@ -6,6 +7,7 @@ export default function ThemeToggle() {
   const { darkMode, setDarkMode } = useContext(ThemeContext);
 
   const toggleTheme = () => {
+    navigator.vibrate?.(50); // Trigger vibration on toggle
     setDarkMode(prev => !prev);
   };
 

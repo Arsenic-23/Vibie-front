@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const thumbnails = [
-  "/images/image1.jpg",
-  "/images/image2.jpg",
-  "/images/image3.jpg",
-  "/images/image4.jpg",
-  "/images/image5.jpg",
-  "/images/image6.jpg",
+  "/images/1.jpg",
+  "/images/2.jpg",
+  "/images/3.jpg",
+  "/images/4.jpg",
+  "/images/5.jpg",
+  "/images/6.jpg",
 ];
 
 export default function Landing() {
@@ -22,21 +22,21 @@ export default function Landing() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % thumbnails.length);
-    }, 2000); // Change speed here
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
-      {/* Glassy gradient background */}
+      {/* Gradient background */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-black via-[#1f1f1f] to-[#3a3a3a] opacity-90 backdrop-blur-xl" />
 
-      {/* Sliding thumbnail animation stack */}
-      <div className="absolute top-20 w-full flex justify-center z-10 h-[260px]">
-        <div className="relative w-[320px] h-[260px] overflow-hidden">
+      {/* Curved thumbnail carousel */}
+      <div className="absolute top-20 w-full flex justify-center z-10 h-[260px] perspective-[1200px]">
+        <div className="relative w-[320px] h-[260px] transform-style-preserve-3d">
           {thumbnails.map((thumb, i) => {
             const offset = (i - currentIndex + thumbnails.length) % thumbnails.length;
-            const xOffset = offset * 30;
+            const angle = offset * 40; // Adjust for how spread out they are
             const zIndex = thumbnails.length - offset;
             const opacity = offset === 0 ? 1 : 0.3;
 
@@ -45,9 +45,13 @@ export default function Landing() {
                 key={i}
                 src={thumb}
                 alt={`thumb-${i}`}
-                className="absolute w-[280px] h-[280px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
+                className="absolute w-[220px] h-[220px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
                 style={{
-                  transform: `translateX(${xOffset}px) scale(${1 - offset * 0.05})`,
+                  transform: `
+                    rotateY(${angle}deg)
+                    translateZ(400px)
+                  `,
+                  transformOrigin: 'center center',
                   zIndex,
                   opacity,
                 }}
@@ -58,16 +62,11 @@ export default function Landing() {
       </div>
 
       {/* Logo */}
-      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[400px] mb-6 font-['Poppins'] drop-shadow-2xl">
+      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[400px] mb-10 font-['Poppins'] drop-shadow-2xl">
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400">
           VIBIE
         </span>
       </h1>
-
-      {/* Tagline */}
-      <p className="z-20 text-lg font-light mb-10 max-w-md text-white/80">
-        Stream music together in real-time. Feel the vibe. Live the music.
-      </p>
 
       {/* Join Button */}
       <button

@@ -2,35 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Global Styles === */
 body {
-  font-family: 'Inter', sans-serif;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* === Shooting Comets Animation === */
-@keyframes cometMove {
-  0% {
-    transform: translateX(0) translateY(0) rotate(45deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100vw) translateY(-100vh) rotate(45deg);
-    opacity: 0;
-  }
-}
-
-.comet {
-  position: absolute;
-  width: 2px; /* Slightly thinner for sleek look */
-  height: 100px; /* Longer trail */
-  background: linear-gradient(to top, white, transparent); /* More natural tail */
-  opacity: 0;
-  animation-name: cometMove;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-fill-mode: forwards;
-  border-radius: 9999px;
-  pointer-events: none;
-  filter: drop-shadow(0 0 6px white); /* Glowing tail */
+font-family: 'Inter', sans-serif;
+transition: background-color 0.3s, color 0.3s;
 }

@@ -21,14 +21,14 @@ export default function NavigationBar() {
     <nav
       className="fixed bottom-3 left-1/2 transform -translate-x-1/2
       bg-gradient-to-r from-white via-neutral-100 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900
-      text-neutral-800 dark:text-neutral-200
-      shadow-lg rounded-full px-4 py-1.5
-      flex justify-around items-center z-50 w-[75%] max-w-xs
-      backdrop-blur-md border border-neutral-300 dark:border-neutral-700
+      text-neutral-900 dark:text-neutral-100
+      shadow-xl rounded-3xl px-6 py-2
+      flex justify-around items-center z-50 w-[80%] max-w-sm
+      backdrop-blur-lg border-2 border-neutral-300 dark:border-neutral-600
       transition-all duration-300"
     >
       <NavItem
-        icon={<Home size={18} strokeWidth={2.2} />}
+        icon={<Home size={20} strokeWidth={2.5} />}
         label="Home"
         path="/home"
         currentPath={location.pathname}
@@ -37,7 +37,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Search size={18} strokeWidth={2.2} />}
+        icon={<Search size={20} strokeWidth={2.5} />}
         label="Search"
         path="/search"
         currentPath={location.pathname}
@@ -46,7 +46,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<Compass size={18} strokeWidth={2.2} />}
+        icon={<Compass size={20} strokeWidth={2.5} />}
         label="Explore"
         path="/explore"
         currentPath={location.pathname}
@@ -55,7 +55,7 @@ export default function NavigationBar() {
         onLongPressEnd={handleLongPressEnd}
       />
       <NavItem
-        icon={<User size={18} strokeWidth={2.2} />}
+        icon={<User size={20} strokeWidth={2.5} />}
         label="Profile"
         path="/profile"
         currentPath={location.pathname}
@@ -65,7 +65,7 @@ export default function NavigationBar() {
       />
 
       {popup && (
-        <div className="absolute bottom-12 bg-black/80 dark:bg-white/10 text-white dark:text-white px-2.5 py-1 rounded-md text-[11px] opacity-90 shadow-md transition-all duration-300">
+        <div className="absolute bottom-14 bg-black/90 dark:bg-white/10 text-white dark:text-white px-3 py-1.5 rounded-md text-sm opacity-95 shadow-md transition-all duration-300">
           {popup}
         </div>
       )}
@@ -86,8 +86,8 @@ function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, o
       onTouchEnd={onLongPressEnd}
       className={`flex flex-col items-center transition-all duration-300 ${
         isActive
-          ? 'text-primary dark:text-white scale-105 drop-shadow-md'
-          : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+          ? 'text-primary dark:text-white scale-110 font-semibold drop-shadow-xl'
+          : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
       }`}
     >
       {icon}

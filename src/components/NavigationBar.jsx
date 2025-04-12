@@ -23,8 +23,8 @@ export default function NavigationBar() {
       className="fixed bottom-3 left-1/2 transform -translate-x-1/2
       bg-white/90 dark:bg-neutral-900/80
       text-neutral-800 dark:text-neutral-100
-      rounded-full px-4 py-1.5
-      flex justify-around items-center z-50 w-[75%] max-w-sm
+      rounded-full px-3 py-1.5
+      flex justify-around items-center z-50 w-[60%] max-w-xs
       shadow-lg backdrop-blur-md border border-neutral-300 dark:border-neutral-700"
     >
       <NavItem

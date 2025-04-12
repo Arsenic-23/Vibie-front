@@ -90,13 +90,16 @@ export default function Landing({ setIsLandingPage }) {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-tr from-[#ffe1f9] via-[#fddaff] to-[#e0e7ff] text-black overflow-hidden">
-      {/* Branding */}
-      <div className="absolute top-8 text-center z-20">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-indigo-500 to-blue-500 drop-shadow-lg font-sans">
-          Vibie
-        </h1>
-        <p className="mt-2 text-base md:text-lg text-neutral-700 font-medium">
+    <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#1f1c2c] via-[#5b247a] to-[#1f1c2c] text-white overflow-hidden">
+      
+      {/* Vibie Logo */}
+      <div className="flex flex-col items-center z-20 mb-8">
+        <img
+          src="/images/vibie-logo.png"
+          alt="Vibie Logo"
+          className="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-lg"
+        />
+        <p className="mt-4 text-lg md:text-xl text-white font-medium tracking-wide">
           Feel the music, live the vibe
         </p>
       </div>
@@ -104,7 +107,7 @@ export default function Landing({ setIsLandingPage }) {
       {/* Carousel */}
       <div
         ref={carouselRef}
-        className="absolute top-28 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
+        className="w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
       >
         <div className="relative w-[400px] h-[320px] transform-style-preserve-3d transition-transform duration-1000 ease-in-out">
           {thumbnails.map((thumb, i) => {
@@ -135,7 +138,7 @@ export default function Landing({ setIsLandingPage }) {
       <div className="absolute bottom-10 z-30 flex gap-4 justify-center items-center">
         <button
           onClick={handleJoin}
-          className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+          className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
         >
           Join the Vibe
         </button>

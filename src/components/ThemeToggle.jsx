@@ -7,7 +7,7 @@ export default function ThemeToggle() {
   const { darkMode, setDarkMode } = useContext(ThemeContext);
 
   const toggleTheme = () => {
-    navigator.vibrate?.(50); // Trigger vibration on toggle
+    navigator.vibrate?.(100); // Trigger vibration on toggle
     setDarkMode(prev => !prev);
   };
 

@@ -9,7 +9,7 @@ import MainLayout from './layouts/MainLayout';
 
 function App() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // Initially null to handle loading state
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -19,8 +19,13 @@ function App() {
     const checkAuth = () => {
       return localStorage.getItem('authToken') !== null;
     };
-    setIsAuthenticated(checkAuth());
+    setIsAuthenticated(checkAuth()); // Set the auth state once check is done
   }, []);
+
+  // Loading state before authentication is determined
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>; // Optionally show a loading indicator or spinner here
+  }
 
   return (
     <Routes>

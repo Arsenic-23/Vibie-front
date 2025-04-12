@@ -145,7 +145,7 @@ export default function Landing({ setIsLandingPage }) {
       </div>
 
       {/* Logo */}
-      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[400px] mb-10 font-['Poppins'] drop-shadow-2xl">
+      <h1 className="z-20 text-7xl sm:text-8xl font-extrabold tracking-widest mt-[200px] mb-4 font-['Poppins'] drop-shadow-2xl">
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400">
           VIBIE
         </span>
@@ -154,7 +154,7 @@ export default function Landing({ setIsLandingPage }) {
       {/* Join button */}
       <button
         onClick={handleJoin}
-        className="z-20 bg-white/10 text-white font-semibold px-10 py-4 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300"
+        className="z-20 bg-white/10 text-white font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-6"
       >
         <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
           Join the Vibe

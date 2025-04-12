@@ -42,7 +42,12 @@ export default function SongQueue({ onClose }) {
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 h-[75vh] overflow-y-auto animate-slide-up">
+      <motion.div
+        className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto animate-slide-up"
+        initial={{ height: '75vh' }}
+        animate={{ height: `${queue.length * 90 + 150}px` }} // Dynamically adjust height based on the number of songs
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Upcoming Songs</h3>
           <button
@@ -66,7 +71,7 @@ export default function SongQueue({ onClose }) {
             ))}
           </AnimatePresence>
         </ul>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -74,10 +79,10 @@ export default function SongQueue({ onClose }) {
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   return (
     <motion.li
-      layout
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -150 }}
+      layout="position"
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 30 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       whileTap={{ scale: 0.97 }}
       drag="x"
@@ -85,7 +90,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       dragElastic={0.5}
       onDragEnd={(event, info) => {
         if (info.offset.x < -100) {
-          navigator.vibrate?.(100); // vibrate on swipe left
+          navigator.vibrate?.(100);
           onRemove();
         }
       }}

@@ -11,20 +11,9 @@ const thumbnails = [
   "/images/image6.jpg",
 ];
 
-function generateComets(num) {
-  return Array.from({ length: num }, (_, i) => ({
-    id: i,
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 10}s`,
-    duration: `${1 + Math.random() * 2}s`,
-  }));
-}
-
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [comets] = useState(generateComets(6));
   const [isPlaying, setIsPlaying] = useState(false);
 
   const carouselRef = useRef(null);
@@ -101,35 +90,28 @@ export default function Landing({ setIsLandingPage }) {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 z-0 animate-pulse-slow bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#0f0f0f] via-[#1a1a1a] to-black">
-        <div className="absolute inset-0 bg-[url('/images/stars.png')] opacity-10 mix-blend-screen pointer-events-none animate-twinkle" />
-        {comets.map((comet) => (
-          <div
-            key={comet.id}
-            className="comet"
-            style={{
-              top: comet.top,
-              left: comet.left,
-              animationDelay: comet.delay,
-              animationDuration: comet.duration,
-            }}
-          />
-        ))}
+    <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-tr from-[#ffe1f9] via-[#fddaff] to-[#e0e7ff] text-black overflow-hidden">
+      {/* Branding */}
+      <div className="absolute top-8 text-center z-20">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-indigo-500 to-blue-500 drop-shadow-lg font-sans">
+          Vibie
+        </h1>
+        <p className="mt-2 text-base md:text-lg text-neutral-700 font-medium">
+          Feel the music, live the vibe
+        </p>
       </div>
 
-      {/* 3D Carousel */}
+      {/* Carousel */}
       <div
         ref={carouselRef}
-        className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
+        className="absolute top-28 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
       >
         <div className="relative w-[400px] h-[320px] transform-style-preserve-3d transition-transform duration-1000 ease-in-out">
           {thumbnails.map((thumb, i) => {
             const offset = ((i - currentIndex + thumbnails.length) % thumbnails.length);
             const angle = offset * 40;
             const zIndex = Math.round(thumbnails.length - offset);
-            const opacity = offset === 0 ? 1 : 0.25;
+            const opacity = offset === 0 ? 1 : 0.3;
 
             return (
               <img
@@ -138,10 +120,7 @@ export default function Landing({ setIsLandingPage }) {
                 alt={`thumb-${i}`}
                 className="absolute w-[260px] h-[260px] object-cover rounded-2xl shadow-2xl transition-all duration-1000 ease-in-out"
                 style={{
-                  transform: `
-                    rotateY(${angle}deg)
-                    translateZ(500px)
-                  `,
+                  transform: `rotateY(${angle}deg) translateZ(500px)`,
                   transformOrigin: 'center center',
                   zIndex,
                   opacity,
@@ -152,11 +131,11 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Join + Play Buttons */}
-      <div className="absolute bottom-10 z-20 flex gap-4 justify-center items-center">
+      {/* Buttons */}
+      <div className="absolute bottom-10 z-30 flex gap-4 justify-center items-center">
         <button
           onClick={handleJoin}
-          className="bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-md hover:shadow-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
+          className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
         >
           Join the Vibe
         </button>
@@ -168,20 +147,6 @@ export default function Landing({ setIsLandingPage }) {
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
         </button>
       </div>
-
-      {/* Background Animation Tailwind CSS extensions (optional, if not already included) */}
-      <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.2; }
-        }
-        .animate-twinkle {
-          animation: twinkle 5s ease-in-out infinite;
-        }
-        .animate-pulse-slow {
-          animation: pulse 20s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }

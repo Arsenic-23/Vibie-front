@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Volume2, VolumeX } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function Landing({ setIsLandingPage }) {
 
   const carouselRef = useRef(null);
   const touchStartX = useRef(null);
-  const backgroundAudioRef = useRef(null);
+  const backgroundAudioRef = useRef(new Audio('/sounds/ambient-loop.mp3'));
 
   const handleJoin = () => {
     window.navigator.vibrate?.([10, 40, 10]);
@@ -39,6 +40,12 @@ export default function Landing({ setIsLandingPage }) {
 
     const sound = new Audio('/sounds/button-tap.mp3');
     sound.play();
+
+    const audio = backgroundAudioRef.current;
+    audio.loop = true;
+    audio.volume = 0.4;
+    audio.muted = !isSoundOn;
+    audio.play().catch(() => {});
   };
 
   const toggleSound = () => {
@@ -51,15 +58,18 @@ export default function Landing({ setIsLandingPage }) {
     });
   };
 
+  // Auto trigger join after delay
   useEffect(() => {
-    const audio = new Audio('/sounds/ambient-loop.mp3');
-    audio.loop = true;
-    audio.volume = 0.4;
-    audio.muted = !isSoundOn;
-    audio.play().catch(() => {});
-    backgroundAudioRef.current = audio;
+    const timeout = setTimeout(() => {
+      handleJoin();
+    }, 2000); // 2 second delay before joining
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
     return () => {
-      audio.pause();
+      backgroundAudioRef.current.pause();
     };
   }, []);
 
@@ -144,10 +154,10 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Sound Toggle Button - Bottom Right */}
+      {/* Sound Toggle Button */}
       <button
         onClick={toggleSound}
-        className="absolute bottom-6 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
+        className="absolute bottom-20 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
       >
         {isSoundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
       </button>
@@ -186,26 +196,26 @@ export default function Landing({ setIsLandingPage }) {
       </div>
 
       {/* Neon Animated Logo */}
-      <h1 className="z-20 text-7xl sm:text-8xl font-extrabold tracking-widest mt-[200px] mb-12 font-['Poppins'] drop-shadow-2xl relative">
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 animate-neon-glow">
+      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[200px] mb-12 font-['Poppins'] drop-shadow-2xl relative">
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 animate-soft-neon">
           VIBIE
         </span>
         <style jsx="true">{`
-          @keyframes neon-glow {
-            0% { text-shadow: 0 0 5px #f0f, 0 0 10px #f0f, 0 0 20px #f0f; }
-            50% { text-shadow: 0 0 10px #ff0, 0 0 20px #ff0, 0 0 40px #ff0; }
-            100% { text-shadow: 0 0 5px #f0f, 0 0 10px #f0f, 0 0 20px #f0f; }
+          @keyframes soft-neon {
+            0% { text-shadow: 0 0 8px #f0f5, 0 0 14px #f0f5; }
+            50% { text-shadow: 0 0 12px #ff09, 0 0 20px #ff09; }
+            100% { text-shadow: 0 0 8px #f0f5, 0 0 14px #f0f5; }
           }
-          .animate-neon-glow {
-            animation: neon-glow 3s infinite ease-in-out;
+          .animate-soft-neon {
+            animation: soft-neon 4s ease-in-out infinite;
           }
         `}</style>
       </h1>
 
-      {/* Join Button */}
+      {/* Join Button (for backup/manual click) */}
       <button
         onClick={handleJoin}
-        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 scale-100 animate-pulse"
+        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-105 active:scale-95"
       >
         <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
           Join the Vibe

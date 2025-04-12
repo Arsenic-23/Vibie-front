@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const thumbnails = [
@@ -23,44 +23,80 @@ function generateComets(num) {
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [speedStage, setSpeedStage] = useState(0);
-  const [comets] = useState(generateComets(8)); // More = more comets
+  const [direction, setDirection] = useState(1); // 1 for forward, -1 for reverse
+  const [comets] = useState(generateComets(8));
 
-  const speedMap = [2500, 1500, 1000];
+  const carouselRef = useRef(null);
+  const touchStartX = useRef(null);
 
   const handleJoin = () => {
-    window.navigator.vibrate?.(30);
-    setIsLandingPage(false); // Unlock the app for navigation
-    navigate('/home'); // Navigate to the home page
+    window.navigator.vibrate?.([10, 40, 10]);
+    setIsLandingPage(false);
+    navigate('/home');
   };
 
   useEffect(() => {
-    let currentStage = 0;
-    const advanceStage = () => {
-      currentStage = (currentStage + 1) % speedMap.length;
-      setSpeedStage(currentStage);
-    };
-    const stageInterval = setInterval(advanceStage, 8000);
-    return () => clearInterval(stageInterval);
-  }, []);
+    let animationFrameId;
+    let lastTime = performance.now();
 
+    const update = (now) => {
+      const delta = now - lastTime;
+      const speedFactor = 0.002; // Control rotation speed
+      setCurrentIndex((prev) => {
+        let next = prev + delta * speedFactor * direction;
+        if (next >= thumbnails.length || next <= 0) {
+          setDirection((d) => -d); // Reverse direction at edges
+        }
+        return next;
+      });
+      lastTime = now;
+      animationFrameId = requestAnimationFrame(update);
+    };
+
+    animationFrameId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [direction]);
+
+  // Swipe gesture for manual rotate
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % thumbnails.length);
-    }, speedMap[speedStage]);
-    return () => clearInterval(interval);
-  }, [speedStage]);
+    const handleTouchStart = (e) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e) => {
+      if (touchStartX.current !== null) {
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+        if (Math.abs(deltaX) > 30) {
+          setCurrentIndex((prev) =>
+            (prev + (deltaX > 0 ? -1 : 1) + thumbnails.length) % thumbnails.length
+          );
+        }
+        touchStartX.current = null;
+      }
+    };
+
+    const node = carouselRef.current;
+    if (node) {
+      node.addEventListener('touchstart', handleTouchStart);
+      node.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      if (node) {
+        node.removeEventListener('touchstart', handleTouchStart);
+        node.removeEventListener('touchend', handleTouchEnd);
+      }
+    };
+  }, []);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
-      {/* Fancy layered background */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0d0d0d] to-[#1a1a1a] opacity-95" />
         <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
         <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
-        
-        {/* Shooting comets */}
         {comets.map((comet) => (
           <div
             key={comet.id}
@@ -76,20 +112,23 @@ export default function Landing({ setIsLandingPage }) {
       </div>
 
       {/* 3D carousel */}
-      <div className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]">
+      <div
+        ref={carouselRef}
+        className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
+      >
         <div className="relative w-[400px] h-[320px] transform-style-preserve-3d">
           {thumbnails.map((thumb, i) => {
-            const offset = (i - currentIndex + thumbnails.length) % thumbnails.length;
+            const offset = ((i - currentIndex + thumbnails.length) % thumbnails.length);
             const angle = offset * 40;
-            const zIndex = thumbnails.length - offset;
-            const opacity = offset === 0 ? 1 : 0.3;
+            const zIndex = Math.round(thumbnails.length - offset);
+            const opacity = offset < 0.5 || offset > thumbnails.length - 0.5 ? 1 : 0.3;
 
             return (
               <img
                 key={i}
                 src={thumb}
                 alt={`thumb-${i}`}
-                className="absolute w-[260px] h-[260px] object-cover rounded-2xl transition-all duration-700 ease-in-out shadow-2xl"
+                className="absolute w-[260px] h-[260px] object-cover rounded-2xl transition-all duration-500 ease-linear shadow-2xl"
                 style={{
                   transform: `
                     rotateY(${angle}deg)

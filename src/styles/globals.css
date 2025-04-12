@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,8 +24,33 @@ img {
   object-fit: cover;
 }
 
-/* Slide-up animation for queue popup */
+/* Shiny effect for the 'Join the Vibe' button */
 @layer utilities {
+  .shiny-button {
+    position: relative;
+    overflow: hidden;
+    color: white;
+    background-color: transparent;
+    border: 2px solid white;
+    font-weight: bold;
+    padding: 12px 24px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    background-image: linear-gradient(to right, #ff00ff, #ff7300, #ff007f);
+    background-size: 200% 100%;
+    background-position: left bottom;
+    transition: background-position 0.4s ease, color 0.4s ease;
+  }
+
+  .shiny-button:hover {
+    background-position: right bottom;
+    color: #fffcfc;
+  }
+
+  /* Slide-up animation for queue popup */
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }

@@ -5,8 +5,10 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
 import { Users, ListMusic } from 'lucide-react';
+import { useUIContext } from '../context/UIContext'; // Import the UI context
 
 export default function Home() {
+  const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext(); // Get context values
   const [showQueue, setShowQueue] = useState(false);
   const [showVibers, setShowVibers] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -51,28 +53,32 @@ export default function Home() {
 
     const cleanupVibers = setupLongPress(vibersBtnRef, () => {
       setShowVibers(true);
+      setIsVibersPopupOpen(true); // Update the context
     });
 
     const cleanupQueue = setupLongPress(queueBtnRef, () => {
       setShowQueue(true);
+      setIsSongQueueOpen(true); // Update the context
     });
 
     return () => {
       cleanupVibers();
       cleanupQueue();
     };
-  }, []);
+  }, [setIsSongQueueOpen, setIsVibersPopupOpen]);
 
   const popupVisible = showQueue || showVibers;
 
   const handleQueueClick = () => {
     navigator.vibrate?.([70, 30, 70]);
     setShowQueue(true);
+    setIsSongQueueOpen(true); // Update the context
   };
 
   const handleVibersClick = () => {
     navigator.vibrate?.([70, 30, 70]);
     setShowVibers(true);
+    setIsVibersPopupOpen(true); // Update the context
   };
 
   return (
@@ -111,9 +117,15 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowVibers(false)}
+            onClick={() => {
+              setShowVibers(false);
+              setIsVibersPopupOpen(false); // Reset the context
+            }}
           />
-          <VibersPopup onClose={() => setShowVibers(false)} />
+          <VibersPopup onClose={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false); // Reset the context
+          }} />
         </div>
       )}
 
@@ -121,9 +133,15 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowQueue(false)}
+            onClick={() => {
+              setShowQueue(false);
+              setIsSongQueueOpen(false); // Reset the context
+            }}
           />
-          <SongQueue onClose={() => setShowQueue(false)} />
+          <SongQueue onClose={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false); // Reset the context
+          }} />
         </div>
       )}
 

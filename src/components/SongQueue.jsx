@@ -42,7 +42,7 @@ export default function SongQueue({ onClose }) {
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 max-h-[90vh] overflow-y-auto animate-slide-up">
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 h-[75vh] overflow-y-auto animate-slide-up">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Upcoming Songs</h3>
           <button

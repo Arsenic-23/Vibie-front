@@ -17,16 +17,14 @@ function generateComets(num) {
     left: `${Math.random() * 100}%`,
     delay: `${Math.random() * 10}s`,
     duration: `${1 + Math.random() * 2}s`,
-    burst: false,
   }));
 }
 
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [comets, setComets] = useState(generateComets(8));
-  const [burstComets, setBurstComets] = useState([]);
+  const [direction, setDirection] = useState(1); // 1 for forward, -1 for reverse
+  const [comets] = useState(generateComets(8));
 
   const carouselRef = useRef(null);
   const touchStartX = useRef(null);
@@ -43,11 +41,11 @@ export default function Landing({ setIsLandingPage }) {
 
     const update = (now) => {
       const delta = now - lastTime;
-      const speedFactor = 0.002;
+      const speedFactor = 0.002; // Control rotation speed
       setCurrentIndex((prev) => {
         let next = prev + delta * speedFactor * direction;
         if (next >= thumbnails.length || next <= 0) {
-          setDirection((d) => -d);
+          setDirection((d) => -d); // Reverse direction at edges
         }
         return next;
       });
@@ -59,7 +57,7 @@ export default function Landing({ setIsLandingPage }) {
     return () => cancelAnimationFrame(animationFrameId);
   }, [direction]);
 
-  // Swipe gesture + haptic feedback
+  // Swipe gesture for manual rotate
   useEffect(() => {
     const handleTouchStart = (e) => {
       touchStartX.current = e.touches[0].clientX;
@@ -69,7 +67,6 @@ export default function Landing({ setIsLandingPage }) {
       if (touchStartX.current !== null) {
         const deltaX = e.changedTouches[0].clientX - touchStartX.current;
         if (Math.abs(deltaX) > 30) {
-          window.navigator.vibrate?.([15, 30, 15]); // Haptic on swipe
           setCurrentIndex((prev) =>
             (prev + (deltaX > 0 ? -1 : 1) + thumbnails.length) % thumbnails.length
           );
@@ -92,24 +89,6 @@ export default function Landing({ setIsLandingPage }) {
     };
   }, []);
 
-  // Trigger comet bursts every few seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const burst = Array.from({ length: 5 }, (_, i) => ({
-        id: `burst-${Date.now()}-${i}`,
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        duration: `${0.5 + Math.random()}s`,
-      }));
-      setBurstComets(burst);
-
-      // Clear burst after animation
-      setTimeout(() => setBurstComets([]), 1200);
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
       {/* Background */}
@@ -118,7 +97,6 @@ export default function Landing({ setIsLandingPage }) {
         <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
         <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
-
         {comets.map((comet) => (
           <div
             key={comet.id}
@@ -126,40 +104,14 @@ export default function Landing({ setIsLandingPage }) {
             style={{
               top: comet.top,
               left: comet.left,
-              animation: `shooting-star ${comet.duration} linear infinite`,
               animationDelay: comet.delay,
-              position: 'absolute',
-              width: '2px',
-              height: '80px',
-              background: 'white',
-              transform: 'rotate(45deg)',
-              opacity: 0.5,
-              pointerEvents: 'none',
-            }}
-          />
-        ))}
-
-        {burstComets.map((comet) => (
-          <div
-            key={comet.id}
-            className="comet-burst"
-            style={{
-              top: comet.top,
-              left: comet.left,
-              animation: `burst-shoot ${comet.duration} linear`,
-              position: 'absolute',
-              width: '2px',
-              height: '100px',
-              background: 'white',
-              transform: 'rotate(60deg)',
-              opacity: 0.8,
-              pointerEvents: 'none',
+              animationDuration: comet.duration,
             }}
           />
         ))}
       </div>
 
-      {/* Carousel */}
+      {/* 3D carousel */}
       <div
         ref={carouselRef}
         className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
@@ -208,18 +160,6 @@ export default function Landing({ setIsLandingPage }) {
           Join the Vibe
         </span>
       </button>
-
-      {/* Comet animations */}
-      <style>{`
-        @keyframes shooting-star {
-          0% { transform: translate(0, 0) rotate(45deg); opacity: 0.5; }
-          100% { transform: translate(300px, 300px) rotate(45deg); opacity: 0; }
-        }
-        @keyframes burst-shoot {
-          0% { transform: translate(0, 0) rotate(60deg); opacity: 0.8; }
-          100% { transform: translate(200px, 200px) rotate(60deg); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 }

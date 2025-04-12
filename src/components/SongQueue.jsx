@@ -63,7 +63,7 @@ export default function SongQueue({ onClose }) {
         </div>
 
         <ul className="space-y-4">
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {queue.map((song, index) => (
               <SwipeableSongItem
                 key={song.id}
@@ -81,43 +81,54 @@ export default function SongQueue({ onClose }) {
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const opacity = useTransform(x, [-120, 0], [1, 0]);
-  const backgroundWidth = useTransform(x, [-120, 0], ['100%', '0%']);
+  const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
+  const [showBg, setShowBg] = useState(false);
 
   return (
     <div className="relative overflow-hidden rounded-xl">
-      {/* Animated red background */}
-      <motion.div
-        className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 pointer-events-none"
-        style={{ width: backgroundWidth }}
-      >
-        <motion.div style={{ opacity }}>
-          <Trash2 className="text-white w-5 h-5 scale-110" />
-        </motion.div>
-      </motion.div>
+      {/* Persistent red background */}
+      <AnimatePresence>
+        {showBg && (
+          <motion.div
+            className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 z-0"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Trash2 className="text-white w-5 h-5 scale-110" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Swipable Foreground */}
+      {/* Foreground swipeable item */}
       <motion.li
         layout
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
+        exit={{ opacity: 0, y: 30 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         drag="x"
-        style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
+        style={{ x, zIndex: 10 }}
         onDragEnd={(e, info) => {
           if (info.offset.x < -100) {
             navigator.vibrate?.(100);
-            onRemove();
+            setShowBg(true);
+            setTimeout(() => {
+              onRemove();
+              setShowBg(false);
+            }, 200); // keep background visible briefly
+          } else {
+            x.set(0);
           }
         }}
-        className={`relative z-10 p-4 flex items-center space-x-4 cursor-grab shadow-md ${
+        className={`relative p-4 flex items-center space-x-4 cursor-grab shadow-md ${
           isCurrent
             ? 'bg-blue-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-        }`}
+        } rounded-xl`}
       >
         <img
           src={song.thumbnail}

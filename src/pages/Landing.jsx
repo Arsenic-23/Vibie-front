@@ -24,7 +24,6 @@ function generateComets(num) {
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [comets] = useState(generateComets(8));
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -34,14 +33,9 @@ export default function Landing({ setIsLandingPage }) {
 
   const handleJoin = () => {
     window.navigator.vibrate?.([10, 40, 10]);
-
-    // Make sure landing page disappears after joining
     setIsLandingPage(false);
-    
-    // Navigate to home
     navigate('/home');
 
-    // Play background audio
     const sound = new Audio('/sounds/button-tap.mp3');
     sound.play();
 
@@ -69,26 +63,11 @@ export default function Landing({ setIsLandingPage }) {
   }, []);
 
   useEffect(() => {
-    let animationFrameId;
-    let lastTime = performance.now();
-
-    const update = (now) => {
-      const delta = now - lastTime;
-      const speedFactor = 0.002;
-      setCurrentIndex((prev) => {
-        let next = prev + delta * speedFactor * direction;
-        if (next >= thumbnails.length || next <= 0) {
-          setDirection((d) => -d);
-        }
-        return next;
-      });
-      lastTime = now;
-      animationFrameId = requestAnimationFrame(update);
-    };
-
-    animationFrameId = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [direction]);
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % thumbnails.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleTouchStart = (e) => {
@@ -122,12 +101,9 @@ export default function Landing({ setIsLandingPage }) {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
-      {/* Background */}
+    <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#050505] via-[#111111] to-[#1b1b1b] text-white overflow-hidden">
+      {/* Static Background Stars */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0d0d0d] to-[#1a1a1a] opacity-95" />
-        <div className="absolute top-[10%] left-[30%] w-[500px] h-[500px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-pink-500/20 rounded-full blur-[100px] animate-ping" />
         <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
         {comets.map((comet) => (
           <div
@@ -151,24 +127,24 @@ export default function Landing({ setIsLandingPage }) {
         {isPlaying ? <Pause size={20} /> : <Play size={20} />}
       </button>
 
-      {/* 3D Carousel */}
+      {/* Smooth 3D Carousel */}
       <div
         ref={carouselRef}
         className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
       >
-        <div className="relative w-[400px] h-[320px] transform-style-preserve-3d">
+        <div className="relative w-[400px] h-[320px] transform-style-preserve-3d transition-transform duration-1000 ease-in-out">
           {thumbnails.map((thumb, i) => {
             const offset = ((i - currentIndex + thumbnails.length) % thumbnails.length);
             const angle = offset * 40;
             const zIndex = Math.round(thumbnails.length - offset);
-            const opacity = offset < 0.5 || offset > thumbnails.length - 0.5 ? 1 : 0.3;
+            const opacity = offset === 0 ? 1 : 0.25;
 
             return (
               <img
                 key={i}
                 src={thumb}
                 alt={`thumb-${i}`}
-                className="absolute w-[260px] h-[260px] object-cover rounded-2xl transition-all duration-500 ease-linear shadow-2xl"
+                className="absolute w-[260px] h-[260px] object-cover rounded-2xl shadow-2xl transition-all duration-1000 ease-in-out"
                 style={{
                   transform: `
                     rotateY(${angle}deg)
@@ -184,23 +160,12 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Small, Classy Vibie Capsule */}
-      <div className="z-20 mt-[200px] mb-12">
-        <div
-          className="px-5 py-2 rounded-full border border-white/20 shadow-md bg-black/30 backdrop-blur text-white text-lg tracking-widest uppercase font-['Monoton']"
-        >
-          Vibie
-        </div>
-      </div>
-
-      {/* Join Button */}
+      {/* Stylish Join Button */}
       <button
         onClick={handleJoin}
-        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-105 active:scale-95"
+        className="z-20 bg-gradient-to-r from-fuchsia-500 via-indigo-400 to-sky-500 text-white font-semibold px-8 py-3 rounded-full text-base tracking-wide shadow-xl backdrop-blur-md border border-white/10 hover:shadow-white/30 transition-all duration-300 mt-[380px] hover:scale-105 active:scale-95"
       >
-        <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
-          Join the Vibe
-        </span>
+        Join the Vibe
       </button>
     </div>
   );

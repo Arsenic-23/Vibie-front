@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pause, Play } from 'lucide-react';
 
@@ -34,9 +34,14 @@ export default function Landing({ setIsLandingPage }) {
 
   const handleJoin = () => {
     window.navigator.vibrate?.([10, 40, 10]);
+
+    // Make sure landing page disappears after joining
     setIsLandingPage(false);
+    
+    // Navigate to home
     navigate('/home');
 
+    // Play background audio
     const sound = new Audio('/sounds/button-tap.mp3');
     sound.play();
 

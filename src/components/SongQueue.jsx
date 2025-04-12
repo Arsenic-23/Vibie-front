@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 
 export default function SongQueue({ onClose }) {
@@ -49,9 +49,7 @@ export default function SongQueue({ onClose }) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{
-          maxHeight: '80vh',
-        }}
+        style={{ maxHeight: '80vh' }}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Upcoming Songs</h3>
@@ -82,46 +80,44 @@ export default function SongQueue({ onClose }) {
 }
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
-  const [dragX, setDragX] = useState(0);
+  const x = useMotionValue(0);
+  const opacity = useTransform(x, [-120, 0], [1, 0]);
+  const backgroundWidth = useTransform(x, [-120, 0], ['100%', '0%']);
 
   return (
     <div className="relative overflow-hidden rounded-xl">
-      {/* Red background and trash icon */}
+      {/* Animated red background */}
       <motion.div
         className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 pointer-events-none"
-        style={{
-          transform: `translateX(${Math.min(0, dragX)}px)`,
-          opacity: `${Math.min(Math.abs(dragX) / 120, 1)}`,
-        }}
+        style={{ width: backgroundWidth }}
       >
-        <Trash2 className="text-white w-5 h-5 scale-110" />
+        <motion.div style={{ opacity }}>
+          <Trash2 className="text-white w-5 h-5 scale-110" />
+        </motion.div>
       </motion.div>
 
-      {/* Foreground swipable item */}
+      {/* Swipable Foreground */}
       <motion.li
         layout
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 30 }}
+        exit={{ opacity: 0, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         drag="x"
+        style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
-        onDrag={(e, info) => setDragX(info.offset.x)}
         onDragEnd={(e, info) => {
           if (info.offset.x < -100) {
             navigator.vibrate?.(100);
             onRemove();
-          } else {
-            setDragX(0);
           }
         }}
-        className={`relative z-10 p-4 transition-all flex items-center space-x-4 cursor-grab shadow-md ${
+        className={`relative z-10 p-4 flex items-center space-x-4 cursor-grab shadow-md ${
           isCurrent
             ? 'bg-blue-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
         }`}
-        style={{ borderRadius: '0.75rem', x: dragX }}
       >
         <img
           src={song.thumbnail}

@@ -179,13 +179,10 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Capsule Logo */}
+      {/* Small, Classy Vibie Capsule */}
       <div className="z-20 mt-[200px] mb-12">
         <div
-          className="px-10 py-4 rounded-full border border-white/20 shadow-xl bg-black/30 backdrop-blur-lg text-white text-4xl tracking-widest uppercase font-['Monoton']"
-          style={{
-            textShadow: '0 0 8px #f0f, 0 0 15px #ff00ff',
-          }}
+          className="px-5 py-2 rounded-full border border-white/20 shadow-md bg-black/30 backdrop-blur text-white text-lg tracking-widest uppercase font-['Monoton']"
         >
           Vibie
         </div>

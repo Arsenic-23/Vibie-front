@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Home, Search, Compass, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -9,7 +10,8 @@ export default function NavigationBar() {
   let pressTimer;
 
   const handleLongPressStart = (label) => {
-    window.navigator.vibrate?.(10); // light feedback for long-press start
+    // Simulates a medium-impact iOS-style vibration
+    window.navigator.vibrate?.([30, 20, 30]);
     pressTimer = setTimeout(() => setPopup(label), 500);
   };
 
@@ -78,7 +80,8 @@ function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, o
   const isActive = currentPath === path;
 
   const handleClick = () => {
-    window.navigator.vibrate?.(15); // vibrate on tap
+    // Light iOS-style vibration tap
+    window.navigator.vibrate?.([10, 15, 10]);
     navigate(path);
   };
 

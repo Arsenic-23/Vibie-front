@@ -47,8 +47,15 @@ export default function Home() {
       };
     };
 
-    const cleanupVibers = setupLongPress(vibersBtnRef, () => setShowVibers(true));
-    const cleanupQueue = setupLongPress(queueBtnRef, () => setShowQueue(true));
+    const cleanupVibers = setupLongPress(vibersBtnRef, () => {
+      navigator.vibrate?.(60);
+      setShowVibers(true);
+    });
+
+    const cleanupQueue = setupLongPress(queueBtnRef, () => {
+      navigator.vibrate?.(60);
+      setShowQueue(true);
+    });
 
     return () => {
       cleanupVibers();
@@ -58,6 +65,16 @@ export default function Home() {
 
   const popupVisible = showQueue || showVibers;
 
+  const handleQueueClick = () => {
+    navigator.vibrate?.(40);
+    setShowQueue(true);
+  };
+
+  const handleVibersClick = () => {
+    navigator.vibrate?.(40);
+    setShowVibers(true);
+  };
+
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
@@ -66,7 +83,7 @@ export default function Home() {
           <button
             ref={vibersBtnRef}
             className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform"
-            onClick={() => setShowVibers(true)}
+            onClick={handleVibersClick}
           >
             <Users size={16} />
             <span>Vibers</span>
@@ -133,7 +150,7 @@ export default function Home() {
         <div className="fixed bottom-24 right-4 z-40">
           <button
             ref={queueBtnRef}
-            onClick={() => setShowQueue(true)}
+            onClick={handleQueueClick}
             className="flex items-center space-x-2 px-4 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
           >
             <ListMusic size={16} />

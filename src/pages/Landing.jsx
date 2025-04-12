@@ -152,25 +152,21 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Bottom Highlight Section with Join + Play */}
-      <div className="absolute bottom-10 w-full px-6 z-20">
-        <div className="relative flex justify-between items-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-2xl shadow-lg px-6 py-4">
-          {/* Join the Vibe Button */}
-          <button
-            onClick={handleJoin}
-            className="bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-md hover:shadow-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
-          >
-            Join the Vibe
-          </button>
+      {/* Buttons Side-by-Side at Bottom */}
+      <div className="absolute bottom-10 w-full px-6 z-20 flex justify-between items-center">
+        <button
+          onClick={handleJoin}
+          className="bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-md hover:shadow-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
+        >
+          Join the Vibe
+        </button>
 
-          {/* Play/Pause Toggle */}
-          <button
-            onClick={togglePlay}
-            className="ml-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white p-3 rounded-full transition-all duration-200"
-          >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-          </button>
-        </div>
+        <button
+          onClick={togglePlay}
+          className="bg-gradient-to-tr from-sky-500 to-indigo-600 hover:from-indigo-500 hover:to-purple-600 text-white p-3 rounded-full shadow-md transition-all duration-300"
+        >
+          {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+        </button>
       </div>
     </div>
   );

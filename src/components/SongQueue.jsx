@@ -63,7 +63,7 @@ export default function SongQueue({ onClose }) {
         </div>
 
         <ul className="space-y-4">
-          <AnimatePresence initial={false}>
+          <AnimatePresence>
             {queue.map((song, index) => (
               <SwipeableSongItem
                 key={song.id}
@@ -81,50 +81,37 @@ export default function SongQueue({ onClose }) {
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
-  const [showBg, setShowBg] = useState(false);
+  const scale = useTransform(x, [-120, 0], [1.1, 0]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl">
-      {/* Persistent red background */}
-      <AnimatePresence>
-        {showBg && (
-          <motion.div
-            className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 z-0"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Trash2 className="text-white w-5 h-5 scale-110" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <motion.li
+      layout
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="relative overflow-hidden rounded-xl"
+    >
+      {/* Persistent red background with trash icon */}
+      <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 z-0">
+        <motion.div style={{ scale }}>
+          <Trash2 className="text-white w-5 h-5" />
+        </motion.div>
+      </div>
 
-      {/* Foreground swipeable item */}
-      <motion.li
-        layout
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 30 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      {/* Foreground swipable card */}
+      <motion.div
         drag="x"
+        style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
-        style={{ x, zIndex: 10 }}
         onDragEnd={(e, info) => {
           if (info.offset.x < -100) {
             navigator.vibrate?.(100);
-            setShowBg(true);
-            setTimeout(() => {
-              onRemove();
-              setShowBg(false);
-            }, 200); // keep background visible briefly
-          } else {
-            x.set(0);
+            onRemove();
           }
         }}
-        className={`relative p-4 flex items-center space-x-4 cursor-grab shadow-md ${
+        className={`relative z-10 p-4 flex items-center space-x-4 cursor-grab shadow-md ${
           isCurrent
             ? 'bg-blue-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -142,7 +129,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
           </p>
           <p className="text-[10px] text-gray-400 mt-1">Swipe left to remove</p>
         </div>
-      </motion.li>
-    </div>
+      </motion.div>
+    </motion.li>
   );
 }

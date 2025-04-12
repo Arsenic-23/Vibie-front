@@ -181,7 +181,12 @@ export default function Landing({ setIsLandingPage }) {
 
       {/* Capsule Logo */}
       <div className="z-20 mt-[200px] mb-12">
-        <div className="px-10 py-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg text-white text-3xl font-bold tracking-widest font-['Poppins'] uppercase">
+        <div
+          className="px-10 py-4 rounded-full border border-white/20 shadow-xl bg-black/30 backdrop-blur-lg text-white text-4xl tracking-widest uppercase font-['Monoton']"
+          style={{
+            textShadow: '0 0 8px #f0f, 0 0 15px #ff00ff',
+          }}
+        >
           Vibie
         </div>
       </div>

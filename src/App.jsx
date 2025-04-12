@@ -1,51 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import Landing from './pages/Landing';
-import Home from './pages/Home';
-import Search from './pages/Search';
-import Explore from './pages/Explore';
-import Profile from './pages/Profile';
+import React, { useEffect, useState } from 'react'; 
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'; 
+import Landing from './pages/Landing'; 
+import Home from './pages/Home'; 
+import Search from './pages/Search'; 
+import Explore from './pages/Explore'; // Import Explore instead of Hits 
+import Profile from './pages/Profile'; 
 import MainLayout from './layouts/MainLayout';
 
-function App() {
-  const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // Initially null to handle loading state
+function App() { 
+  const location = useLocation(); 
+  const [isAuthenticated, setIsAuthenticated] = useState(false); 
+  const [isLandingPage, setIsLandingPage] = useState(true); // Track if we are on the landing page
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  useEffect(() => { 
+    window.scrollTo(0, 0); 
   }, [location.pathname]);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      return localStorage.getItem('authToken') !== null;
-    };
-    setIsAuthenticated(checkAuth()); // Set the auth state once check is done
+  const checkAuth = () => { 
+    return localStorage.getItem('authToken') !== null; 
+  };
+
+  useEffect(() => { 
+    setIsAuthenticated(checkAuth()); 
   }, []);
 
-  // Loading state before authentication is determined
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Optionally show a loading indicator or spinner here
-  }
+  return ( 
+    <Routes> 
+      {/* Landing page route */} 
+      <Route path="/" element={<Landing setIsLandingPage={setIsLandingPage} />} />
 
-  return (
-    <Routes>
-      {/* Public Landing Page */}
-      <Route path="/" element={<Landing />} />
-
-      {/* Protected Routes */}
-      {isAuthenticated ? (
+      {/* Protect the other routes if on the landing page */}
+      {isLandingPage ? (
+        <Route path="" element={<Navigate to="/" replace />} />
+      ) : (
         <Route element={<MainLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/search" element={<Search />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/explore" element={<Explore />} /> {/* Explore instead of Hits */}
+          <Route
+            path="/profile"
+            element={isAuthenticated ? <Profile /> : <Navigate to="/" replace />}
+          />
         </Route>
-      ) : (
-        // Redirect all other routes to landing if not authenticated
-        <Route path="*" element={<Navigate to="/" replace />} />
       )}
     </Routes>
-  );
+  ); 
 }
 
 export default App;

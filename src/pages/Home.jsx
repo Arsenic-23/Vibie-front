@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
@@ -20,7 +19,10 @@ export default function Home() {
       let pressTimer = null;
 
       const handlePressStart = () => {
-        pressTimer = setTimeout(() => onLongPress(), 500);
+        pressTimer = setTimeout(() => {
+          navigator.vibrate?.([100, 50, 100]);
+          onLongPress();
+        }, 500);
       };
 
       const handlePressEnd = () => {
@@ -48,12 +50,10 @@ export default function Home() {
     };
 
     const cleanupVibers = setupLongPress(vibersBtnRef, () => {
-      navigator.vibrate?.(60);
       setShowVibers(true);
     });
 
     const cleanupQueue = setupLongPress(queueBtnRef, () => {
-      navigator.vibrate?.(60);
       setShowQueue(true);
     });
 
@@ -66,12 +66,12 @@ export default function Home() {
   const popupVisible = showQueue || showVibers;
 
   const handleQueueClick = () => {
-    navigator.vibrate?.(40);
+    navigator.vibrate?.([70, 30, 70]);
     setShowQueue(true);
   };
 
   const handleVibersClick = () => {
-    navigator.vibrate?.(40);
+    navigator.vibrate?.([70, 30, 70]);
     setShowVibers(true);
   };
 

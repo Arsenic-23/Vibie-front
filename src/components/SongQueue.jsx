@@ -62,7 +62,7 @@ export default function SongQueue({ onClose }) {
           </button>
         </div>
 
-        <ul className="space-y-4">
+        <ul className="space-y-3">
           <AnimatePresence>
             {queue.map((song, index) => (
               <SwipeableSongItem
@@ -93,9 +93,9 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       className="relative overflow-hidden rounded-xl"
     >
       {/* Persistent red background with trash icon */}
-      <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 z-0">
+      <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0">
         <motion.div style={{ scale }}>
-          <Trash2 className="text-white w-5 h-5" />
+          <Trash2 className="text-white w-4 h-4" />
         </motion.div>
       </div>
 
@@ -111,7 +111,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
             onRemove();
           }
         }}
-        className={`relative z-10 p-4 flex items-center space-x-4 cursor-grab shadow-md ${
+        className={`relative z-10 p-3 flex items-center space-x-3 cursor-grab shadow-md ${
           isCurrent
             ? 'bg-blue-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -120,14 +120,14 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         <img
           src={song.thumbnail}
           alt={song.title}
-          className="w-14 h-14 rounded-full object-cover border-2 border-white shadow"
+          className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
         />
         <div className="flex-1">
-          <p className="font-semibold truncate">{song.title}</p>
+          <p className="font-medium text-sm truncate">{song.title}</p>
           <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
             {song.artist}
           </p>
-          <p className="text-[10px] text-gray-400 mt-1">Swipe left to remove</p>
+          <p className="text-[10px] text-gray-400 mt-0.5">Swipe left to remove</p>
         </div>
       </motion.div>
     </motion.li>

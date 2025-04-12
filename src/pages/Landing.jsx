@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Volume2, VolumeX } from 'lucide-react'; // Make sure you have lucide-react installed
 
 const thumbnails = [
   "/images/image1.jpg",
@@ -135,12 +136,12 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Sound Toggle Button */}
+      {/* Icon Toggle Sound Button */}
       <button
         onClick={toggleSound}
-        className="absolute top-6 right-6 z-30 bg-white/10 text-white px-4 py-2 rounded-full text-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+        className="absolute top-6 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
       >
-        {isSoundOn ? 'Sound: On' : 'Sound: Off'}
+        {isSoundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
       </button>
 
       {/* 3D Carousel */}

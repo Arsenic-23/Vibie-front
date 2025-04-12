@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2 } from 'lucide-react';
 
 export default function SongQueue({ onClose }) {
   const [queue, setQueue] = useState([
@@ -44,8 +46,10 @@ export default function SongQueue({ onClose }) {
 
       <motion.div
         className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto animate-slide-up"
-        initial={{ height: '75vh' }}
-        animate={{ height: `${queue.length * 90 + 150}px` }} // Dynamically adjust height based on the number of songs
+        initial={{ height: '60vh' }}
+        animate={{
+          height: `${Math.min(queue.length * 90 + 180, 600)}px`,
+        }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <div className="flex justify-between items-center mb-4">
@@ -77,41 +81,55 @@ export default function SongQueue({ onClose }) {
 }
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
+  const [dragX, setDragX] = useState(0);
+
   return (
-    <motion.li
-      layout="position"
-      initial={{ opacity: 0, y: -30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 30 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      whileTap={{ scale: 0.97 }}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
-      onDragEnd={(event, info) => {
-        if (info.offset.x < -100) {
-          navigator.vibrate?.(100);
-          onRemove();
-        }
-      }}
-      className={`p-4 rounded-xl shadow-md flex items-center space-x-4 cursor-grab ${
-        isCurrent
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-      }`}
-    >
-      <img
-        src={song.thumbnail}
-        alt={song.title}
-        className="w-14 h-14 rounded-full object-cover border-2 border-white shadow"
-      />
-      <div className="flex-1">
-        <p className="font-semibold truncate">{song.title}</p>
-        <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
-          {song.artist}
-        </p>
-        <p className="text-[10px] text-gray-400 mt-1">Swipe left to remove</p>
-      </div>
-    </motion.li>
+    <div className="relative">
+      <motion.div
+        className="absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6"
+        style={{ opacity: Math.min(Math.abs(dragX) / 100, 1) }}
+      >
+        <Trash2 className="text-white w-5 h-5" />
+      </motion.div>
+
+      <motion.li
+        layout="position"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 30 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        whileTap={{ scale: 0.97 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.5}
+        onDrag={(e, info) => setDragX(info.offset.x)}
+        onDragEnd={(e, info) => {
+          if (info.offset.x < -100) {
+            navigator.vibrate?.(100);
+            onRemove();
+          } else {
+            setDragX(0);
+          }
+        }}
+        className={`relative z-10 p-4 rounded-xl shadow-md flex items-center space-x-4 cursor-grab transition-all ${
+          isCurrent
+            ? 'bg-blue-500 text-white'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+        }`}
+      >
+        <img
+          src={song.thumbnail}
+          alt={song.title}
+          className="w-14 h-14 rounded-full object-cover border-2 border-white shadow"
+        />
+        <div className="flex-1">
+          <p className="font-semibold truncate">{song.title}</p>
+          <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
+            {song.artist}
+          </p>
+          <p className="text-[10px] text-gray-400 mt-1">Swipe left to remove</p>
+        </div>
+      </motion.li>
+    </div>
   );
 }

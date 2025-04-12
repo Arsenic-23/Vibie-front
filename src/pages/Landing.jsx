@@ -1,7 +1,6 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Pause, Play } from 'lucide-react';
 
 const thumbnails = [
   "/images/image1.jpg",
@@ -27,7 +26,7 @@ export default function Landing({ setIsLandingPage }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [comets] = useState(generateComets(8));
-  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const carouselRef = useRef(null);
   const touchStartX = useRef(null);
@@ -44,40 +43,25 @@ export default function Landing({ setIsLandingPage }) {
     const audio = backgroundAudioRef.current;
     audio.loop = true;
     audio.volume = 0.4;
-    audio.muted = !isSoundOn;
     audio.play().catch(() => {});
+    setIsPlaying(true);
   };
 
-  const toggleSound = () => {
-    setIsSoundOn((prev) => {
-      const newState = !prev;
-      if (backgroundAudioRef.current) {
-        backgroundAudioRef.current.muted = !newState;
-      }
-      return newState;
-    });
+  const togglePlay = () => {
+    const audio = backgroundAudioRef.current;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch(() => {});
+    }
+    setIsPlaying((prev) => !prev);
   };
-
-  // Auto trigger join after delay
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      handleJoin();
-    }, 2000); // 2 second delay before joining
-
-    return () => clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     return () => {
       backgroundAudioRef.current.pause();
     };
   }, []);
-
-  useEffect(() => {
-    if (backgroundAudioRef.current) {
-      backgroundAudioRef.current.muted = !isSoundOn;
-    }
-  }, [isSoundOn]);
 
   useEffect(() => {
     let animationFrameId;
@@ -154,12 +138,12 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Sound Toggle Button */}
+      {/* Play/Pause Toggle Button */}
       <button
-        onClick={toggleSound}
-        className="absolute bottom-20 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
+        onClick={togglePlay}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
       >
-        {isSoundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
+        {isPlaying ? <Pause size={20} /> : <Play size={20} />}
       </button>
 
       {/* 3D Carousel */}
@@ -202,9 +186,9 @@ export default function Landing({ setIsLandingPage }) {
         </span>
         <style jsx="true">{`
           @keyframes soft-neon {
-            0% { text-shadow: 0 0 8px #f0f5, 0 0 14px #f0f5; }
-            50% { text-shadow: 0 0 12px #ff09, 0 0 20px #ff09; }
-            100% { text-shadow: 0 0 8px #f0f5, 0 0 14px #f0f5; }
+            0% { text-shadow: 0 0 4px #f0f5, 0 0 6px #f0f5; }
+            50% { text-shadow: 0 0 6px #ff09, 0 0 10px #ff09; }
+            100% { text-shadow: 0 0 4px #f0f5, 0 0 6px #f0f5; }
           }
           .animate-soft-neon {
             animation: soft-neon 4s ease-in-out infinite;
@@ -212,7 +196,7 @@ export default function Landing({ setIsLandingPage }) {
         `}</style>
       </h1>
 
-      {/* Join Button (for backup/manual click) */}
+      {/* Join Button */}
       <button
         onClick={handleJoin}
         className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-105 active:scale-95"

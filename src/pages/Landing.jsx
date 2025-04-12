@@ -179,22 +179,12 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Neon Animated Logo */}
-      <h1 className="z-20 text-6xl sm:text-7xl font-extrabold tracking-widest mt-[200px] mb-12 font-['Poppins'] drop-shadow-2xl relative">
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 animate-soft-neon">
-          VIBIE
-        </span>
-        <style jsx="true">{`
-          @keyframes soft-neon {
-            0% { text-shadow: 0 0 4px #f0f5, 0 0 6px #f0f5; }
-            50% { text-shadow: 0 0 6px #ff09, 0 0 10px #ff09; }
-            100% { text-shadow: 0 0 4px #f0f5, 0 0 6px #f0f5; }
-          }
-          .animate-soft-neon {
-            animation: soft-neon 4s ease-in-out infinite;
-          }
-        `}</style>
-      </h1>
+      {/* Capsule Logo */}
+      <div className="z-20 mt-[200px] mb-12">
+        <div className="px-10 py-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg text-white text-3xl font-bold tracking-widest font-['Poppins'] uppercase">
+          Vibie
+        </div>
+      </div>
 
       {/* Join Button */}
       <button

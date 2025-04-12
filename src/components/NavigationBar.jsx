@@ -9,6 +9,7 @@ export default function NavigationBar() {
   let pressTimer;
 
   const handleLongPressStart = (label) => {
+    window.navigator.vibrate?.(10); // light feedback for long-press start
     pressTimer = setTimeout(() => setPopup(label), 500);
   };
 
@@ -76,9 +77,14 @@ export default function NavigationBar() {
 function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, onLongPressEnd }) {
   const isActive = currentPath === path;
 
+  const handleClick = () => {
+    window.navigator.vibrate?.(15); // vibrate on tap
+    navigate(path);
+  };
+
   return (
     <button
-      onClick={() => navigate(path)}
+      onClick={handleClick}
       onMouseDown={() => onLongPressStart(label)}
       onMouseUp={onLongPressEnd}
       onMouseLeave={onLongPressEnd}

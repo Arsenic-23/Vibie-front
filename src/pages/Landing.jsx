@@ -23,21 +23,42 @@ function generateComets(num) {
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 for forward, -1 for reverse
+  const [direction, setDirection] = useState(1);
   const [comets] = useState(generateComets(8));
+  const [isSoundOn, setIsSoundOn] = useState(true);
 
   const carouselRef = useRef(null);
   const touchStartX = useRef(null);
+  const backgroundAudioRef = useRef(null);
 
   const handleJoin = () => {
     window.navigator.vibrate?.([10, 40, 10]);
     setIsLandingPage(false);
     navigate('/home');
 
-    // Play a sound when the button is tapped
-    const sound = new Audio('/sounds/button-tap.mp3'); // Replace with actual sound file path
+    const sound = new Audio('/sounds/button-tap.mp3');
     sound.play();
   };
+
+  const toggleSound = () => {
+    setIsSoundOn((prev) => {
+      const newState = !prev;
+      if (backgroundAudioRef.current) {
+        backgroundAudioRef.current.muted = !newState;
+      }
+      return newState;
+    });
+  };
+
+  useEffect(() => {
+    backgroundAudioRef.current = new Audio('/sounds/ambient-loop.mp3');
+    backgroundAudioRef.current.loop = true;
+    backgroundAudioRef.current.volume = 0.4;
+    backgroundAudioRef.current.play().catch(() => {});
+    return () => {
+      backgroundAudioRef.current.pause();
+    };
+  }, []);
 
   useEffect(() => {
     let animationFrameId;
@@ -45,11 +66,11 @@ export default function Landing({ setIsLandingPage }) {
 
     const update = (now) => {
       const delta = now - lastTime;
-      const speedFactor = 0.002; // Control rotation speed
+      const speedFactor = 0.002;
       setCurrentIndex((prev) => {
         let next = prev + delta * speedFactor * direction;
         if (next >= thumbnails.length || next <= 0) {
-          setDirection((d) => -d); // Reverse direction at edges
+          setDirection((d) => -d);
         }
         return next;
       });
@@ -61,7 +82,6 @@ export default function Landing({ setIsLandingPage }) {
     return () => cancelAnimationFrame(animationFrameId);
   }, [direction]);
 
-  // Swipe gesture for manual rotate
   useEffect(() => {
     const handleTouchStart = (e) => {
       touchStartX.current = e.touches[0].clientX;
@@ -115,7 +135,15 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* 3D carousel */}
+      {/* Sound Toggle Button */}
+      <button
+        onClick={toggleSound}
+        className="absolute top-6 right-6 z-30 bg-white/10 text-white px-4 py-2 rounded-full text-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+      >
+        {isSoundOn ? 'Sound: On' : 'Sound: Off'}
+      </button>
+
+      {/* 3D Carousel */}
       <div
         ref={carouselRef}
         className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
@@ -155,7 +183,7 @@ export default function Landing({ setIsLandingPage }) {
         </span>
       </h1>
 
-      {/* Stylish Join button with sound */}
+      {/* Join Button */}
       <button
         onClick={handleJoin}
         className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-110 transform-gpu hover:animate-pulse"

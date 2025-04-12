@@ -160,7 +160,7 @@ export default function Home() {
       )}
 
       {/* Bottom Navigation */}
-      <NavigationBar visible={!showQueue && !showVibers} />
+      {!popupVisible && <NavigationBar />}
     </div>
   );
 }

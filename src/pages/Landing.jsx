@@ -119,14 +119,6 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Play/Pause Toggle Button */}
-      <button
-        onClick={togglePlay}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
-      >
-        {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-      </button>
-
       {/* Smooth 3D Carousel */}
       <div
         ref={carouselRef}
@@ -160,13 +152,26 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Stylish Join Button */}
-      <button
-        onClick={handleJoin}
-        className="z-20 bg-gradient-to-r from-fuchsia-500 via-indigo-400 to-sky-500 text-white font-semibold px-8 py-3 rounded-full text-base tracking-wide shadow-xl backdrop-blur-md border border-white/10 hover:shadow-white/30 transition-all duration-300 mt-[380px] hover:scale-105 active:scale-95"
-      >
-        Join the Vibe
-      </button>
+      {/* Bottom Highlight Section with Join + Play */}
+      <div className="absolute bottom-10 w-full px-6 z-20">
+        <div className="relative flex justify-between items-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-2xl shadow-lg px-6 py-4">
+          {/* Join the Vibe Button */}
+          <button
+            onClick={handleJoin}
+            className="bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-md hover:shadow-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
+          >
+            Join the Vibe
+          </button>
+
+          {/* Play/Pause Toggle */}
+          <button
+            onClick={togglePlay}
+            className="ml-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white p-3 rounded-full transition-all duration-200"
+          >
+            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

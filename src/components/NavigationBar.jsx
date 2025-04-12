@@ -66,12 +66,7 @@ export default function NavigationBar() {
       />
 
       {popup && (
-        <div
-          className="absolute bottom-16 left-1/2 -translate-x-1/2
-          px-4 py-2 rounded-full text-sm text-white
-          bg-black/70 dark:bg-white/10 backdrop-blur-md
-          shadow-lg transition-all duration-300 scale-100 animate-popupIsland"
-        >
+        <div className="absolute bottom-14 bg-neutral-900 text-white px-3 py-1 rounded-md text-xs shadow-sm dark:bg-white/10">
           {popup}
         </div>
       )}

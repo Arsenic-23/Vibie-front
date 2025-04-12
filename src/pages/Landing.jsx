@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX } from 'lucide-react'; // Make sure you have lucide-react installed
+import { Volume2, VolumeX } from 'lucide-react';
 
 const thumbnails = [
   "/images/image1.jpg",
@@ -52,14 +52,22 @@ export default function Landing({ setIsLandingPage }) {
   };
 
   useEffect(() => {
-    backgroundAudioRef.current = new Audio('/sounds/ambient-loop.mp3');
-    backgroundAudioRef.current.loop = true;
-    backgroundAudioRef.current.volume = 0.4;
-    backgroundAudioRef.current.play().catch(() => {});
+    const audio = new Audio('/sounds/ambient-loop.mp3');
+    audio.loop = true;
+    audio.volume = 0.4;
+    audio.muted = !isSoundOn;
+    audio.play().catch(() => {});
+    backgroundAudioRef.current = audio;
     return () => {
-      backgroundAudioRef.current.pause();
+      audio.pause();
     };
   }, []);
+
+  useEffect(() => {
+    if (backgroundAudioRef.current) {
+      backgroundAudioRef.current.muted = !isSoundOn;
+    }
+  }, [isSoundOn]);
 
   useEffect(() => {
     let animationFrameId;
@@ -136,10 +144,10 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Icon Toggle Sound Button */}
+      {/* Sound Toggle Button - Bottom Right */}
       <button
         onClick={toggleSound}
-        className="absolute top-6 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
+        className="absolute bottom-6 right-6 z-30 bg-white/10 text-white p-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
       >
         {isSoundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
       </button>
@@ -177,19 +185,29 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Logo */}
-      <h1 className="z-20 text-7xl sm:text-8xl font-extrabold tracking-widest mt-[200px] mb-12 font-['Poppins'] drop-shadow-2xl">
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400">
+      {/* Neon Animated Logo */}
+      <h1 className="z-20 text-7xl sm:text-8xl font-extrabold tracking-widest mt-[200px] mb-12 font-['Poppins'] drop-shadow-2xl relative">
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 animate-neon-glow">
           VIBIE
         </span>
+        <style jsx="true">{`
+          @keyframes neon-glow {
+            0% { text-shadow: 0 0 5px #f0f, 0 0 10px #f0f, 0 0 20px #f0f; }
+            50% { text-shadow: 0 0 10px #ff0, 0 0 20px #ff0, 0 0 40px #ff0; }
+            100% { text-shadow: 0 0 5px #f0f, 0 0 10px #f0f, 0 0 20px #f0f; }
+          }
+          .animate-neon-glow {
+            animation: neon-glow 3s infinite ease-in-out;
+          }
+        `}</style>
       </h1>
 
       {/* Join Button */}
       <button
         onClick={handleJoin}
-        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-110 transform-gpu hover:animate-pulse"
+        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 scale-100 animate-pulse"
       >
-        <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text animate-shiny">
+        <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text">
           Join the Vibe
         </span>
       </button>

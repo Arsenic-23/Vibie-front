@@ -33,6 +33,10 @@ export default function Landing({ setIsLandingPage }) {
     window.navigator.vibrate?.([10, 40, 10]);
     setIsLandingPage(false);
     navigate('/home');
+
+    // Play a sound when the button is tapped
+    const sound = new Audio('/sounds/button-tap.mp3'); // Replace with actual sound file path
+    sound.play();
   };
 
   useEffect(() => {
@@ -151,10 +155,10 @@ export default function Landing({ setIsLandingPage }) {
         </span>
       </h1>
 
-      {/* Join button */}
+      {/* Stylish Join button with sound */}
       <button
         onClick={handleJoin}
-        className="z-20 bg-white/10 text-white font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-110 transform-gpu"
+        className="z-20 bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text font-semibold px-12 py-6 rounded-full text-lg tracking-wider border border-white/30 shadow-lg backdrop-blur-md hover:shadow-white/30 transition-all duration-300 mt-10 hover:scale-110 transform-gpu hover:animate-pulse"
       >
         <span className="bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 text-transparent bg-clip-text animate-shiny">
           Join the Vibe

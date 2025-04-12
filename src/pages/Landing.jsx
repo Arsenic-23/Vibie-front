@@ -24,7 +24,7 @@ function generateComets(num) {
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [comets] = useState(generateComets(8));
+  const [comets] = useState(generateComets(6));
   const [isPlaying, setIsPlaying] = useState(false);
 
   const carouselRef = useRef(null);
@@ -101,10 +101,10 @@ export default function Landing({ setIsLandingPage }) {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#050505] via-[#111111] to-[#1b1b1b] text-white overflow-hidden">
-      {/* Static Background Stars */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[url('/images/stars.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen flex flex-col justify-center items-center bg-black text-white overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 z-0 animate-pulse-slow bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#0f0f0f] via-[#1a1a1a] to-black">
+        <div className="absolute inset-0 bg-[url('/images/stars.png')] opacity-10 mix-blend-screen pointer-events-none animate-twinkle" />
         {comets.map((comet) => (
           <div
             key={comet.id}
@@ -119,7 +119,7 @@ export default function Landing({ setIsLandingPage }) {
         ))}
       </div>
 
-      {/* Smooth 3D Carousel */}
+      {/* 3D Carousel */}
       <div
         ref={carouselRef}
         className="absolute top-10 w-full flex justify-center z-10 h-[320px] perspective-[1200px]"
@@ -152,8 +152,8 @@ export default function Landing({ setIsLandingPage }) {
         </div>
       </div>
 
-      {/* Buttons Side-by-Side at Bottom */}
-      <div className="absolute bottom-10 w-full px-6 z-20 flex justify-between items-center">
+      {/* Join + Play Buttons */}
+      <div className="absolute bottom-10 z-20 flex gap-4 justify-center items-center">
         <button
           onClick={handleJoin}
           className="bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 text-white font-semibold px-6 py-3 rounded-full text-base tracking-wide shadow-md hover:shadow-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
@@ -168,6 +168,20 @@ export default function Landing({ setIsLandingPage }) {
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
         </button>
       </div>
+
+      {/* Background Animation Tailwind CSS extensions (optional, if not already included) */}
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.2; }
+        }
+        .animate-twinkle {
+          animation: twinkle 5s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulse 20s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }

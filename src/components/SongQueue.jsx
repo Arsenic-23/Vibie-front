@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
@@ -45,12 +44,14 @@ export default function SongQueue({ onClose }) {
       />
 
       <motion.div
-        className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto animate-slide-up"
-        initial={{ height: '60vh' }}
-        animate={{
-          height: `${Math.min(queue.length * 90 + 180, 600)}px`,
-        }}
+        className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        style={{
+          maxHeight: '80vh',
+        }}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Upcoming Songs</h3>
@@ -84,21 +85,25 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const [dragX, setDragX] = useState(0);
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden rounded-xl">
+      {/* Red background and trash icon */}
       <motion.div
-        className="absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6"
-        style={{ opacity: Math.min(Math.abs(dragX) / 100, 1) }}
+        className="absolute inset-0 bg-red-600 flex items-center justify-end pr-6 pointer-events-none"
+        style={{
+          transform: `translateX(${Math.min(0, dragX)}px)`,
+          opacity: `${Math.min(Math.abs(dragX) / 120, 1)}`,
+        }}
       >
-        <Trash2 className="text-white w-5 h-5" />
+        <Trash2 className="text-white w-5 h-5 scale-110" />
       </motion.div>
 
+      {/* Foreground swipable item */}
       <motion.li
-        layout="position"
-        initial={{ opacity: 0, y: -30 }}
+        layout
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 30 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
@@ -111,11 +116,12 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
             setDragX(0);
           }
         }}
-        className={`relative z-10 p-4 rounded-xl shadow-md flex items-center space-x-4 cursor-grab transition-all ${
+        className={`relative z-10 p-4 transition-all flex items-center space-x-4 cursor-grab shadow-md ${
           isCurrent
             ? 'bg-blue-500 text-white'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
         }`}
+        style={{ borderRadius: '0.75rem', x: dragX }}
       >
         <img
           src={song.thumbnail}

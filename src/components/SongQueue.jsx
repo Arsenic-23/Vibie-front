@@ -107,7 +107,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         dragElastic={0.5}
         onDragEnd={(e, info) => {
           if (info.offset.x < -100) {
-            navigator.vibrate?.(100);
+            navigator.vibrate?.(70);
             onRemove();
           }
         }}

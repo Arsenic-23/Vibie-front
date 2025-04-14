@@ -27,16 +27,16 @@ export default function Landing({ setIsLandingPage }) {
 
       {/* Center Text */}
       <div className="z-10 flex flex-col items-center">
-        <h1 className="text-white text-3xl md:text-4xl font-extrabold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
+        <h1 className="text-white text-3xl md:text-4xl font-semibold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
           Over 100 million songs<br />and counting
         </h1>
-        <p className="text-white text-base md:text-lg font-light text-center px-4 italic opacity-95">
-          Tune in. Chill out. Feel every beat with Vibie.
-        </p>
       </div>
 
-      {/* Bottom Button */}
-      <div className="z-20 pb-12">
+      {/* Bottom Button and Tagline */}
+      <div className="z-20 pb-12 flex flex-col items-center gap-2">
+        <p className="text-white text-sm md:text-base font-light opacity-90">
+          Crafted for those who live in rhythm.
+        </p>
         <button
           onClick={handleJoin}
           className="bg-white text-black font-medium rounded-full px-20 py-3 text-base md:text-lg shadow-xl transition-transform duration-150 ease-out active:scale-95 motion-safe:active:animate-tapShrink"

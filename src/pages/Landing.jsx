@@ -22,7 +22,7 @@ export default function Landing({ setIsLandingPage }) {
       {/* Top Branding */}
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-white" />
-        <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie~</span>
+        <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
       </div>
 
       {/* Center Text */}

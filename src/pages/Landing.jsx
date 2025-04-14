@@ -6,7 +6,7 @@ export default function Landing({ setIsLandingPage }) {
 
   const handleJoin = () => {
     // Haptic feedback
-    window.navigator.vibrate?.([10, 40, 10]);
+    window.navigator.vibrate?.([50, 70, 100]);
 
     // Navigate and hide landing
     setIsLandingPage(false);
@@ -36,7 +36,6 @@ export default function Landing({ setIsLandingPage }) {
       {/* Content Overlay */}
       <div className="z-10 flex flex-col items-center justify-center">
         <h1 className="text-white text-xl md:text-2xl font-medium mb-6 text-center px-4">
-          Over 100 million songs and counting
         </h1>
 
         {/* iOS-style tap animation button */}

@@ -81,7 +81,7 @@ export default function SongQueue({ onClose }) {
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const scale = useTransform(x, [-60, 0], [1.1, 0]);
+  const scale = useTransform(x, [-40, 0], [1.1, 0]);
 
   return (
     <motion.li

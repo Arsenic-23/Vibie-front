@@ -81,7 +81,7 @@ export default function SongQueue({ onClose }) {
 
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const scale = useTransform(x, [-120, 0], [1.1, 0]);
+  const scale = useTransform(x, [-60, 0], [1.1, 0]);
 
   return (
     <motion.li
@@ -106,7 +106,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
         onDragEnd={(e, info) => {
-          if (info.offset.x < -100) {
+          if (info.offset.x < -60) {
             navigator.vibrate?.(70);
             onRemove();
           }

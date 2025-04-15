@@ -15,45 +15,57 @@ export default function Landing({ setIsLandingPage }) {
   useEffect(() => {
     const tgUser = window?.Telegram?.WebApp?.initDataUnsafe?.user;
 
-    if (tgUser) {
-      const userData = {
-        user_id: tgUser.id,
-        name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
-        username: tgUser.username || '',
-      };
-
-      // 1. Register or update user
-      fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      })
-        .then(res => res.json())
-        .then(() => {
-          // 2. Fetch full profile info
-          fetch(`${import.meta.env.VITE_API_URL}/api/user/profile?user_id=${userData.user_id}`)
-            .then(res => res.json())
-            .then(profile => {
-              if (!profile.profile_picture_url) {
-                // 3. If no profile photo, send to bot to complete setup
-                window.location.href = 'https://t.me/vibie_bot';
-              } else {
-                // 4. All good, proceed
-                setCheckingUser(false);
-              }
-            })
-            .catch(err => {
-              console.error('Profile fetch failed:', err);
-              window.location.href = 'https://t.me/vibie_bot';
-            });
-        })
-        .catch(err => {
-          console.error('Registration failed:', err);
-          window.location.href = 'https://t.me/vibie_bot';
-        });
-    } else {
+    if (!tgUser) {
       window.location.href = 'https://t.me/vibie_bot';
+      return;
     }
+
+    const userData = {
+      telegram_id: tgUser.id,
+      name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
+      username: tgUser.username || '',
+      photo_url: tgUser.photo_url || '', // fallback if available in WebApp
+    };
+
+    // Register or update the user
+    fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Registration failed');
+        return res.json();
+      })
+      .then(() => {
+        // Fetch full profile to check photo_url
+        fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tgUser.id}` // Or use token if available
+          }
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Profile fetch failed');
+            return res.json();
+          })
+          .then(profile => {
+            if (!profile.photo_url) {
+              // If profile photo missing, redirect to bot to complete
+              window.location.href = 'https://t.me/vibie_bot';
+            } else {
+              setCheckingUser(false);
+            }
+          })
+          .catch(err => {
+            console.error('Profile error:', err);
+            window.location.href = 'https://t.me/vibie_bot';
+          });
+      })
+      .catch(err => {
+        console.error('Registration error:', err);
+        window.location.href = 'https://t.me/vibie_bot';
+      });
   }, []);
 
   if (checkingUser) {

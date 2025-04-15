@@ -24,46 +24,32 @@ export default function Landing({ setIsLandingPage }) {
       telegram_id: tgUser.id,
       name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
       username: tgUser.username || '',
-      photo_url: tgUser.photo_url || '', // fallback if available in WebApp
+      photo_url: tgUser.photo_url || '',
     };
 
-    // Register or update the user
+    // Register user
     fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Registration failed');
-        return res.json();
-      })
+      .then(res => res.ok ? res.json() : Promise.reject())
       .then(() => {
-        // Fetch full profile to check photo_url
-        fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tgUser.id}` // Or use token if available
-          }
-        })
-          .then(res => {
-            if (!res.ok) throw new Error('Profile fetch failed');
-            return res.json();
-          })
-          .then(profile => {
-            if (!profile.photo_url) {
-              // If profile photo missing, redirect to bot to complete
-              window.location.href = 'https://t.me/vibie_bot';
-            } else {
-              setCheckingUser(false);
-            }
-          })
-          .catch(err => {
-            console.error('Profile error:', err);
-            window.location.href = 'https://t.me/vibie_bot';
-          });
+        // Now fetch profile using GET /api/user/profile?telegram_id=XXX
+        return fetch(
+          `${import.meta.env.VITE_API_URL}/api/user/profile?telegram_id=${tgUser.id}`
+        );
+      })
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(profile => {
+        if (!profile.photo_url || profile.photo_url === '') {
+          window.location.href = 'https://t.me/vibie_bot';
+        } else {
+          setCheckingUser(false);
+        }
       })
       .catch(err => {
-        console.error('Registration error:', err);
+        console.error('User check failed:', err);
         window.location.href = 'https://t.me/vibie_bot';
       });
   }, []);
@@ -71,7 +57,7 @@ export default function Landing({ setIsLandingPage }) {
   if (checkingUser) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-black text-white text-lg">
-        Checking your account...
+        Checking your Vibe...
       </div>
     );
   }

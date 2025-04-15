@@ -16,28 +16,42 @@ export default function Landing({ setIsLandingPage }) {
     const tgUser = window?.Telegram?.WebApp?.initDataUnsafe?.user;
 
     if (tgUser) {
-      const userId = tgUser.id;
-      const username = tgUser.username;
+      const userData = {
+        user_id: tgUser.id,
+        name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
+        username: tgUser.username || '',
+      };
 
-      fetch(`${import.meta.env.VITE_API_URL}/users/verify`, {
+      // 1. Register or update user
+      fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, username }),
+        body: JSON.stringify(userData),
       })
         .then(res => res.json())
-        .then(data => {
-          if (!data.exists) {
-            // User has not started the bot
-            window.location.href = 'https://t.me/vibie_bot';
-          } else {
-            setCheckingUser(false);
-          }
+        .then(() => {
+          // 2. Fetch full profile info
+          fetch(`${import.meta.env.VITE_API_URL}/api/user/profile?user_id=${userData.user_id}`)
+            .then(res => res.json())
+            .then(profile => {
+              if (!profile.profile_picture_url) {
+                // 3. If no profile photo, send to bot to complete setup
+                window.location.href = 'https://t.me/vibie_bot';
+              } else {
+                // 4. All good, proceed
+                setCheckingUser(false);
+              }
+            })
+            .catch(err => {
+              console.error('Profile fetch failed:', err);
+              window.location.href = 'https://t.me/vibie_bot';
+            });
         })
         .catch(err => {
-          console.error('Verification error:', err);
+          console.error('Registration failed:', err);
+          window.location.href = 'https://t.me/vibie_bot';
         });
     } else {
-      // Telegram context not found
       window.location.href = 'https://t.me/vibie_bot';
     }
   }, []);
@@ -55,23 +69,19 @@ export default function Landing({ setIsLandingPage }) {
       className="relative w-full h-screen overflow-hidden flex flex-col justify-between items-center bg-cover bg-center"
       style={{ backgroundImage: 'url(/images/bg.jpg)' }}
     >
-      {/* Overlay */}
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40 z-0" />
 
-      {/* Branding */}
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-white" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
       </div>
 
-      {/* Heading */}
       <div className="z-10 flex flex-col items-center">
         <h1 className="text-white text-3xl md:text-4xl font-semibold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
           Over 100 million songs<br />and counting
         </h1>
       </div>
 
-      {/* CTA */}
       <div className="z-20 pb-12 flex flex-col items-center gap-2">
         <p className="text-white text-sm md:text-base font-light opacity-90">
           Crafted for those who live in rhythm.

@@ -1,66 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayCircle } from 'lucide-react';
 
 export default function Landing({ setIsLandingPage }) {
   const navigate = useNavigate();
-  const [checkingUser, setCheckingUser] = useState(true);
 
   const handleJoin = () => {
     window.navigator.vibrate?.([70, 100, 70]);
     setIsLandingPage(false);
     navigate('/home');
   };
-
-  useEffect(() => {
-    const tgUser = window?.Telegram?.WebApp?.initDataUnsafe?.user;
-
-    if (!tgUser) {
-      window.location.href = 'https://t.me/vibie_bot';
-      return;
-    }
-
-    const userData = {
-      telegram_id: tgUser.id,
-      name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
-      username: tgUser.username || '',
-      photo_url: tgUser.photo_url || '',
-    };
-
-    // Register user
-    fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    })
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(() => {
-        // Now fetch profile using GET /api/user/profile?telegram_id=XXX
-        return fetch(
-          `${import.meta.env.VITE_API_URL}/api/user/profile?telegram_id=${tgUser.id}`
-        );
-      })
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(profile => {
-        if (!profile.photo_url || profile.photo_url === '') {
-          window.location.href = 'https://t.me/vibie_bot';
-        } else {
-          setCheckingUser(false);
-        }
-      })
-      .catch(err => {
-        console.error('User check failed:', err);
-        window.location.href = 'https://t.me/vibie_bot';
-      });
-  }, []);
-
-  if (checkingUser) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-black text-white text-lg">
-        Checking your Vibe...
-      </div>
-    );
-  }
 
   return (
     <div

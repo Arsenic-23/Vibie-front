@@ -1,5 +1,6 @@
+// File: app/src/pages/Profile.jsx
+
 import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import ProfileTabs from './ProfileTabs';
 
 export default function Profile({ user: propUser }) {
@@ -18,25 +19,19 @@ export default function Profile({ user: propUser }) {
   }, []);
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col items-center p-6">
-        <img
-          src={user?.photo || 'https://placehold.co/100x100'}
-          alt="Profile"
-          className="w-28 h-28 rounded-full object-cover shadow-md mb-4 pointer-events-none"
-          draggable={false}
-        />
-        <h2 className="text-2xl font-bold mb-1">{user?.name || 'Your Vibe'}</h2>
-        <p className="text-gray-500 dark:text-gray-300 text-sm">
-          {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
-        </p>
-      </div>
-
-      <ProfileTabs />
-
-      {/* Renders the nested tab content */}
-      <div className="p-4">
-        <Outlet />
+    <div className="flex flex-col items-center p-6">
+      <img
+        src={user?.photo || 'https://placehold.co/100x100'}
+        alt="Profile"
+        className="w-28 h-28 rounded-full object-cover shadow-md mb-4 pointer-events-none"
+        draggable={false}
+      />
+      <h2 className="text-2xl font-bold mb-1">{user?.name || 'Your Vibe'}</h2>
+      <p className="text-gray-500 dark:text-gray-300 text-sm">
+        {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
+      </p>
+      <div className="w-full mt-6">
+        <ProfileTabs />
       </div>
     </div>
   );

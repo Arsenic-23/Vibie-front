@@ -1,31 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState('history'); // Track the active tab
+  const [activeTab, setActiveTab] = useState('history');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (tgUser) {
+      setUser({
+        id: tgUser.id,
+        name: `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
+        username: tgUser.username,
+        photo: tgUser.photo_url,
+      });
+    }
+  }, []);
 
   return (
     <div className="px-4 pt-6">
       {/* Profile Header */}
       <div className="flex items-center space-x-6 mb-6">
         <img
-          src="https://placehold.co/100x100"
+          src={user?.photo || 'https://placehold.co/100x100'}
           alt="Profile"
           className="w-28 h-28 rounded-full object-cover shadow-lg"
         />
         <div>
-          <h2 className="text-3xl font-bold">Your Vibe</h2>
-          <p className="text-gray-500 dark:text-gray-300 text-sm">Welcome back, Viber!</p>
+          <h2 className="text-3xl font-bold">{user?.name || 'Your Vibe'}</h2>
+          <p className="text-gray-500 dark:text-gray-300 text-sm">
+            {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
+          </p>
         </div>
       </div>
 
       {/* Tab Navigation */}
       <div className="mb-6">
-        <div className="flex border-b border-gray-300 dark:border-gray-700">
+        <div className="flex border-b border-gray-300 dark:border-gray-700 overflow-x-auto">
           {['history', 'statistics', 'favourites', 'settings'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-lg font-medium transition-all duration-200 ${
+              className={`px-4 py-2 text-lg font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab
                   ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
                   : 'text-gray-500 dark:text-gray-400'

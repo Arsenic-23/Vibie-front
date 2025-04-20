@@ -7,17 +7,15 @@ export default function Landing() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-
-    const user = tg?.initDataUnsafe?.user;
-
-    const profile = user || {
+    // Assuming user data is fetched from localStorage or context
+    const profile = JSON.parse(localStorage.getItem('profile')) || {
       id: 'guest',
       first_name: 'Guest',
       username: '',
       is_bot: false,
     };
 
+    // No need to set profile and authToken here if you're using Context or App.jsx
     localStorage.setItem('profile', JSON.stringify(profile));
     localStorage.setItem('authToken', 'fake-token'); // For dev/test
   }, []);
@@ -29,6 +27,7 @@ export default function Landing() {
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');
 
+    // Navigate to the home page or to the specific stream join page
     navigate(joinId ? `/home?join=${joinId}` : '/home');
   };
 

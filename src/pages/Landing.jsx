@@ -4,22 +4,23 @@ import { PlayCircle } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [telegramUser, setTelegramUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [telegramReady, setTelegramReady] = useState(false);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    const user = tg?.initDataUnsafe?.user;
 
-    if (user) {
-      setTelegramUser(user);
+    if (tg?.initData && tg.initData.length > 0) {
+      const user = tg.initDataUnsafe?.user || {
+        id: 'unknown',
+        first_name: 'Guest',
+        username: '',
+        is_bot: false,
+      };
+
       localStorage.setItem('profile', JSON.stringify(user));
       localStorage.setItem('authToken', 'fake-token');
-    } else if (tg?.initData && tg.initData.length > 0) {
-      // Fallback: user object not available but still opened via Telegram
-      setTelegramUser({ id: 'unknown', first_name: 'Viber' });
-      localStorage.setItem('profile', JSON.stringify({ id: 'unknown', first_name: 'Viber' }));
-      localStorage.setItem('authToken', 'fake-token');
+      setTelegramReady(true);
     }
   }, []);
 
@@ -27,8 +28,8 @@ export default function Landing() {
     window.navigator.vibrate?.([70, 100, 70]);
     setIsLoading(true);
 
-    if (!telegramUser) {
-      alert("Please open this Mini App via Telegram.");
+    if (!telegramReady) {
+      alert('Please open this Mini App via Telegram.');
       setIsLoading(false);
       return;
     }
@@ -36,11 +37,7 @@ export default function Landing() {
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');
 
-    if (joinId) {
-      navigate(`/home?join=${joinId}`);
-    } else {
-      navigate('/home');
-    }
+    navigate(joinId ? `/home?join=${joinId}` : '/home');
   };
 
   return (
@@ -70,7 +67,7 @@ export default function Landing() {
           className="bg-white text-black font-medium rounded-full px-20 py-3 text-base md:text-lg shadow-xl transition-transform duration-150 ease-out active:scale-95 motion-safe:active:animate-tapShrink"
           disabled={isLoading}
         >
-          {isLoading ? "Joining..." : "Join the Vibe"}
+          {isLoading ? 'Joining...' : 'Join the Vibe'}
         </button>
       </div>
     </div>

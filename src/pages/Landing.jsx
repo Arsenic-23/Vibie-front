@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayCircle } from 'lucide-react';
 
@@ -6,29 +6,28 @@ export default function Landing() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Assuming user data is fetched from localStorage or context
-    const profile = JSON.parse(localStorage.getItem('profile')) || {
-      id: 'guest',
-      first_name: 'Guest',
-      username: '',
-      is_bot: false,
-    };
-
-    // No need to set profile and authToken here if you're using Context or App.jsx
-    localStorage.setItem('profile', JSON.stringify(profile));
-    localStorage.setItem('authToken', 'fake-token'); // For dev/test
-  }, []);
-
   const handleJoin = () => {
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+
+    if (!user) {
+      alert('Please open this in Telegram Mini App');
+      return;
+    }
+
+    // Save user and mark as "authenticated"
+    localStorage.setItem('profile', JSON.stringify(user));
+    localStorage.setItem('authToken', 'fake-token'); // Replace with real token later
     window.navigator.vibrate?.([70, 100, 70]);
+
     setIsLoading(true);
 
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');
 
-    // Navigate to the home page or to the specific stream join page
-    navigate(joinId ? `/home?join=${joinId}` : '/home');
+    setTimeout(() => {
+      navigate(joinId ? `/home?join=${joinId}` : '/home');
+    }, 300);
   };
 
   return (

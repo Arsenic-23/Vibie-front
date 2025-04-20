@@ -1,3 +1,5 @@
+// File: app/src/App.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';
@@ -33,15 +35,11 @@ function App() {
           <Route path="/home" element={<Home user={user} />} />
           <Route path="/search" element={<Search user={user} />} />
           <Route path="/explore" element={<Explore user={user} />} />
-
-          {/* Nested Profile Route */}
-          <Route path="/profile/*" element={<Profile user={user} />}>
-            <Route path="history" element={<History />} />
-            <Route path="favourites" element={<Favourites />} />
-            <Route path="statistics" element={<Statistics />} />
-            <Route path="settings" element={<Settings />} />
-            <Route index element={<Navigate to="history" replace />} />
-          </Route>
+          <Route path="/profile" element={<Profile user={user} />} />
+          <Route path="/profile/history" element={<History />} />
+          <Route path="/profile/favourites" element={<Favourites />} />
+          <Route path="/profile/statistics" element={<Statistics />} />
+          <Route path="/profile/settings" element={<Settings />} />
         </Route>
       )}
     </Routes>

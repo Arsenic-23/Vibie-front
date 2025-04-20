@@ -1,3 +1,5 @@
+// File: app/src/App.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';
@@ -5,10 +7,10 @@ import Home from './pages/Home';
 import Search from './pages/Search';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
-import History from './pages/profile/History';
-import Favourites from './pages/profile/Favourites';
-import Statistics from './pages/profile/Statistics';
-import Settings from './pages/profile/Settings';
+import History from './pages/Profile/History';
+import Favourites from './pages/Profile/Favourites';
+import Statistics from './pages/Profile/Statistics';
+import Settings from './pages/Profile/Settings';
 import MainLayout from './layouts/MainLayout';
 
 function App() {

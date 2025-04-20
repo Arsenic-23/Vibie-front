@@ -5,13 +5,14 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
 import { Users, ListMusic } from 'lucide-react';
-import { useUIContext } from '../context/UIContext'; // Import the UI context
+import { useUIContext } from '../context/UIContext';
 
 export default function Home() {
-  const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext(); // Get context values
+  const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);
   const [showVibers, setShowVibers] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [userPhoto, setUserPhoto] = useState(null);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -53,12 +54,12 @@ export default function Home() {
 
     const cleanupVibers = setupLongPress(vibersBtnRef, () => {
       setShowVibers(true);
-      setIsVibersPopupOpen(true); // Update the context
+      setIsVibersPopupOpen(true);
     });
 
     const cleanupQueue = setupLongPress(queueBtnRef, () => {
       setShowQueue(true);
-      setIsSongQueueOpen(true); // Update the context
+      setIsSongQueueOpen(true);
     });
 
     return () => {
@@ -67,18 +68,25 @@ export default function Home() {
     };
   }, [setIsSongQueueOpen, setIsVibersPopupOpen]);
 
+  useEffect(() => {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (tgUser?.photo_url) {
+      setUserPhoto(tgUser.photo_url);
+    }
+  }, []);
+
   const popupVisible = showQueue || showVibers;
 
   const handleQueueClick = () => {
     navigator.vibrate?.([70, 30, 70]);
     setShowQueue(true);
-    setIsSongQueueOpen(true); // Update the context
+    setIsSongQueueOpen(true);
   };
 
   const handleVibersClick = () => {
     navigator.vibrate?.([70, 30, 70]);
     setShowVibers(true);
-    setIsVibersPopupOpen(true); // Update the context
+    setIsVibersPopupOpen(true);
   };
 
   return (
@@ -97,7 +105,7 @@ export default function Home() {
           <ThemeToggle />
         </div>
         <img
-          src="https://placehold.co/40x40"
+          src={userPhoto || "https://placehold.co/40x40"}
           alt="Profile"
           className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
           onClick={() => setShowProfile(!showProfile)}
@@ -119,12 +127,12 @@ export default function Home() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => {
               setShowVibers(false);
-              setIsVibersPopupOpen(false); // Reset the context
+              setIsVibersPopupOpen(false);
             }}
           />
           <VibersPopup onClose={() => {
             setShowVibers(false);
-            setIsVibersPopupOpen(false); // Reset the context
+            setIsVibersPopupOpen(false);
           }} />
         </div>
       )}
@@ -135,12 +143,12 @@ export default function Home() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => {
               setShowQueue(false);
-              setIsSongQueueOpen(false); // Reset the context
+              setIsSongQueueOpen(false);
             }}
           />
           <SongQueue onClose={() => {
             setShowQueue(false);
-            setIsSongQueueOpen(false); // Reset the context
+            setIsSongQueueOpen(false);
           }} />
         </div>
       )}

@@ -14,7 +14,12 @@ export default function Landing() {
     if (user) {
       setTelegramUser(user);
       localStorage.setItem('profile', JSON.stringify(user));
-      localStorage.setItem('authToken', 'fake-token'); // Fake token for now
+      localStorage.setItem('authToken', 'fake-token');
+    } else if (tg?.initData && tg.initData.length > 0) {
+      // Fallback: user object not available but still opened via Telegram
+      setTelegramUser({ id: 'unknown', first_name: 'Viber' });
+      localStorage.setItem('profile', JSON.stringify({ id: 'unknown', first_name: 'Viber' }));
+      localStorage.setItem('authToken', 'fake-token');
     }
   }, []);
 

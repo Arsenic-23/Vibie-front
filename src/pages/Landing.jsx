@@ -2,28 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayCircle } from 'lucide-react';
 
-export default function Landing({ user }) {
+export default function Landing() {
   const navigate = useNavigate();
+  const [telegramUser, setTelegramUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+
+    if (user) {
+      setTelegramUser(user);
+      localStorage.setItem('profile', JSON.stringify(user));
+      localStorage.setItem('authToken', 'fake-token'); // Fake token for now
+    }
+  }, []);
 
   const handleJoin = () => {
     window.navigator.vibrate?.([70, 100, 70]);
     setIsLoading(true);
 
-    // If Telegram user is already detected, proceed
-    if (user) {
-      navigate('/home');
-    } else {
-      // Try grabbing user info again (fallback)
-      const tg = window.Telegram?.WebApp;
-      const telegramUser = tg?.initDataUnsafe?.user;
+    if (!telegramUser) {
+      alert("Please open this Mini App via Telegram.");
+      setIsLoading(false);
+      return;
+    }
 
-      if (telegramUser) {
-        navigate('/home');
-      } else {
-        alert("Please open this Mini App via Telegram.");
-        setIsLoading(false);
-      }
+    const queryParams = new URLSearchParams(window.location.search);
+    const joinId = queryParams.get('join');
+
+    if (joinId) {
+      navigate(`/home?join=${joinId}`);
+    } else {
+      navigate('/home');
     }
   };
 

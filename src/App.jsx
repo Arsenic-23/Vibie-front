@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -12,24 +12,17 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-
-  useEffect(() => {
+    const token = localStorage.getItem('authToken');
     const profile = localStorage.getItem('profile');
-    const authToken = localStorage.getItem('authToken');
-
-    if (authToken && profile) {
+    if (token && profile) {
       setUser(JSON.parse(profile));
     }
   }, []);
 
-  const isAuthenticated = !!user;
-
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      {!isAuthenticated ? (
+      {!user ? (
         <Route path="*" element={<Navigate to="/" replace />} />
       ) : (
         <Route element={<MainLayout />}>

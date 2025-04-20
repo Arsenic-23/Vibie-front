@@ -9,36 +9,35 @@ import MainLayout from './layouts/MainLayout';
 
 function App() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLandingPage, setIsLandingPage] = useState(true); // back in
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const checkAuth = () => {
-    return localStorage.getItem('authToken') !== null;
-  };
-
+  // Detect Telegram Mini App user on load
   useEffect(() => {
-    setIsAuthenticated(checkAuth());
+    const tg = window.Telegram?.WebApp;
+    const telegramUser = tg?.initDataUnsafe?.user;
+    if (telegramUser) {
+      setUser(telegramUser);
+    }
   }, []);
+
+  const isAuthenticated = !!user;
 
   return (
     <Routes>
-      <Route path="/" element={<Landing setIsLandingPage={setIsLandingPage} />} />
+      <Route path="/" element={<Landing user={user} />} />
 
-      {isLandingPage ? (
+      {!isAuthenticated ? (
         <Route path="*" element={<Navigate to="/" replace />} />
       ) : (
         <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route
-            path="/profile"
-            element={isAuthenticated ? <Profile /> : <Navigate to="/" replace />}
-          />
+          <Route path="/home" element={<Home user={user} />} />
+          <Route path="/search" element={<Search user={user} />} />
+          <Route path="/explore" element={<Explore user={user} />} />
+          <Route path="/profile" element={<Profile user={user} />} />
         </Route>
       )}
     </Routes>

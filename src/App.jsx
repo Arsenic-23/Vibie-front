@@ -1,39 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Home from './pages/Home';
-import Search from './pages/Search';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
-import MainLayout from './layouts/MainLayout';
 
-function App() {
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    const profile = localStorage.getItem('profile');
-    if (token && profile) {
-      setUser(JSON.parse(profile));
-    }
-  }, []);
+    setIsAuthenticated(!!token);
+  }, [location]);
 
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      {!user ? (
-        <Route path="*" element={<Navigate to="/" replace />} />
-      ) : (
-        <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home user={user} />} />
-          <Route path="/search" element={<Search user={user} />} />
-          <Route path="/explore" element={<Explore user={user} />} />
-          <Route path="/profile" element={<Profile user={user} />} />
-        </Route>
-      )}
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/home" /> : <Landing />}
+      />
+      <Route
+        path="/home"
+        element={isAuthenticated ? <Home /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/explore"
+        element={isAuthenticated ? <Explore /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/profile/*"
+        element={isAuthenticated ? <Profile /> : <Navigate to="/" />}
+      />
     </Routes>
   );
 }
-
-export default App;

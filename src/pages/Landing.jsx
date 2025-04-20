@@ -5,34 +5,26 @@ import { PlayCircle } from 'lucide-react';
 export default function Landing() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [telegramReady, setTelegramReady] = useState(false);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
 
-    if (tg?.initData && tg.initData.length > 0) {
-      const user = tg.initDataUnsafe?.user || {
-        id: 'unknown',
-        first_name: 'Guest',
-        username: '',
-        is_bot: false,
-      };
+    const user = tg?.initDataUnsafe?.user;
 
-      localStorage.setItem('profile', JSON.stringify(user));
-      localStorage.setItem('authToken', 'fake-token');
-      setTelegramReady(true);
-    }
+    const profile = user || {
+      id: 'guest',
+      first_name: 'Guest',
+      username: '',
+      is_bot: false,
+    };
+
+    localStorage.setItem('profile', JSON.stringify(profile));
+    localStorage.setItem('authToken', 'fake-token'); // For dev/test
   }, []);
 
   const handleJoin = () => {
     window.navigator.vibrate?.([70, 100, 70]);
     setIsLoading(true);
-
-    if (!telegramReady) {
-      alert('Please open this Mini App via Telegram.');
-      setIsLoading(false);
-      return;
-    }
 
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');

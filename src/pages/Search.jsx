@@ -1,6 +1,7 @@
 // src/pages/Search.jsx
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, Flame } from 'lucide-react';
+import axios from 'axios';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -11,30 +12,15 @@ export default function Search() {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) {
-        setResults([]);
-        return;
-      }
-
+      if (!query) return;
       setLoading(true);
       try {
-        const res = await fetch('https://vibie-backend.onrender.com/api/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query }),
+        const res = await axios.get(`https://vibie-backend.onrender.com/api/search/`, {
+          params: { query }
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-          console.error('Search error:', data);
-          setResults([]);
-        } else {
-          setResults(data.results?.slice(0, 7) || []);
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
+        setResults(res.data.results || []);
+      } catch (error) {
+        console.error(error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -84,30 +70,26 @@ export default function Search() {
         </>
       )}
 
-      {loading ? (
-        <div className="mt-10 text-center text-gray-500">Searching...</div>
-      ) : (
-        results.length > 0 && (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 max-w-4xl mx-auto">
-            {results.map((song, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-4 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] shadow hover:shadow-xl transition-all"
-              >
-                <img
-                  src={song.thumbnail}
-                  alt={song.title}
-                  className="w-16 h-16 rounded-md object-cover"
-                />
-                <div className="flex flex-col overflow-hidden">
-                  <p className="font-semibold text-sm truncate">{song.title}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
-                  {song.duration && <span className="text-xs mt-1 text-gray-500">{song.duration}</span>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
+      {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
+
+      {!loading && results.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          {results.slice(0, 7).map((song, i) => (
+            <div key={i} className="rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-[#1c1c1c] p-4">
+              <img
+                src={song.thumbnail || '/placeholder.jpg'}
+                alt={song.title}
+                className="w-full h-40 object-cover rounded-lg mb-3"
+              />
+              <div className="font-bold text-lg truncate">{song.title}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{song.artist}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && query && results.length === 0 && (
+        <div className="text-center mt-6 text-sm text-gray-500">No results found.</div>
       )}
     </div>
   );

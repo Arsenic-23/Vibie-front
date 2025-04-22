@@ -4,7 +4,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
-import { Users, ListMusic } from 'lucide-react';
+import { Users, ListMusic, Repeat, Shuffle, FileText } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 
 export default function Home() {
@@ -13,6 +13,8 @@ export default function Home() {
   const [showVibers, setShowVibers] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
+  const [isLooping, setIsLooping] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -164,6 +166,32 @@ export default function Home() {
         </div>
         <h2 className="text-2xl font-bold text-center mb-1">Song Title</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
+      </div>
+
+      {/* Player Options */}
+      <div className="flex justify-center gap-6 mt-4">
+        <button
+          onClick={() => setIsShuffling(!isShuffling)}
+          className={`p-3 rounded-full shadow-md transition-colors ${
+            isShuffling ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-800'
+          }`}
+        >
+          <Shuffle size={20} />
+        </button>
+        <button
+          onClick={() => alert("Lyrics feature coming soon!")}
+          className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-105 transition-transform"
+        >
+          <FileText size={20} />
+        </button>
+        <button
+          onClick={() => setIsLooping(!isLooping)}
+          className={`p-3 rounded-full shadow-md transition-colors ${
+            isLooping ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-800'
+          }`}
+        >
+          <Repeat size={20} />
+        </button>
       </div>
 
       {/* Controls */}

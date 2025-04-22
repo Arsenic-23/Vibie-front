@@ -23,7 +23,7 @@ export default function Search() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ query }), // Adjust if your backend expects a different key
+          body: JSON.stringify({ query }),
         });
 
         const data = await res.json();
@@ -31,7 +31,7 @@ export default function Search() {
           console.error('Search error:', data);
           setResults([]);
         } else {
-          setResults(data.results || []);
+          setResults(data.results?.slice(0, 7) || []);
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -41,7 +41,7 @@ export default function Search() {
       }
     };
 
-    const debounce = setTimeout(fetchResults, 400); // Debounce input
+    const debounce = setTimeout(fetchResults, 400);
     return () => clearTimeout(debounce);
   }, [query]);
 
@@ -88,11 +88,22 @@ export default function Search() {
         <div className="mt-10 text-center text-gray-500">Searching...</div>
       ) : (
         results.length > 0 && (
-          <div className="mt-8 px-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {results.map((item, index) => (
-              <div key={index} className="bg-gray-100 dark:bg-[#1c1c1c] p-4 rounded-xl shadow hover:shadow-lg transition-all">
-                <p className="text-sm font-medium">{item.title || 'Untitled Track'}</p>
-                {/* Add artist name, image, or other data here if available */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 max-w-4xl mx-auto">
+            {results.map((song, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-4 p-4 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] shadow hover:shadow-xl transition-all"
+              >
+                <img
+                  src={song.thumbnail}
+                  alt={song.title}
+                  className="w-16 h-16 rounded-md object-cover"
+                />
+                <div className="flex flex-col overflow-hidden">
+                  <p className="font-semibold text-sm truncate">{song.title}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                  {song.duration && <span className="text-xs mt-1 text-gray-500">{song.duration}</span>}
+                </div>
               </div>
             ))}
           </div>

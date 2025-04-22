@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Flame, Play } from 'lucide-react';
 import axios from 'axios';
 
@@ -6,8 +6,31 @@ export default function Search() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const observer = useRef();
+  const lastSongElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
 
   const trending = ['Chill Vibes', 'Lo-fi', 'EDM', 'Bollywood', 'Pop', 'RnB'];
+
+  useEffect(() => {
+    setResults([]);
+    setPage(1);
+    setHasMore(true);
+  }, [query]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -15,9 +38,12 @@ export default function Search() {
       setLoading(true);
       try {
         const res = await axios.get(`https://vibie-backend.onrender.com/api/search/search/`, {
-          params: { query }
+          params: { query, page }
         });
-        setResults(res.data.results?.slice(0, 15) || []);
+
+        const newResults = res.data.results || [];
+        setResults((prev) => [...prev, ...newResults]);
+        if (newResults.length < 15) setHasMore(false);
       } catch (error) {
         console.error(error);
         setResults([]);
@@ -26,13 +52,13 @@ export default function Search() {
       }
     };
 
-    const debounce = setTimeout(fetchResults, 400);
+    const debounce = setTimeout(fetchResults, 300);
     return () => clearTimeout(debounce);
-  }, [query]);
+  }, [query, page]);
 
   const handlePlay = (song) => {
     console.log('Playing:', song.title);
-    // Connect with player logic here
+    // Trigger your actual player logic
   };
 
   return (
@@ -74,39 +100,43 @@ export default function Search() {
         </>
       )}
 
-      {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
-
       {!loading && results.length > 0 && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto px-2">
-          {results.map((song, i) => (
-            <div
-              key={i}
-              className="group relative rounded-xl bg-gray-100 dark:bg-[#1a1a1a] p-2 shadow hover:shadow-md transition-all duration-300"
-            >
-              <div className="relative w-full h-32 rounded-lg overflow-hidden">
-                <img
-                  src={song.thumbnail || '/placeholder.jpg'}
-                  alt={song.title}
-                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                />
-                <button
-                  onClick={() => handlePlay(song)}
-                  className="absolute bottom-1 right-1 p-1.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-transform"
-                >
-                  <Play size={14} className="text-white" />
-                </button>
+          {results.map((song, i) => {
+            const isLast = results.length === i + 1;
+            return (
+              <div
+                ref={isLast ? lastSongElementRef : null}
+                key={i}
+                className="group relative rounded-xl bg-gray-100 dark:bg-[#1a1a1a] p-2 shadow hover:shadow-md transition-all duration-300"
+              >
+                <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                  <img
+                    src={song.thumbnail || '/placeholder.jpg'}
+                    alt={song.title}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <button
+                    onClick={() => handlePlay(song)}
+                    className="absolute bottom-1.5 right-1.5 p-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-transform"
+                  >
+                    <Play size={18} className="text-white" />
+                  </button>
+                </div>
+                <div className="mt-2 space-y-0.5 text-sm">
+                  <h2 className="font-semibold truncate">{song.title}</h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                  {song.duration && (
+                    <p className="text-[10px] text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
+                  )}
+                </div>
               </div>
-              <div className="mt-2 space-y-0.5 text-sm">
-                <h2 className="font-semibold truncate">{song.title}</h2>
-                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
-                {song.duration && (
-                  <p className="text-[10px] text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
+
+      {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
 
       {!loading && query && results.length === 0 && (
         <div className="text-center mt-6 text-sm text-gray-500">No results found.</div>

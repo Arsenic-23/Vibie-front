@@ -1,6 +1,5 @@
-// src/pages/Search.jsx
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, Flame } from 'lucide-react';
+import { SearchIcon, Flame, Play } from 'lucide-react';
 import axios from 'axios';
 
 export default function Search() {
@@ -18,7 +17,7 @@ export default function Search() {
         const res = await axios.get(`https://vibie-backend.onrender.com/api/search/search/`, {
           params: { query }
         });
-        setResults(res.data.results || []);
+        setResults(res.data.results?.slice(0, 10) || []);
       } catch (error) {
         console.error(error);
         setResults([]);
@@ -30,6 +29,11 @@ export default function Search() {
     const debounce = setTimeout(fetchResults, 400);
     return () => clearTimeout(debounce);
   }, [query]);
+
+  const handlePlay = (song) => {
+    console.log('Playing:', song.title);
+    // You can link this to actual player logic or navigation here
+  };
 
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white dark:bg-black text-black dark:text-white transition-colors">
@@ -73,16 +77,32 @@ export default function Search() {
       {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
 
       {!loading && results.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {results.slice(0, 7).map((song, i) => (
-            <div key={i} className="rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-[#1c1c1c] p-4">
-              <img
-                src={song.thumbnail || '/placeholder.jpg'}
-                alt={song.title}
-                className="w-full h-40 object-cover rounded-lg mb-3"
-              />
-              <div className="font-bold text-lg truncate">{song.title}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{song.artist}</div>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 max-w-6xl mx-auto">
+          {results.map((song, i) => (
+            <div
+              key={i}
+              className="group relative rounded-2xl bg-gray-100 dark:bg-[#1a1a1a] p-4 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="relative w-full h-44 rounded-xl overflow-hidden">
+                <img
+                  src={song.thumbnail || '/placeholder.jpg'}
+                  alt={song.title}
+                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                />
+                <button
+                  onClick={() => handlePlay(song)}
+                  className="absolute bottom-2 right-2 p-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-transform"
+                >
+                  <Play size={18} className="text-white" />
+                </button>
+              </div>
+              <div className="mt-3 space-y-1">
+                <h2 className="text-lg font-semibold truncate">{song.title}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                {song.duration && (
+                  <p className="text-xs text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -93,4 +113,11 @@ export default function Search() {
       )}
     </div>
   );
+}
+
+// Utility to format duration in mm:ss
+function formatDuration(seconds) {
+  const min = Math.floor(seconds / 60);
+  const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
 }

@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
-import { Users, ListMusic, Shuffle, Repeat, BookOpen } from 'lucide-react';
+import { Users, ListMusic, Mic2 } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 
 export default function Home() {
@@ -87,22 +88,6 @@ export default function Home() {
     navigator.vibrate?.([70, 30, 70]);
     setShowVibers(true);
     setIsVibersPopupOpen(true);
-  };
-
-  const triggerBackendAction = async (endpoint) => {
-    try {
-      const res = await fetch(`https://vibie-backend.onrender.com/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          'Content-Type': 'application/json'
-        },
-      });
-      const data = await res.json();
-      console.log(`${endpoint} result:`, data);
-    } catch (err) {
-      console.error(`${endpoint} error:`, err);
-    }
   };
 
   const fetchLyrics = async () => {
@@ -197,49 +182,27 @@ export default function Home() {
       </div>
 
       {/* Player + Action Buttons */}
-      <div className="my-6 relative">
-        <div className="flex justify-center">
-          <SongControls size="large" />
-        </div>
+      <div className="my-6 relative flex items-center justify-center gap-6">
+        {/* Queue Button */}
+        <button
+          ref={queueBtnRef}
+          onClick={handleQueueClick}
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+        >
+          <ListMusic size={20} />
+        </button>
 
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
-          <button
-            onClick={() => triggerBackendAction('shuffle')}
-            className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition shadow-md"
-          >
-            <Shuffle size={20} />
-          </button>
-        </div>
+        {/* Song Controls */}
+        <SongControls size="large" />
 
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-          <button
-            onClick={() => triggerBackendAction('loop')}
-            className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition shadow-md"
-          >
-            <Repeat size={20} />
-          </button>
-        </div>
+        {/* Lyrics Button */}
+        <button
+          onClick={fetchLyrics}
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Mic2 size={20} />
+        </button>
       </div>
-
-      {/* Queue and Lyrics */}
-      {!popupVisible && (
-        <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3">
-          <button
-            ref={queueBtnRef}
-            onClick={handleQueueClick}
-            className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
-          >
-            <ListMusic size={20} />
-          </button>
-
-          <button
-            onClick={fetchLyrics}
-            className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
-          >
-            <BookOpen size={20} />
-          </button>
-        </div>
-      )}
 
       {/* Bottom Navigation */}
       {!popupVisible && <NavigationBar />}

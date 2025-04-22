@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
@@ -183,24 +182,24 @@ export default function Home() {
 
       {/* Player + Action Buttons */}
       <div className="my-6 relative flex items-center justify-center gap-6">
-        {/* Queue Button */}
+        {/* Lyrics Button on Left */}
+        <button
+          onClick={fetchLyrics}
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Mic2 size={20} />
+        </button>
+
+        {/* Song Controls Center */}
+        <SongControls size="large" />
+
+        {/* Queue Button on Right */}
         <button
           ref={queueBtnRef}
           onClick={handleQueueClick}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
           <ListMusic size={20} />
-        </button>
-
-        {/* Song Controls */}
-        <SongControls size="large" />
-
-        {/* Lyrics Button */}
-        <button
-          onClick={fetchLyrics}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
-        >
-          <Mic2 size={20} />
         </button>
       </div>
 

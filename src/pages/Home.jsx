@@ -4,7 +4,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
-import { Users, ListMusic, Repeat, Shuffle, FileText } from 'lucide-react';
+import { Users, ListMusic, Shuffle, Repeat, BookOpen } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 
 export default function Home() {
@@ -13,8 +13,6 @@ export default function Home() {
   const [showVibers, setShowVibers] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
-  const [isLooping, setIsLooping] = useState(false);
-  const [isShuffling, setIsShuffling] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -91,6 +89,37 @@ export default function Home() {
     setIsVibersPopupOpen(true);
   };
 
+  const triggerBackendAction = async (endpoint) => {
+    try {
+      const res = await fetch(`https://vibie-backend.onrender.com/${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      console.log(`${endpoint} result:`, data);
+    } catch (err) {
+      console.error(`${endpoint} error:`, err);
+    }
+  };
+
+  const fetchLyrics = async () => {
+    try {
+      const res = await fetch(`https://vibie-backend.onrender.com/lyrics`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      const data = await res.json();
+      alert(data.lyrics || 'Lyrics not found.');
+    } catch (err) {
+      console.error('Lyrics fetch error:', err);
+      alert('Failed to fetch lyrics.');
+    }
+  };
+
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
@@ -98,11 +127,10 @@ export default function Home() {
         <div className="flex items-center space-x-3">
           <button
             ref={vibersBtnRef}
-            className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className="p-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform"
             onClick={handleVibersClick}
           >
-            <Users size={16} />
-            <span>Vibers</span>
+            <Users size={20} />
           </button>
           <ThemeToggle />
         </div>
@@ -168,47 +196,47 @@ export default function Home() {
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
       </div>
 
-      {/* Player Options */}
-      <div className="flex justify-center gap-6 mt-4">
-        <button
-          onClick={() => setIsShuffling(!isShuffling)}
-          className={`p-3 rounded-full shadow-md transition-colors ${
-            isShuffling ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-800'
-          }`}
-        >
-          <Shuffle size={20} />
-        </button>
-        <button
-          onClick={() => alert("Lyrics feature coming soon!")}
-          className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-105 transition-transform"
-        >
-          <FileText size={20} />
-        </button>
-        <button
-          onClick={() => setIsLooping(!isLooping)}
-          className={`p-3 rounded-full shadow-md transition-colors ${
-            isLooping ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-800'
-          }`}
-        >
-          <Repeat size={20} />
-        </button>
+      {/* Player + Action Buttons */}
+      <div className="my-6 relative">
+        <div className="flex justify-center">
+          <SongControls size="large" />
+        </div>
+
+        <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
+          <button
+            onClick={() => triggerBackendAction('shuffle')}
+            className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition shadow-md"
+          >
+            <Shuffle size={20} />
+          </button>
+        </div>
+
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+          <button
+            onClick={() => triggerBackendAction('loop')}
+            className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition shadow-md"
+          >
+            <Repeat size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Controls */}
-      <div className="my-6">
-        <SongControls size="large" />
-      </div>
-
-      {/* Queue Floating Button */}
+      {/* Queue and Lyrics */}
       {!popupVisible && (
-        <div className="fixed bottom-24 right-4 z-40">
+        <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3">
           <button
             ref={queueBtnRef}
             onClick={handleQueueClick}
-            className="flex items-center space-x-2 px-4 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+            className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
           >
-            <ListMusic size={16} />
-            <span>Queue</span>
+            <ListMusic size={20} />
+          </button>
+
+          <button
+            onClick={fetchLyrics}
+            className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+          >
+            <BookOpen size={20} />
           </button>
         </div>
       )}

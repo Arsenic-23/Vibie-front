@@ -38,6 +38,7 @@ export default function Landing() {
 
     setIsLoading(true);
     setTimeout(() => {
+      // Redirect to Home with the joinId
       navigate(joinId ? `/home?join=${joinId}` : '/home');
     }, 200); // small delay for effect
   };

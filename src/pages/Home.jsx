@@ -150,4 +150,20 @@ export default function Home() {
       {showProfile && (
         <div className="absolute top-16 left-4 z-30 w-64 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-3xl shadow-2xl">
           <h3 className="text-xl font-bold mb-1">Profile</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">Your user information goes here.</
+          <p className="text-sm text-gray-600 dark:text-gray-300">Your user information goes here.</p>
+        </div>
+      )}
+
+      {/* Song Queue and Vibers Popup */}
+      {popupVisible && (
+        <>
+          <SongQueue />
+          <VibersPopup />
+        </>
+      )}
+
+      {/* Song Controls */}
+      <SongControls songData={songData} />
+    </div>
+  );
+}

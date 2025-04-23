@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle } from 'lucide-react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -92,13 +93,22 @@ export default function Search() {
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
         </div>
 
-        {!searchSubmitted && (
-          <div className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700">
-            <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
-              <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
-            </h2>
-          </div>
-        )}
+        <AnimatePresence>
+          {!searchSubmitted && (
+            <motion.div
+              key="discover-box"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700"
+            >
+              <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
+                <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
+              </h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
@@ -136,7 +146,7 @@ export default function Search() {
           </div>
         )}
 
-        {!loading && searchSubmitted && results.length === 0 && (
+        {!loading && searchSubmitted && results.length === 0 && page === 1 && (
           <div className="text-center mt-10 text-sm text-gray-500 dark:text-gray-400">
             No results found. Try a different vibe!
           </div>
@@ -145,7 +155,6 @@ export default function Search() {
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
 
-      {/* Branding Footer */}
       <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchIcon, Play, Music2 } from 'lucide-react';
+import { SearchIcon, Play } from 'lucide-react';
 import axios from 'axios';
 
 export default function Search() {
@@ -9,7 +9,6 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-
   const observer = useRef();
 
   const lastSongElementRef = useCallback(
@@ -40,13 +39,12 @@ export default function Search() {
         const res = await axios.get(`https://vibie-backend.onrender.com/api/search/search/`, {
           params: { query, page }
         });
-
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
         if (newResults.length < 15) setHasMore(false);
       } catch (error) {
         console.error(error);
-        setResults([]);
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
@@ -58,7 +56,10 @@ export default function Search() {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      setQuery(input.trim());
+      if (input.trim()) {
+        setResults([]);
+        setQuery(input.trim());
+      }
     }
   };
 
@@ -78,31 +79,33 @@ export default function Search() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Find your vibe..."
-          className="w-full p-3 pl-11 rounded-full shadow-md bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
+          className="w-full p-3 pl-11 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
         />
         <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
       </div>
 
-      {query ? (
-        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          Showing results for <span className="text-purple-500 font-medium">"{query}"</span>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center mt-20 space-y-4 text-gray-400 dark:text-gray-500">
-          <Music2 size={48} />
-          <p className="text-sm font-light">Start typing a vibe and press <span className="font-medium">Enter</span> or <span className="font-medium">Space</span> to discover tunes</p>
-        </div>
-      )}
+      {/* Fancy glass effect panel */}
+      <div className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700">
+        <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
+          {query ? (
+            <>
+              Showing results for <span className="text-purple-500 font-medium">"{query}"</span>
+            </>
+          ) : (
+            <>Search for your favorite tracks, artists or vibes</>
+          )}
+        </h2>
+      </div>
 
       {!loading && results.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
+        <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
           {results.map((song, i) => {
             const isLast = results.length === i + 1;
             return (
               <div
                 ref={isLast ? lastSongElementRef : null}
                 key={i}
-                className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-lg transition-all duration-300"
+                className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-32 rounded-lg overflow-hidden">
                   <img

@@ -62,11 +62,13 @@ export default function Home() {
     const cleanupVibers = setupLongPress(vibersBtnRef, () => {  
       setShowVibers(true);  
       setIsVibersPopupOpen(true);  
+      setShowQueue(false);  // Ensure the queue is not shown
     });  
 
     const cleanupQueue = setupLongPress(queueBtnRef, () => {  
       setShowQueue(true);  
       setIsSongQueueOpen(true);  
+      setShowVibers(false);  // Ensure the Vibers popup is not shown
     });
 
     return () => {  
@@ -116,12 +118,14 @@ export default function Home() {
     navigator.vibrate?.([70, 30, 70]);
     setShowQueue(true);
     setIsSongQueueOpen(true);
+    setShowVibers(false); // Close Vibers popup if Queue is opened
   };
 
   const handleVibersClick = () => {
     navigator.vibrate?.([70, 30, 70]);
     setShowVibers(true);
     setIsVibersPopupOpen(true);
+    setShowQueue(false); // Close Queue if Vibers popup is opened
   };
 
   return (
@@ -157,8 +161,8 @@ export default function Home() {
       {/* Song Queue and Vibers Popup */}
       {popupVisible && (
         <>
-          <SongQueue />
-          <VibersPopup />
+          {showQueue && <SongQueue />}
+          {showVibers && <VibersPopup />}
         </>
       )}
 

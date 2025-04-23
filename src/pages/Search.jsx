@@ -4,12 +4,17 @@ import axios from 'axios';
 
 export default function Search() {
   const [query, setQuery] = useState('');
+  const [searchTrigger, setSearchTrigger] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
   const observer = useRef();
+  const inputRef = useRef();
+
+  const trending = ['Chill Vibes', 'Lo-fi', 'EDM', 'Bollywood', 'Pop', 'RnB'];
+
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -24,23 +29,20 @@ export default function Search() {
     [loading, hasMore]
   );
 
-  const trending = ['Chill Vibes', 'Lo-fi', 'EDM', 'Bollywood', 'Pop', 'RnB'];
-
   useEffect(() => {
     setResults([]);
     setPage(1);
     setHasMore(true);
-  }, [query]);
+  }, [searchTrigger]);
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) return;
+      if (!searchTrigger) return;
       setLoading(true);
       try {
         const res = await axios.get(`https://vibie-backend.onrender.com/api/search/search/`, {
-          params: { query, page }
+          params: { query: searchTrigger, page }
         });
-
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
         if (newResults.length < 15) setHasMore(false);
@@ -52,63 +54,74 @@ export default function Search() {
       }
     };
 
-    const debounce = setTimeout(fetchResults, 300);
-    return () => clearTimeout(debounce);
-  }, [query, page]);
+    fetchResults();
+  }, [searchTrigger, page]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const trimmed = query.trim();
+      if (trimmed) setSearchTrigger(trimmed);
+    }
+  };
 
   const handlePlay = (song) => {
     console.log('Playing:', song.title);
-    // Trigger your actual player logic
+    // Trigger your actual player logic here
   };
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-28 bg-white dark:bg-black text-black dark:text-white transition-colors">
-      <h1 className="text-2xl font-bold text-center mb-4 tracking-tight">Search Vibes</h1>
+    <div className="min-h-screen px-4 pt-6 pb-28 bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white transition-colors">
+      <h1 className="text-3xl font-bold text-center mb-6 tracking-tight drop-shadow">Search Vibes</h1>
 
-      <div className="relative max-w-xl mx-auto">
+      <div className="relative max-w-xl mx-auto mb-4">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find your vibe..."
-          className="w-full p-3 pl-11 rounded-full shadow-md bg-gray-100 dark:bg-[#111111] text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+          onKeyDown={handleKeyDown}
+          placeholder="Find your vibe and press Enter..."
+          className="w-full p-3 pl-11 rounded-full shadow-xl bg-gray-900 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 transition-all duration-300"
         />
-        <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+        <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
       </div>
 
-      {query ? (
-        <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
-          Showing results for "<span className="font-medium text-primary">{query}</span>"
-        </div>
-      ) : (
+      {!searchTrigger ? (
         <>
-          <div className="mt-10 mb-2 flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-            <Flame size={16} />
-            <span className="text-sm font-medium">Trending Vibes</span>
+          <div className="mt-10 mb-4 flex items-center justify-center gap-2 text-gray-300">
+            <Flame size={18} />
+            <span className="text-sm font-semibold">Trending Vibes</span>
           </div>
-          <div className="flex flex-wrap justify-center gap-2 px-6">
+          <div className="flex flex-wrap justify-center gap-3 px-6">
             {trending.map((tag, index) => (
               <button
                 key={index}
-                onClick={() => setQuery(tag)}
-                className="px-3 py-1.5 rounded-full bg-gray-200 dark:bg-[#1c1c1c] text-xs hover:bg-primary dark:hover:bg-primary hover:text-white transition-all"
+                onClick={() => {
+                  setQuery(tag);
+                  setSearchTrigger(tag);
+                }}
+                className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white hover:brightness-110 transition-all shadow-lg"
               >
                 {tag}
               </button>
             ))}
           </div>
         </>
+      ) : (
+        <div className="mt-6 text-center text-xs text-gray-400">
+          Showing results for "<span className="text-pink-400 font-medium">{searchTrigger}</span>"
+        </div>
       )}
 
       {!loading && results.length > 0 && (
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto px-2">
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto px-2">
           {results.map((song, i) => {
             const isLast = results.length === i + 1;
             return (
               <div
                 ref={isLast ? lastSongElementRef : null}
                 key={i}
-                className="group relative rounded-xl bg-gray-100 dark:bg-[#1a1a1a] p-2 shadow hover:shadow-md transition-all duration-300"
+                className="group relative rounded-xl bg-[#1a1a1a] p-3 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-32 rounded-lg overflow-hidden">
                   <img
@@ -118,16 +131,16 @@ export default function Search() {
                   />
                   <button
                     onClick={() => handlePlay(song)}
-                    className="absolute bottom-1.5 right-1.5 p-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-transform"
+                    className="absolute bottom-2 right-2 p-2 rounded-full bg-pink-600 hover:scale-110 transition-transform shadow-md"
                   >
                     <Play size={18} className="text-white" />
                   </button>
                 </div>
                 <div className="mt-2 space-y-0.5 text-sm">
                   <h2 className="font-semibold truncate">{song.title}</h2>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                  <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                   {song.duration && (
-                    <p className="text-[10px] text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
+                    <p className="text-[10px] text-gray-500">{formatDuration(song.duration)}</p>
                   )}
                 </div>
               </div>
@@ -136,10 +149,10 @@ export default function Search() {
         </div>
       )}
 
-      {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
+      {loading && <div className="text-center mt-8 text-sm text-gray-400">Loading...</div>}
 
-      {!loading && query && results.length === 0 && (
-        <div className="text-center mt-6 text-sm text-gray-500">No results found.</div>
+      {!loading && searchTrigger && results.length === 0 && (
+        <div className="text-center mt-8 text-sm text-gray-500">No results found.</div>
       )}
     </div>
   );

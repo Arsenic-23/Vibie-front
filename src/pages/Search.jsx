@@ -9,6 +9,7 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [searchSubmitted, setSearchSubmitted] = useState(false);
   const observer = useRef();
 
   const lastSongElementRef = useCallback(
@@ -37,7 +38,7 @@ export default function Search() {
       setLoading(true);
       try {
         const res = await axios.get('https://vibie-backend.onrender.com/api/search/search/', {
-          params: { query, page }
+          params: { query, page },
         });
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
@@ -50,7 +51,7 @@ export default function Search() {
       }
     };
 
-    const debounce = setTimeout(fetchResults, 300);  
+    const debounce = setTimeout(fetchResults, 300);
     return () => clearTimeout(debounce);
   }, [query, page]);
 
@@ -59,6 +60,7 @@ export default function Search() {
       if (input.trim()) {
         setResults([]);
         setQuery(input.trim());
+        setSearchSubmitted(true);
       }
     }
   };
@@ -77,7 +79,12 @@ export default function Search() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (!e.target.value) {
+                setSearchSubmitted(false);
+              }
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
@@ -85,17 +92,13 @@ export default function Search() {
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
         </div>
 
-        <div className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700">
-  {query ? (
-    <h2 className="text-sm font-medium text-center text-gray-600 dark:text-gray-300">
-      Showing results for <span className="text-purple-500 font-semibold">"{query}"</span>
-    </h2>
-  ) : (
-    <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
-      <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
-    </h2>
-  )}
-</div>
+        {!searchSubmitted && (
+          <div className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700">
+            <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
+              <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
+            </h2>
+          </div>
+        )}
 
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
@@ -133,13 +136,13 @@ export default function Search() {
           </div>
         )}
 
-        {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
-
-        {!loading && query && results.length === 0 && (
+        {!loading && searchSubmitted && results.length === 0 && (
           <div className="text-center mt-10 text-sm text-gray-500 dark:text-gray-400">
             No results found. Try a different vibe!
           </div>
         )}
+
+        {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
 
       {/* Branding Footer */}

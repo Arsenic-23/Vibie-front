@@ -1,39 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 
-export default function SongQueue({ onClose }) {
-  const [queue, setQueue] = useState([
-    {
-      id: '1',
-      title: 'Next Vibe',
-      artist: 'DJ Sonic',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Vibe',
-    },
-    {
-      id: '2',
-      title: 'Rhythm Flow',
-      artist: 'Beatline',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Flow',
-    },
-    {
-      id: '3',
-      title: 'Echo Beats',
-      artist: 'Synthex',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Echo',
-    },
-    {
-      id: '4',
-      title: 'Midnight Pulse',
-      artist: 'NeonWaves',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Pulse',
-    },
-  ]);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
+export default function SongQueue({ queue, setQueue, currentIndex, onClose }) {
   const handleRemove = (id) => {
-    setQueue((prev) => prev.filter((s) => s.id !== id));
+    setQueue((prevQueue) => {
+      const newQueue = prevQueue.filter((s) => s.id !== id);
+      return newQueue;
+    });
   };
 
   return (
@@ -92,14 +66,12 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="relative overflow-hidden rounded-xl"
     >
-      {/* Persistent red background with trash icon */}
       <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0">
         <motion.div style={{ scale }}>
           <Trash2 className="text-white w-4 h-4" />
         </motion.div>
       </div>
 
-      {/* Foreground swipable card */}
       <motion.div
         drag="x"
         style={{ x }}

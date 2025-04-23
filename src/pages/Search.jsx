@@ -1,19 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchIcon, Flame, Play } from 'lucide-react';
+import { SearchIcon, Play, Music2 } from 'lucide-react';
 import axios from 'axios';
 
 export default function Search() {
   const [query, setQuery] = useState('');
-  const [searchTrigger, setSearchTrigger] = useState('');
+  const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
   const observer = useRef();
-  const inputRef = useRef();
-
-  const trending = ['Chill Vibes', 'Lo-fi', 'EDM', 'Bollywood', 'Pop', 'RnB'];
 
   const lastSongElementRef = useCallback(
     (node) => {
@@ -33,16 +30,17 @@ export default function Search() {
     setResults([]);
     setPage(1);
     setHasMore(true);
-  }, [searchTrigger]);
+  }, [query]);
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!searchTrigger) return;
+      if (!query) return;
       setLoading(true);
       try {
         const res = await axios.get(`https://vibie-backend.onrender.com/api/search/search/`, {
-          params: { query: searchTrigger, page }
+          params: { query, page }
         });
+
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
         if (newResults.length < 15) setHasMore(false);
@@ -54,74 +52,57 @@ export default function Search() {
       }
     };
 
-    fetchResults();
-  }, [searchTrigger, page]);
+    const debounce = setTimeout(fetchResults, 300);
+    return () => clearTimeout(debounce);
+  }, [query, page]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      const trimmed = query.trim();
-      if (trimmed) setSearchTrigger(trimmed);
+      setQuery(input.trim());
     }
   };
 
   const handlePlay = (song) => {
     console.log('Playing:', song.title);
-    // Trigger your actual player logic here
+    // Add player logic
   };
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-28 bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white transition-colors">
-      <h1 className="text-3xl font-bold text-center mb-6 tracking-tight drop-shadow">Search Vibes</h1>
+    <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all">
+      <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Search Vibes</h1>
 
-      <div className="relative max-w-xl mx-auto mb-4">
+      <div className="relative max-w-xl mx-auto">
         <input
-          ref={inputRef}
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Find your vibe and press Enter..."
-          className="w-full p-3 pl-11 rounded-full shadow-xl bg-gray-900 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 transition-all duration-300"
+          placeholder="Find your vibe..."
+          className="w-full p-3 pl-11 rounded-full shadow-md bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
         />
-        <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+        <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
       </div>
 
-      {!searchTrigger ? (
-        <>
-          <div className="mt-10 mb-4 flex items-center justify-center gap-2 text-gray-300">
-            <Flame size={18} />
-            <span className="text-sm font-semibold">Trending Vibes</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3 px-6">
-            {trending.map((tag, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setQuery(tag);
-                  setSearchTrigger(tag);
-                }}
-                className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white hover:brightness-110 transition-all shadow-lg"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </>
+      {query ? (
+        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          Showing results for <span className="text-purple-500 font-medium">"{query}"</span>
+        </div>
       ) : (
-        <div className="mt-6 text-center text-xs text-gray-400">
-          Showing results for "<span className="text-pink-400 font-medium">{searchTrigger}</span>"
+        <div className="flex flex-col items-center mt-20 space-y-4 text-gray-400 dark:text-gray-500">
+          <Music2 size={48} />
+          <p className="text-sm font-light">Start typing a vibe and press <span className="font-medium">Enter</span> or <span className="font-medium">Space</span> to discover tunes</p>
         </div>
       )}
 
       {!loading && results.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto px-2">
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
           {results.map((song, i) => {
             const isLast = results.length === i + 1;
             return (
               <div
                 ref={isLast ? lastSongElementRef : null}
                 key={i}
-                className="group relative rounded-xl bg-[#1a1a1a] p-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative w-full h-32 rounded-lg overflow-hidden">
                   <img
@@ -131,16 +112,16 @@ export default function Search() {
                   />
                   <button
                     onClick={() => handlePlay(song)}
-                    className="absolute bottom-2 right-2 p-2 rounded-full bg-pink-600 hover:scale-110 transition-transform shadow-md"
+                    className="absolute bottom-2 right-2 p-2 rounded-full bg-purple-600 hover:scale-105 transition-transform"
                   >
                     <Play size={18} className="text-white" />
                   </button>
                 </div>
                 <div className="mt-2 space-y-0.5 text-sm">
                   <h2 className="font-semibold truncate">{song.title}</h2>
-                  <p className="text-xs text-gray-400 truncate">{song.artist}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
                   {song.duration && (
-                    <p className="text-[10px] text-gray-500">{formatDuration(song.duration)}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
                   )}
                 </div>
               </div>
@@ -149,10 +130,12 @@ export default function Search() {
         </div>
       )}
 
-      {loading && <div className="text-center mt-8 text-sm text-gray-400">Loading...</div>}
+      {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
 
-      {!loading && searchTrigger && results.length === 0 && (
-        <div className="text-center mt-8 text-sm text-gray-500">No results found.</div>
+      {!loading && query && results.length === 0 && (
+        <div className="text-center mt-10 text-sm text-gray-500 dark:text-gray-400">
+          No results found. Try a different vibe!
+        </div>
       )}
     </div>
   );

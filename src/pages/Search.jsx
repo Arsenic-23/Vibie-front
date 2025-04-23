@@ -85,18 +85,16 @@ export default function Search() {
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
         </div>
 
-        <div className="mt-6 mx-auto max-w-xl px-4 py-4 rounded-xl backdrop-blur-md border border-white/10 shadow-md bg-gradient-to-br from-white/10 to-purple-100/5 dark:from-neutral-800/20 dark:to-purple-900/5 transition-all duration-500">
-  <h2 className="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
-    {query ? (
-      <>
-        Showing results for <span className="text-purple-500 font-semibold">"{query}"</span>
-      </>
-    ) : (
-      <>
-        <span className="text-purple-500 font-semibold">Discover</span> your favorite tracks, artists, and vibes
-      </>
-    )}
-  </h2>
+        <div className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700">
+  {query ? (
+    <h2 className="text-sm font-medium text-center text-gray-600 dark:text-gray-300">
+      Showing results for <span className="text-purple-500 font-semibold">"{query}"</span>
+    </h2>
+  ) : (
+    <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
+      <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
+    </h2>
+  )}
 </div>
 
         {!loading && results.length > 0 && (

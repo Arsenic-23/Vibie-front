@@ -67,15 +67,13 @@ export default function Search() {
   };
 
   const handlePlay = (song) => {
-    console.log('Playing:', song.title);
-    // Add player logic
+    console.log('Playing:', song.title); // Add player logic
   };
 
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
         <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Search Vibes</h1>
-
         <div className="relative max-w-xl mx-auto">
           <input
             type="text"
@@ -92,7 +90,6 @@ export default function Search() {
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
         </div>
-
         <AnimatePresence>
           {!searchSubmitted && (
             <motion.div
@@ -154,7 +151,6 @@ export default function Search() {
 
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
-
       <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>

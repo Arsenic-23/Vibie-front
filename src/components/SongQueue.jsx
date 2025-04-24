@@ -1,21 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 
-export default function SongQueue({ queue, setQueue, currentIndex, onClose }) {
+export default function SongQueue({ onClose }) {
+  const [queue, setQueue] = useState([
+    {
+      id: '1',
+      title: 'Next Vibe',
+      artist: 'DJ Sonic',
+      thumbnail: 'https://via.placeholder.com/100x100.png?text=Vibe',
+    },
+    {
+      id: '2',
+      title: 'Rhythm Flow',
+      artist: 'Beatline',
+      thumbnail: 'https://via.placeholder.com/100x100.png?text=Flow',
+    },
+    {
+      id: '3',
+      title: 'Echo Beats',
+      artist: 'Synthex',
+      thumbnail: 'https://via.placeholder.com/100x100.png?text=Echo',
+    },
+    {
+      id: '4',
+      title: 'Midnight Pulse',
+      artist: 'NeonWaves',
+      thumbnail: 'https://via.placeholder.com/100x100.png?text=Pulse',
+    },
+  ]);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const handleRemove = (id) => {
-    setQueue((prevQueue) => {
-      const newQueue = prevQueue.filter((s) => s.id !== id);
-      return newQueue;
-    });
+    setQueue((prev) => prev.filter((s) => s.id !== id));
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-md"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onClose} />
 
       <motion.div
         className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto"
@@ -66,12 +89,14 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="relative overflow-hidden rounded-xl"
     >
+      {/* Persistent red background with trash icon */}
       <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0">
         <motion.div style={{ scale }}>
           <Trash2 className="text-white w-4 h-4" />
         </motion.div>
       </div>
 
+      {/* Foreground swipable card */}
       <motion.div
         drag="x"
         style={{ x }}
@@ -96,9 +121,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         />
         <div className="flex-1">
           <p className="font-medium text-sm truncate">{song.title}</p>
-          <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
-            {song.artist}
-          </p>
+          <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{song.artist}</p>
           <p className="text-[10px] text-gray-400 mt-0.5">Swipe left to remove</p>
         </div>
       </motion.div>

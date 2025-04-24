@@ -122,8 +122,8 @@ export default function Home() {
 
         {/* Vibie Branding Centered */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <PlayCircle size={22} className="text-purple-500 drop-shadow-sm" />
-          <span className="text-lg font-semibold tracking-wide">Vibie</span>
+          <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
+          <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
         <img

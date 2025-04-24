@@ -106,9 +106,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
-      
+
       {/* Top Bar */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
           <button
             ref={vibersBtnRef}
@@ -120,10 +120,10 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        {/* Vibie Branding */}
-        <div className="flex items-center gap-2">
-          <PlayCircle size={28} className="text-purple-500 drop-shadow-sm" />
-          <span className="text-xl font-bold tracking-wide">Vibie</span>
+        {/* Vibie Branding Centered */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
+          <PlayCircle size={22} className="text-purple-500 drop-shadow-sm" />
+          <span className="text-lg font-semibold tracking-wide">Vibie</span>
         </div>
 
         <img

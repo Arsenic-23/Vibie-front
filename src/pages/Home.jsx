@@ -14,14 +14,8 @@ export default function Home() {
   const [showProfile, setShowProfile] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
 
-  const [songQueue, setSongQueue] = useState([
-    {
-      title: 'Song Title',
-      artist: 'Artist Name',
-      image: 'https://placehold.co/600x600',
-    },
-  ]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [songQueue, setSongQueue] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(null);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -65,6 +59,13 @@ export default function Home() {
     setCurrentIndex(index);
   };
 
+  const handleAddSongToQueue = (song) => {
+    setSongQueue((prevQueue) => [...prevQueue, song]);
+    if (currentIndex === null) {
+      setCurrentIndex(0); // Automatically start the first song if it's the first song added
+    }
+  };
+
   const handleToggleQueue = () => {
     setIsSongQueueOpen(!showQueue);
     setShowQueue(!showQueue);
@@ -84,17 +85,21 @@ export default function Home() {
       <div className="flex flex-grow justify-center items-center py-10">
         <div className="max-w-xl w-full text-center">
           <h2 className="text-2xl font-semibold mb-6">Now Playing</h2>
-          <div className="relative">
-            <img
-              src={songQueue[currentIndex].image}
-              alt={songQueue[currentIndex].title}
-              className="w-64 h-64 object-cover rounded-lg mx-auto"
-            />
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white">
-              <h3 className="text-lg font-semibold">{songQueue[currentIndex].title}</h3>
-              <p className="text-sm">{songQueue[currentIndex].artist}</p>
+          {currentIndex !== null ? (
+            <div className="relative">
+              <img
+                src={songQueue[currentIndex].image}
+                alt={songQueue[currentIndex].title}
+                className="w-64 h-64 object-cover rounded-lg mx-auto"
+              />
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white">
+                <h3 className="text-lg font-semibold">{songQueue[currentIndex].title}</h3>
+                <p className="text-sm">{songQueue[currentIndex].artist}</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p>No song playing</p>
+          )}
         </div>
       </div>
 
@@ -124,7 +129,7 @@ export default function Home() {
         </button>
       </div>
 
-      {showQueue && <SongQueue songQueue={songQueue} />}
+      {showQueue && <SongQueue songQueue={songQueue} onSelectSong={handlePlaySong} />}
       {showVibers && <VibersPopup />}
       {showProfile && (
         <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex justify-center items-center">
@@ -145,7 +150,12 @@ export default function Home() {
         </div>
       )}
 
-      <SongControls onPlaySong={handlePlaySong} />
+      <SongControls
+        onPlaySong={handlePlaySong}
+        songQueue={songQueue}
+        currentIndex={currentIndex}
+        onAddSongToQueue={handleAddSongToQueue}
+      />
     </div>
   );
 }

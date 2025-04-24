@@ -107,12 +107,6 @@ export default function Home() {
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       
-      {/* Vibie Branding */}
-      <div className="flex items-center gap-2 mb-4">
-        <PlayCircle size={30} className="text-purple-500 drop-shadow-sm" />
-        <span className="text-2xl font-extrabold text-black dark:text-white tracking-wide">Vibie</span>
-      </div>
-
       {/* Top Bar */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
@@ -125,6 +119,13 @@ export default function Home() {
           </button>
           <ThemeToggle />
         </div>
+
+        {/* Vibie Branding */}
+        <div className="flex items-center gap-2">
+          <PlayCircle size={28} className="text-purple-500 drop-shadow-sm" />
+          <span className="text-xl font-bold tracking-wide">Vibie</span>
+        </div>
+
         <img
           src={userPhoto || "https://placehold.co/40x40"}
           alt="Profile"

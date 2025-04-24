@@ -51,7 +51,7 @@ export default function Landing() {
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40 z-0" />
 
       <div className="z-20 pt-14 flex items-center gap-2">
-        <PlayCircle size={22} className="text-white" />
+        <PlayCircle size={22} className="text-purple-500" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
       </div>
 

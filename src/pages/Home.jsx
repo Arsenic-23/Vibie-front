@@ -112,7 +112,7 @@ export default function Home() {
             }`}
           >
             <img
-              src={userPhoto || "https://placehold.co/600×600/6a0dad/e6ccff?text=+"}
+              src={userPhoto || "https://placehold.co/150×150/6a0dad/e6ccff?text=+"}
               alt="Profile"
               className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
               onClick={() => {
@@ -174,7 +174,7 @@ export default function Home() {
       <div className="flex flex-col items-center mt-4">
         <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
           <img
-            src="https://placehold.co/thumbnail"
+            src="https://placehold.co/600×600/6a0dad/e6ccff?text=+"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />

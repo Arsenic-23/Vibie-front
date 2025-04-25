@@ -104,15 +104,35 @@ export default function Home() {
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
+        {/* Profile with subtle ring */}
         <div className="relative">
-          <img
-            src={userPhoto || "https://placehold.co/40x40"}
-            alt="Profile"
-            className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
-            onClick={() => setShowProfilePopup(prev => !prev)}
-          />
+          <div
+            className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full transition-transform duration-200 ${
+              showProfilePopup ? 'scale-105' : ''
+            }`}
+          >
+            <img
+              src={userPhoto || "https://placehold.co/40x40"}
+              alt="Profile"
+              className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
+              onClick={() => {
+                navigator.vibrate?.([60]);
+                setShowProfilePopup(true);
+              }}
+            />
+          </div>
+
           {showProfilePopup && (
-            <ProfilePopup onClose={() => setShowProfilePopup(false)} />
+            <>
+              {/* Overlay to close on outside click */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowProfilePopup(false)}
+              />
+              <div className="absolute z-50 right-0 mt-2">
+                <ProfilePopup onClose={() => setShowProfilePopup(false)} />
+              </div>
+            </>
           )}
         </div>
       </div>

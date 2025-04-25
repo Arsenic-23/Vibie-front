@@ -90,16 +90,18 @@ export default function Search() {
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
         </div>
+
         <AnimatePresence>
           {!searchSubmitted && (
             <motion.div
               key="discover-box"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
+              className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700 relative"
             >
+              <div className="absolute top-0 left-0 w-full h-1 rounded-t-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-violet-600" />
               <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
                 <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
               </h2>

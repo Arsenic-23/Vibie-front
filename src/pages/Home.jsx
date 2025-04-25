@@ -112,7 +112,7 @@ export default function Home() {
             }`}
           >
             <img
-              src={userPhoto || "https://placehold.co/thumbnail"}
+              src={userPhoto || "https://placehold.co/600×600/6a0dad/e6ccff?text=+"}
               alt="Profile"
               className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
               onClick={() => {

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Users, ListMusic, Mic2, PlayCircle } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
-import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
@@ -97,7 +96,6 @@ export default function Home() {
           >
             <Users size={20} />
           </button>
-          <ThemeToggle />
         </div>
 
         {/* Vibie Branding Centered */}

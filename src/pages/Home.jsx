@@ -6,7 +6,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
-import ProfilePopup from '../components/ProfilePage';
+import ProfilePopup from '../components/ProfilePopup';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();

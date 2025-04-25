@@ -1,55 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Users, ListMusic, Mic2, PlayCircle } from 'lucide-react';
+import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
-import { Users, ListMusic, Mic2, PlayCircle } from 'lucide-react';
-import { useUIContext } from '../context/UIContext';
+import ProfilePopup from '../components/ProfilePage';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);
   const [showVibers, setShowVibers] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const setupLongPress = (ref, onLongPress) => {
       let pressTimer = null;
-
-      const handlePressStart = () => {
-        pressTimer = setTimeout(() => {
-          navigator.vibrate?.([100, 50, 100]);
-          onLongPress();
-        }, 500);
-      };
-
-      const handlePressEnd = () => {
-        clearTimeout(pressTimer);
-      };
+      const start = () => (pressTimer = setTimeout(() => {
+        navigator.vibrate?.([100, 50, 100]);
+        onLongPress();
+      }, 500));
+      const clear = () => clearTimeout(pressTimer);
 
       const el = ref.current;
-      if (el) {
-        el.addEventListener('mousedown', handlePressStart);
-        el.addEventListener('touchstart', handlePressStart);
-        el.addEventListener('mouseup', handlePressEnd);
-        el.addEventListener('mouseleave', handlePressEnd);
-        el.addEventListener('touchend', handlePressEnd);
-      }
+      el?.addEventListener('mousedown', start);
+      el?.addEventListener('touchstart', start);
+      el?.addEventListener('mouseup', clear);
+      el?.addEventListener('mouseleave', clear);
+      el?.addEventListener('touchend', clear);
 
       return () => {
-        if (el) {
-          el.removeEventListener('mousedown', handlePressStart);
-          el.removeEventListener('touchstart', handlePressStart);
-          el.removeEventListener('mouseup', handlePressEnd);
-          el.removeEventListener('mouseleave', handlePressEnd);
-          el.removeEventListener('touchend', handlePressEnd);
-        }
+        el?.removeEventListener('mousedown', start);
+        el?.removeEventListener('touchstart', start);
+        el?.removeEventListener('mouseup', clear);
+        el?.removeEventListener('mouseleave', clear);
+        el?.removeEventListener('touchend', clear);
       };
     };
 
@@ -57,7 +47,6 @@ export default function Home() {
       setShowVibers(true);
       setIsVibersPopupOpen(true);
     });
-
     const cleanupQueue = setupLongPress(queueBtnRef, () => {
       setShowQueue(true);
       setIsSongQueueOpen(true);
@@ -71,29 +60,10 @@ export default function Home() {
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (tgUser?.photo_url) {
-      setUserPhoto(tgUser.photo_url);
-    }
+    if (tgUser?.photo_url) setUserPhoto(tgUser.photo_url);
   }, []);
 
   const popupVisible = showQueue || showVibers;
-
-  const handleQueueClick = () => {
-    navigator.vibrate?.([70, 30, 70]);
-    setShowQueue(true);
-    setIsSongQueueOpen(true);
-  };
-
-  const handleVibersClick = () => {
-    navigator.vibrate?.([70, 30, 70]);
-    setShowVibers(true);
-    setIsVibersPopupOpen(true);
-  };
-
-  const handleProfileClick = () => {
-    navigator.vibrate?.([70, 30, 70]);
-    navigate('/profile');
-  };
 
   const fetchLyrics = async () => {
     try {
@@ -112,14 +82,18 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
-
+      
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
           <button
             ref={vibersBtnRef}
             className="p-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform"
-            onClick={handleVibersClick}
+            onClick={() => {
+              navigator.vibrate?.([70, 30, 70]);
+              setShowVibers(true);
+              setIsVibersPopupOpen(true);
+            }}
           >
             <Users size={20} />
           </button>
@@ -132,12 +106,17 @@ export default function Home() {
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
-        <img
-          src={userPhoto || "https://placehold.co/40x40"}
-          alt="Profile"
-          className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
-          onClick={handleProfileClick}
-        />
+        <div className="relative">
+          <img
+            src={userPhoto || "https://placehold.co/40x40"}
+            alt="Profile"
+            className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
+            onClick={() => setShowProfilePopup(prev => !prev)}
+          />
+          {showProfilePopup && (
+            <ProfilePopup onClose={() => setShowProfilePopup(false)} />
+          )}
+        </div>
       </div>
 
       {/* Modals */}
@@ -197,7 +176,11 @@ export default function Home() {
         <SongControls size="large" />
         <button
           ref={queueBtnRef}
-          onClick={handleQueueClick}
+          onClick={() => {
+            navigator.vibrate?.([70, 30, 70]);
+            setShowQueue(true);
+            setIsSongQueueOpen(true);
+          }}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
           <ListMusic size={20} />

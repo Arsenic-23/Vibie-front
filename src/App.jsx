@@ -6,7 +6,7 @@ import Search from './pages/Search';
 import Explore from './pages/Explore';
 import MainLayout from './layouts/MainLayout';
 
-import ProfilePage from './pages/Profile/ProfilePage';
+
 import History from './pages/Profile/History';
 import Favourites from './pages/Profile/Favourites';
 import Statistics from './pages/Profile/Statistics';

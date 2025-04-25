@@ -174,7 +174,7 @@ export default function Home() {
       <div className="flex flex-col items-center mt-4">
         <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
           <img
-            src="https://placehold.co/600x600"
+            src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import ThemeToggle from '../components/ThemeToggle';
 import SongQueue from '../components/SongQueue';
@@ -11,11 +12,11 @@ export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);
   const [showVibers, setShowVibers] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const setupLongPress = (ref, onLongPress) => {
@@ -89,6 +90,11 @@ export default function Home() {
     setIsVibersPopupOpen(true);
   };
 
+  const handleProfileClick = () => {
+    navigator.vibrate?.([70, 30, 70]);
+    navigate('/profile');
+  };
+
   const fetchLyrics = async () => {
     try {
       const res = await fetch('https://vibie-backend.onrender.com/lyrics', {
@@ -130,17 +136,9 @@ export default function Home() {
           src={userPhoto || "https://placehold.co/40x40"}
           alt="Profile"
           className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800 hover:scale-105 transition-transform cursor-pointer"
-          onClick={() => setShowProfile(!showProfile)}
+          onClick={handleProfileClick}
         />
       </div>
-
-      {/* Profile Section */}
-      {showProfile && (
-        <div className="absolute top-16 left-4 z-30 w-64 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-3xl shadow-2xl">
-          <h3 className="text-xl font-bold mb-1">Profile</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">Your user information goes here.</p>
-        </div>
-      )}
 
       {/* Modals */}
       {showVibers && (

@@ -30,17 +30,17 @@ export default function ProfilePopup() {
 
   // Close on outside click
   useEffect(() => {
-    const handleOutsideClick = (e) => {
+    const handleClick = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
         setIsProfilePopupOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, [setIsProfilePopupOpen]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
       {/* Link Copied Notification */}
       {copied && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-fadeInOut">

@@ -4,13 +4,16 @@ import toast from 'react-hot-toast';
 
 export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
+  const [copied, setCopied] = useState(false);
 
   const streamLink = 'https://t.me/vibie_bot/Vibiebot';
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
+      setCopied(true);
       toast.success('Link copied to clipboard!');
+      setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       toast.error('Failed to copy the link.');
     }
@@ -57,7 +60,7 @@ export default function ProfilePopup({ onClose }) {
 
       {/* Share Tab */}
       {activeTab === 'share' && (
-        <div>
+        <div className="relative">
           <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Share Stream</h4>
           <div className="text-xs text-gray-600 dark:text-gray-400 break-words mb-2">{streamLink}</div>
           <div className="flex space-x-2">
@@ -74,6 +77,13 @@ export default function ProfilePopup({ onClose }) {
               Share
             </button>
           </div>
+
+          {/* Copy animation */}
+          {copied && (
+            <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-full bg-white/70 dark:bg-gray-800/70 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full shadow-md backdrop-blur-lg animate-fade-in-out">
+              Copied!
+            </div>
+          )}
         </div>
       )}
     </div>

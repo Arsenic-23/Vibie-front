@@ -1,57 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
+import { Check } from 'lucide-react';
 
 export default function ProfilePopup({ onClose }) {
-  const streamLink = 'https://t.me/vibie_bot?startapp';
+  const [activeTab, setActiveTab] = useState('theme');
+  const [copied, setCopied] = useState(false);
+
+  const streamLink = 'https://yourapp.com/stream/abc123';
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
-      alert('Link copied to clipboard!');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       alert('Failed to copy the link.');
     }
   };
 
-  const shareLink = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Join My Stream',
-          url: streamLink,
-        });
-      } catch (error) {
-        console.error('Sharing failed:', error);
-      }
-    } else {
-      alert('Web Share API not supported on this browser.');
-    }
+  const openTelegramShare = () => {
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream!')}`;
+    window.open(telegramUrl, '_blank');
   };
 
   return (
-    <div className="absolute top-14 right-4 z-30 w-64 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-4 rounded-2xl shadow-xl space-y-4">
-      <div>
-        <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Theme</h4>
-        <ThemeToggle />
+    <div className="absolute top-14 right-4 z-30 w-72 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-4 rounded-2xl shadow-xl space-y-4">
+      <div className="flex space-x-2 mb-4">
+        <button
+          onClick={() => setActiveTab('theme')}
+          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+            activeTab === 'theme'
+              ? 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          Theme
+        </button>
+        <button
+          onClick={() => setActiveTab('share')}
+          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+            activeTab === 'share'
+              ? 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          Share
+        </button>
       </div>
-      <div>
-        <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Share Stream</h4>
-        <div className="text-xs text-gray-600 dark:text-gray-400 break-words mb-2">{streamLink}</div>
-        <div className="flex space-x-2">
-          <button
-            onClick={copyToClipboard}
-            className="px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
-          >
-            Copy
-          </button>
-          <button
-            onClick={shareLink}
-            className="px-3 py-1 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Share
-          </button>
+
+      {activeTab === 'theme' && (
+        <div>
+          <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Toggle Theme</h4>
+          <ThemeToggle />
         </div>
-      </div>
+      )}
+
+      {activeTab === 'share' && (
+        <div>
+          <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Share Stream</h4>
+          <div className="text-xs text-gray-600 dark:text-gray-400 break-words mb-2">{streamLink}</div>
+          <div className="flex space-x-2">
+            <button
+              onClick={copyToClipboard}
+              className="relative px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
+            >
+              Copy
+              {copied && (
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded-lg shadow-lg flex items-center space-x-1 animate-fadeInOut">
+                  <Check size={14} />
+                  <span>Copied!</span>
+                </div>
+              )}
+            </button>
+            <button
+              onClick={openTelegramShare}
+              className="px-3 py-1 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Share
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Animation style */}
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          20% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          80% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+        }
+        .animate-fadeInOut {
+          animation: fadeInOut 2s ease-in-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

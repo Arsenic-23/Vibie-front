@@ -58,8 +58,13 @@ export default function Home() {
   }, [setIsSongQueueOpen, setIsVibersPopupOpen]);
 
   useEffect(() => {
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const tg = window.Telegram?.WebApp;
+    const tgUser = tg?.initDataUnsafe?.user;
     if (tgUser?.photo_url) setUserPhoto(tgUser.photo_url);
+
+    // Request fullscreen
+    tg?.ready?.();
+    tg?.requestFullscreen?.();
   }, []);
 
   const popupVisible = showQueue || showVibers;
@@ -81,7 +86,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
-      
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
@@ -124,11 +128,7 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              {/* Overlay to close on outside click */}
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowProfilePopup(false)}
-              />
+              <div className="fixed inset-0 z-40" onClick={() => setShowProfilePopup(false)} />
               <div className="absolute z-50 right-0 mt-2">
                 <ProfilePopup onClose={() => setShowProfilePopup(false)} />
               </div>
@@ -140,13 +140,10 @@ export default function Home() {
       {/* Modals */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
           <VibersPopup onClose={() => {
             setShowVibers(false);
             setIsVibersPopupOpen(false);
@@ -156,13 +153,10 @@ export default function Home() {
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
           <SongQueue onClose={() => {
             setShowQueue(false);
             setIsSongQueueOpen(false);
@@ -205,7 +199,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Bottom Navigation */}
       {!popupVisible && <NavigationBar />}
     </div>
   );

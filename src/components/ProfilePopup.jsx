@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
-import { Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
-  const [copied, setCopied] = useState(false);
 
   const streamLink = 'https://t.me/vibie_bot/Vibiebot';
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Link copied to clipboard!');
     } catch (err) {
-      alert('Failed to copy the link.');
+      toast.error('Failed to copy the link.');
     }
   };
 
@@ -25,6 +23,7 @@ export default function ProfilePopup({ onClose }) {
 
   return (
     <div className="absolute top-14 right-4 z-30 w-72 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-4 rounded-2xl shadow-xl space-y-4">
+      {/* Tab Switch */}
       <div className="flex space-x-2 mb-4">
         <button
           onClick={() => setActiveTab('theme')}
@@ -48,6 +47,7 @@ export default function ProfilePopup({ onClose }) {
         </button>
       </div>
 
+      {/* Theme Tab */}
       {activeTab === 'theme' && (
         <div>
           <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Toggle Theme</h4>
@@ -55,6 +55,7 @@ export default function ProfilePopup({ onClose }) {
         </div>
       )}
 
+      {/* Share Tab */}
       {activeTab === 'share' && (
         <div>
           <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Share Stream</h4>
@@ -62,15 +63,9 @@ export default function ProfilePopup({ onClose }) {
           <div className="flex space-x-2">
             <button
               onClick={copyToClipboard}
-              className="relative px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
+              className="px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
             >
               Copy
-              {copied && (
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded-lg shadow-lg flex items-center space-x-1 animate-fadeInOut">
-                  <Check size={14} />
-                  <span>Copied!</span>
-                </div>
-              )}
             </button>
             <button
               onClick={openTelegramShare}
@@ -81,31 +76,6 @@ export default function ProfilePopup({ onClose }) {
           </div>
         </div>
       )}
-
-      {/* Animation style */}
-      <style jsx>{`
-        @keyframes fadeInOut {
-          0% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          20% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          80% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-        }
-        .animate-fadeInOut {
-          animation: fadeInOut 2s ease-in-out forwards;
-        }
-      `}</style>
     </div>
   );
 }

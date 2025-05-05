@@ -81,7 +81,7 @@ export default function ProfilePopup({ onClose }) {
           {/* Copy animation */}
           {copied && (
             <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-full bg-white/70 dark:bg-gray-800/70 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full shadow-md backdrop-blur-lg animate-fade-in-out">
-              Copied!
+              
             </div>
           )}
         </div>

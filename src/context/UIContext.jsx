@@ -11,9 +11,17 @@ export const useUIContext = () => {
 
 export const UIProvider = ({ children }) => {
   const [isSongQueueOpen, setIsSongQueueOpen] = useState(false);
+  const [isProfilePopupOpen, setIsProfilePopupOpen] = useState(false);
 
   return (
-    <UIContext.Provider value={{ isSongQueueOpen, setIsSongQueueOpen }}>
+    <UIContext.Provider
+      value={{
+        isSongQueueOpen,
+        setIsSongQueueOpen,
+        isProfilePopupOpen,
+        setIsProfilePopupOpen,
+      }}
+    >
       {children}
     </UIContext.Provider>
   );

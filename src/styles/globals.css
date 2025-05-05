@@ -1,19 +1,16 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom fonts or animations can go below */
+/* Base font and transitions */
 body {
   font-family: 'Inter', sans-serif;
   transition: background 0.3s ease, color 0.3s ease;
-  /* Force background color */
-  background-color: #ffffff !important; /* Default to white for light mode */
+  background-color: #ffffff !important; /* Light mode default */
 }
 
-/* Dark mode background override */
 body.dark {
-  background-color: #000000 !important; /* Force black background in dark mode */
+  background-color: #000000 !important; /* Dark mode override */
 }
 
 button {
@@ -24,8 +21,8 @@ img {
   object-fit: cover;
 }
 
-/* Shiny effect for the 'Join the Vibe' button */
 @layer utilities {
+  /* Shiny button (e.g., for 'Join the Vibe') */
   .shiny-button {
     position: relative;
     overflow: hidden;
@@ -50,7 +47,35 @@ img {
     color: #fffcfc;
   }
 
-  /* Slide-up animation for queue popup */
+  /* Tab underline animation (violet to purple) */
+  .tab-underline {
+    position: relative;
+  }
+
+  .tab-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(to right, #7C3AED, #6366F1);
+    border-radius: 9999px;
+    animation: tabUnderline 1s ease forwards;
+  }
+
+  @keyframes tabUnderline {
+    0% {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    100% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  /* Slide-up for modals */
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
@@ -63,6 +88,29 @@ img {
     to {
       transform: translateY(0%);
       opacity: 1;
+    }
+  }
+
+  /* Bounce + fade effect for copied link */
+  .animate-fade-bounce {
+    animation: fadeBounce 1.5s ease-in-out;
+  }
+
+  @keyframes fadeBounce {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(10px);
+    }
+    30% {
+      opacity: 1;
+      transform: scale(1.05) translateY(0);
+    }
+    60% {
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.9) translateY(10px);
     }
   }
 }

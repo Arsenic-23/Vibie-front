@@ -14,7 +14,7 @@ export default function ProfilePopup() {
     try {
       await navigator.clipboard.writeText(streamLink);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast.error('Failed to copy the link.');
     }
@@ -39,9 +39,9 @@ export default function ProfilePopup() {
         onClick={handleClose}
       />
 
-      {/* Dynamic Island-style Copied Tab */}
+      {/* Smooth Bottom Slide Copied Tab */}
       {copied && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideBounce">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideUpSmooth">
           Link Copied!
         </div>
       )}
@@ -120,22 +120,19 @@ export default function ProfilePopup() {
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes slideBounce {
+        @keyframes slideUpSmooth {
           0% {
-            transform: translateY(-20px) scale(0.95);
+            transform: translateY(30px);
             opacity: 0;
           }
-          60% {
-            transform: translateY(8px) scale(1.02);
-            opacity: 1;
-          }
           100% {
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
+            opacity: 1;
           }
         }
 
-        .animate-slideBounce {
-          animation: slideBounce 0.5s ease-out;
+        .animate-slideUpSmooth {
+          animation: slideUpSmooth 0.5s ease-out;
         }
       `}</style>
     </>

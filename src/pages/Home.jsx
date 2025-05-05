@@ -62,7 +62,6 @@ export default function Home() {
     const tgUser = tg?.initDataUnsafe?.user;
     if (tgUser?.photo_url) setUserPhoto(tgUser.photo_url);
 
-    // Request fullscreen
     tg?.ready?.();
     tg?.requestFullscreen?.();
   }, []);
@@ -85,9 +84,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen pb-28 px-4 pt-8 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
-      <div className="flex items-center justify-between mb-6 relative">
+      <div className="flex items-center justify-between mb-8 relative">
         <div className="flex items-center space-x-3">
           <button
             ref={vibersBtnRef}
@@ -102,13 +101,11 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Vibie Branding Centered */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
           <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
-        {/* Profile with subtle ring */}
         <div className="relative">
           <div
             className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full transition-transform duration-200 ${

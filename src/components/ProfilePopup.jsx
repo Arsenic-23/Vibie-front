@@ -14,7 +14,6 @@ export default function ProfilePopup() {
     try {
       await navigator.clipboard.writeText(streamLink);
       setCopied(true);
-      toast.success('Link copied!');
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       toast.error('Failed to copy the link.');
@@ -40,8 +39,18 @@ export default function ProfilePopup() {
         onClick={handleClose}
       />
 
+      {/* Dynamic Island-style Copied Tab */}
+      {copied && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideBounce">
+          Link Copied!
+        </div>
+      )}
+
       {/* Centered Popup */}
-      <div className="fixed top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-6 rounded-2xl shadow-2xl space-y-6 border border-gray-200 dark:border-gray-800 transition-all duration-300">
+      <div
+        className="fixed top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-6 rounded-2xl shadow-2xl space-y-6 border border-gray-200 dark:border-gray-800 transition-all duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Tabs */}
         <div className="flex space-x-2 relative">
           {['theme', 'share'].map((tab) => (
@@ -90,17 +99,11 @@ export default function ProfilePopup() {
                 Share
               </button>
             </div>
-
-            {copied && (
-              <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-900 px-3 py-0.5 text-[10px] text-gray-800 dark:text-gray-200 rounded-full shadow-md border border-gray-200 dark:border-gray-800 animate-fadeBounce">
-                Copied!
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {/* Animations */}
+      {/* Animations and Styles */}
       <style>{`
         @keyframes gradientMove {
           0% {
@@ -117,14 +120,22 @@ export default function ProfilePopup() {
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes fadeBounce {
-          0% { transform: translateY(10px) scale(0.95); opacity: 0; }
-          50% { transform: translateY(-4px) scale(1.02); opacity: 1; }
-          100% { transform: translateY(0) scale(1); }
+        @keyframes slideBounce {
+          0% {
+            transform: translateY(-20px) scale(0.95);
+            opacity: 0;
+          }
+          60% {
+            transform: translateY(8px) scale(1.02);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(0) scale(1);
+          }
         }
 
-        .animate-fadeBounce {
-          animation: fadeBounce 0.4s ease-in-out;
+        .animate-slideBounce {
+          animation: slideBounce 0.5s ease-out;
         }
       `}</style>
     </>

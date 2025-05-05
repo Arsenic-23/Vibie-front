@@ -27,6 +27,11 @@ export default function ProfilePopup({ onClose }) {
     window.open(telegramUrl, '_blank');
   };
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    document.documentElement.setAttribute('data-theme', theme === 'light' ? 'dark' : 'light');
+  };
+
   useEffect(() => {
     const handleClick = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -87,7 +92,7 @@ export default function ProfilePopup({ onClose }) {
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500 dark:text-gray-400">Dark Mode</span>
               <div
-                onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+                onClick={toggleTheme}
                 className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
                   theme === 'dark' ? 'bg-violet-600' : 'bg-gray-300'
                 }`}

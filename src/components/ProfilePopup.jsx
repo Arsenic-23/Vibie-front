@@ -12,7 +12,7 @@ export default function ProfilePopup({ onClose }) {
     try {
       await navigator.clipboard.writeText(streamLink);
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toast.success('Link copied!');
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       toast.error('Failed to copy the link.');

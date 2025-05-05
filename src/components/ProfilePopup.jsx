@@ -1,11 +1,11 @@
 // src/components/ProfilePopup.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import ThemeToggle from './ThemeToggle';
 import toast from 'react-hot-toast';
 
 export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState('light');
   const popupRef = useRef(null);
 
   const streamLink = 'https://t.me/vibie_bot/Vibiebot';
@@ -41,8 +41,16 @@ export default function ProfilePopup({ onClose }) {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
       {/* Copy Notification */}
       {copied && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-sm text-black dark:text-white rounded-xl shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideFadeInOut flex items-center gap-2">
-          <span className="tick-mark animate-tick" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-sm text-black dark:text-white rounded-xl shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideDownInOut flex items-center gap-2">
+          <svg
+            className="w-4 h-4 text-green-500 animate-tickBounce"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            viewBox="0 0 24 24"
+          >
+            <path d="M5 13l4 4L19 7" />
+          </svg>
           Link Copied!
         </div>
       )}
@@ -76,7 +84,21 @@ export default function ProfilePopup({ onClose }) {
         {activeTab === 'theme' && (
           <div>
             <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Theme Preference</h4>
-            <ThemeToggle />
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Dark Mode</span>
+              <div
+                onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+                className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
+                  theme === 'dark' ? 'bg-violet-600' : 'bg-gray-300'
+                }`}
+              >
+                <div
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                    theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </div>
           </div>
         )}
 
@@ -120,26 +142,43 @@ export default function ProfilePopup({ onClose }) {
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes slideFadeInOut {
+        @keyframes slideDownInOut {
           0% {
-            transform: translateY(30px);
+            transform: translateY(-30px);
             opacity: 0;
           }
           10% {
-            transform: translateY(0px);
+            transform: translateY(0);
             opacity: 1;
           }
           90% {
-            transform: translateY(0px);
+            transform: translateY(0);
             opacity: 1;
           }
           100% {
-            transform: translateY(30px);
+            transform: translateY(-30px);
             opacity: 0;
           }
         }
-        .animate-slideFadeInOut {
-          animation: slideFadeInOut 2s ease-in-out forwards;
+        .animate-slideDownInOut {
+          animation: slideDownInOut 2s ease-in-out forwards;
+        }
+
+        @keyframes tickBounce {
+          0% {
+            transform: scale(0.5);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        .animate-tickBounce {
+          animation: tickBounce 0.5s ease-out;
         }
 
         @keyframes popBounce {
@@ -157,34 +196,6 @@ export default function ProfilePopup({ onClose }) {
         }
         .animate-popBounce {
           animation: popBounce 0.4s ease-out forwards;
-        }
-
-        .tick-mark {
-          width: 14px;
-          height: 14px;
-          border-left: 2px solid green;
-          border-bottom: 2px solid green;
-          transform: rotate(-45deg);
-          opacity: 0;
-        }
-
-        @keyframes tick {
-          0% {
-            opacity: 0;
-            transform: scale(0.8) rotate(-45deg);
-          }
-          30% {
-            opacity: 1;
-            transform: scale(1.1) rotate(-45deg);
-          }
-          100% {
-            transform: scale(1) rotate(-45deg);
-            opacity: 1;
-          }
-        }
-
-        .animate-tick {
-          animation: tick 0.4s ease-out forwards;
         }
       `}</style>
     </div>

@@ -2,20 +2,20 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
-import ProfilePopup from '../components/ProfilePopup'; // Import the popup
+import ProfilePopup from '../components/ProfilePopup';
 import { useUIContext } from '../context/UIContext';
 
 export default function MainLayout() {
-  const { isSongQueueOpen, isProfilePopupOpen } = useUIContext();
+  const { isSongQueueOpen, isProfilePopupOpen, setIsProfilePopupOpen } = useUIContext();
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-all duration-500 pb-20 relative">
       <Outlet />
 
-      {/* Conditionally render the ProfilePopup */}
-      {isProfilePopupOpen && <ProfilePopup />}
+      {isProfilePopupOpen && (
+        <ProfilePopup onClose={() => setIsProfilePopupOpen(false)} />
+      )}
 
-      {/* Show nav only when song queue is closed */}
       {!isSongQueueOpen && <NavigationBar />}
     </div>
   );

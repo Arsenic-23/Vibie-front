@@ -27,7 +27,6 @@ export default function ProfilePopup({ onClose }) {
     window.open(telegramUrl, '_blank');
   };
 
-  // Close on outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -40,33 +39,34 @@ export default function ProfilePopup({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
-      {/* Link Copied Notification */}
+      {/* Copy Notification */}
       {copied && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-fadeInOut">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-sm text-black dark:text-white rounded-xl shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideFadeInOut flex items-center gap-2">
+          <span className="tick-mark animate-tick" />
           Link Copied!
         </div>
       )}
 
-      {/* Profile Popup */}
+      {/* Popup */}
       <div
         ref={popupRef}
-        className="w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-6 rounded-2xl shadow-2xl space-y-6 border border-gray-200 dark:border-gray-800 animate-popBounce z-50"
+        className="w-72 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-2xl shadow-2xl space-y-5 border border-gray-200 dark:border-gray-800 animate-popBounce z-50"
       >
         {/* Tabs */}
-        <div className="flex space-x-2 relative">
+        <div className="flex space-x-1 relative">
           {['theme', 'share'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 text-sm font-semibold relative px-3 py-2 rounded-xl transition-all duration-200 ${
+              className={`flex-1 text-xs font-medium relative px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
                 activeTab === tab
-                  ? 'text-black dark:text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                  ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {activeTab === tab && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1.5 rounded-full animate-gradientMove" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-1 rounded-full animate-gradientMove" />
               )}
             </button>
           ))}
@@ -75,14 +75,14 @@ export default function ProfilePopup({ onClose }) {
         {/* Tab Content */}
         {activeTab === 'theme' && (
           <div>
-            <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Theme Preference</h4>
+            <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Theme Preference</h4>
             <ThemeToggle />
           </div>
         )}
 
         {activeTab === 'share' && (
           <div className="relative">
-            <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Invite Others</h4>
+            <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Invite Others</h4>
             <div className="text-xs text-gray-700 dark:text-gray-400 mb-3 break-words bg-gray-100 dark:bg-gray-900 p-2 rounded-md">
               {streamLink}
             </div>
@@ -120,26 +120,26 @@ export default function ProfilePopup({ onClose }) {
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes fadeInOut {
+        @keyframes slideFadeInOut {
           0% {
+            transform: translateY(30px);
             opacity: 0;
-            transform: scale(0.95);
           }
           10% {
+            transform: translateY(0px);
             opacity: 1;
-            transform: scale(1);
           }
           90% {
+            transform: translateY(0px);
             opacity: 1;
-            transform: scale(1);
           }
           100% {
+            transform: translateY(30px);
             opacity: 0;
-            transform: scale(0.95);
           }
         }
-        .animate-fadeInOut {
-          animation: fadeInOut 2s ease-in-out forwards;
+        .animate-slideFadeInOut {
+          animation: slideFadeInOut 2s ease-in-out forwards;
         }
 
         @keyframes popBounce {
@@ -157,6 +157,34 @@ export default function ProfilePopup({ onClose }) {
         }
         .animate-popBounce {
           animation: popBounce 0.4s ease-out forwards;
+        }
+
+        .tick-mark {
+          width: 14px;
+          height: 14px;
+          border-left: 2px solid green;
+          border-bottom: 2px solid green;
+          transform: rotate(-45deg);
+          opacity: 0;
+        }
+
+        @keyframes tick {
+          0% {
+            opacity: 0;
+            transform: scale(0.8) rotate(-45deg);
+          }
+          30% {
+            opacity: 1;
+            transform: scale(1.1) rotate(-45deg);
+          }
+          100% {
+            transform: scale(1) rotate(-45deg);
+            opacity: 1;
+          }
+        }
+
+        .animate-tick {
+          animation: tick 0.4s ease-out forwards;
         }
       `}</style>
     </div>

@@ -1,86 +1,52 @@
-import React, { useState } from 'react';
-import ThemeToggle from './ThemeToggle';
-import toast from 'react-hot-toast';
-
-export default function ProfilePopup({ onClose }) {
-  const [activeTab, setActiveTab] = useState('theme');
-  const [copied, setCopied] = useState(false);
-
-  const streamLink = 'https://t.me/vibie_bot/Vibiebot';
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(streamLink);
-      setCopied(true);
-      toast.success('Link copied!');
-      setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
-      toast.error('Failed to copy the link.');
-    }
-  };
-
-  const openTelegramShare = () => {
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream on Vibie!')}`;
-    window.open(telegramUrl, '_blank');
-  };
-
-  return (
-    <div className="absolute top-16 right-6 z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-2xl shadow-2xl space-y-5 border border-gray-200 dark:border-gray-800">
-      {/* Tab Switch */}
-      <div className="flex space-x-2">
-        {['theme', 'share'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 text-sm font-medium px-3 py-2 rounded-xl transition-all duration-200 ${
-              activeTab === tab
-                ? 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-inner'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Theme Tab */}
-      {activeTab === 'theme' && (
-        <div>
-          <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Theme Preference</h4>
-          <ThemeToggle />
-        </div>
-      )}
-
-      {/* Share Tab */}
-      {activeTab === 'share' && (
-        <div className="relative">
-          <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Invite Others</h4>
-          <div className="text-xs text-gray-700 dark:text-gray-400 mb-3 break-words bg-gray-100 dark:bg-gray-900 p-2 rounded-md">
-            {streamLink}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={copyToClipboard}
-              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
-            >
-              Copy
-            </button>
-            <button
-              onClick={openTelegramShare}
-              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-primary text-white hover:bg-secondary transition"
-            >
-              Share
-            </button>
-          </div>
-
-          {/* Copy Animation */}
-          {copied && (
-            <div className="absolute -top-5 right-2 bg-white dark:bg-gray-900 px-4 py-1 text-xs text-gray-800 dark:text-gray-200 rounded-full shadow-lg border border-gray-200 dark:border-gray-800 animate-fadeInOut">
-              Copied!
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  content: [
+    './index.html',
+    './src/**/*.{js,jsx,ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      colors: {
+        primary: '#7C3AED',
+        secondary: '#6366F1',
+      },
+      animation: {
+        spinSlow: 'spinSlow 20s linear infinite',
+        pop: 'pop 0.3s ease-in-out',
+        fadeInOut: 'fadeInOut 1.5s ease-in-out',
+        fadeBounce: 'fadeBounce 1.5s ease-in-out', // Added this
+      },
+      keyframes: {
+        spinSlow: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        pop: {
+          '0%': { transform: 'scale(1)', opacity: 1 },
+          '50%': { transform: 'scale(1.4)', opacity: 0.8 },
+          '100%': { transform: 'scale(1)', opacity: 1 },
+        },
+        fadeInOut: {
+          '0%': { opacity: 0, transform: 'scale(0.95) translateY(-10px)' },
+          '30%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+          '70%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+          '100%': { opacity: 0, transform: 'scale(0.95) translateY(-10px)' },
+        },
+        fadeBounce: {
+          '0%': { opacity: 0, transform: 'scale(0.8) translateY(-10px)' },
+          '30%': { opacity: 1, transform: 'scale(1.05) translateY(0)' },
+          '60%': { transform: 'scale(1)' },
+          '100%': { opacity: 0, transform: 'scale(0.9) translateY(-10px)' },
+        },
+      },
+      perspective: {
+        1000: '1000px',
+      },
+    },
+  },
+  plugins: [],
+};

@@ -37,7 +37,7 @@ export default function ProfilePopup() {
 
       {/* Link Copied Notification */}
       {copied && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-slideUpSmooth">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-fadeInOut">
           Link Copied!
         </div>
       )}
@@ -106,26 +106,32 @@ export default function ProfilePopup() {
             background-position: 100% 50%;
           }
         }
-
         .animate-gradientMove {
           background-image: linear-gradient(90deg, #a855f7, #ec4899, #8b5cf6);
           background-size: 200% 200%;
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes slideUpSmooth {
+        @keyframes fadeInOut {
           0% {
-            transform: translateY(30px);
             opacity: 0;
+            transform: scale(0.95);
+          }
+          10% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          90% {
+            opacity: 1;
+            transform: scale(1);
           }
           100% {
-            transform: translateY(0);
-            opacity: 1;
+            opacity: 0;
+            transform: scale(0.95);
           }
         }
-
-        .animate-slideUpSmooth {
-          animation: slideUpSmooth 0.5s ease-out;
+        .animate-fadeInOut {
+          animation: fadeInOut 2s ease-in-out forwards;
         }
       `}</style>
     </div>

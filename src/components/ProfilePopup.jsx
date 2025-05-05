@@ -20,7 +20,9 @@ export default function ProfilePopup({ onClose }) {
   };
 
   const openTelegramShare = () => {
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream on Vibie!')}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(
+      streamLink
+    )}&text=${encodeURIComponent('Join my stream on Vibie!')}`;
     window.open(telegramUrl, '_blank');
   };
 
@@ -32,14 +34,13 @@ export default function ProfilePopup({ onClose }) {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 text-sm font-semibold relative px-3 py-2 rounded-xl transition-all duration-200 ${
+            className={`flex-1 text-sm font-semibold relative px-3 py-2 rounded-xl transition-all duration-200 bg-white/30 dark:bg-white/10 backdrop-blur-sm ${
               activeTab === tab
                 ? 'text-black dark:text-white'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {/* Animated underline for active tab */}
             {activeTab === tab && (
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 rounded-full bg-gradient-to-r from-primary to-secondary animate-[slideUnderline_1s_ease-in-out_1]"></span>
             )}
@@ -79,7 +80,7 @@ export default function ProfilePopup({ onClose }) {
 
           {/* Copy Animation */}
           {copied && (
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-white dark:bg-gray-900 px-4 py-1 mt-2 text-xs text-gray-800 dark:text-gray-200 rounded-full shadow-lg border border-gray-200 dark:border-gray-800 animate-fadeBounce">
+            <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-900 px-3 py-0.5 text-[10px] text-gray-800 dark:text-gray-200 rounded-full shadow-md border border-gray-200 dark:border-gray-800 animate-fadeBounce">
               Copied!
             </div>
           )}

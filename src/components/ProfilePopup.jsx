@@ -41,7 +41,7 @@ export default function ProfilePopup({ onClose }) {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
       {/* Copy Notification */}
       {copied && (
-        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[60] px-5 py-2.5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl text-sm text-black dark:text-white rounded-full shadow-2xl border border-white/30 dark:border-gray-700 animate-slideDownFade flex items-center gap-2">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] px-5 py-2.5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl text-sm text-black dark:text-white rounded-full shadow-2xl border border-white/30 dark:border-gray-700 animate-slideDownFade flex items-center gap-2">
           <span className="tick-icon animate-tick" />
           Link Copied!
         </div>
@@ -122,7 +122,7 @@ export default function ProfilePopup({ onClose }) {
 
         @keyframes slideDownFade {
           0% {
-            transform: translateY(-30px);
+            transform: translateY(0);
             opacity: 0;
           }
           10% {
@@ -134,7 +134,7 @@ export default function ProfilePopup({ onClose }) {
             opacity: 1;
           }
           100% {
-            transform: translateY(-30px);
+            transform: translateY(-20px);
             opacity: 0;
           }
         }

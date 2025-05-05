@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 import toast from 'react-hot-toast';
 import { useUIContext } from '../context/UIContext';
@@ -7,7 +7,6 @@ export default function ProfilePopup() {
   const { setIsProfilePopupOpen } = useUIContext();
   const [activeTab, setActiveTab] = useState('theme');
   const [copied, setCopied] = useState(false);
-  const popupRef = useRef(null);
 
   const streamLink = 'https://t.me/vibie_bot/Vibiebot';
 
@@ -28,20 +27,15 @@ export default function ProfilePopup() {
     window.open(telegramUrl, '_blank');
   };
 
-  // Close on outside click
-  useEffect(() => {
-    const handleClick = (e) => {
-      if (popupRef.current && !popupRef.current.contains(e.target)) {
-        setIsProfilePopupOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [setIsProfilePopupOpen]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
-      {/* Link Copied Notification */}
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4">
+      {/* Overlay to close popup */}
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={() => setIsProfilePopupOpen(false)}
+      />
+
+      {/* Link Copied Toast */}
       {copied && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-sm text-black dark:text-white rounded-full shadow-lg border border-white/30 dark:border-gray-600/40 animate-fadeInOut">
           Link Copied!
@@ -49,10 +43,7 @@ export default function ProfilePopup() {
       )}
 
       {/* Profile Popup */}
-      <div
-        ref={popupRef}
-        className="w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-6 rounded-2xl shadow-2xl space-y-6 border border-gray-200 dark:border-gray-800 animate-popBounce z-50"
-      >
+      <div className="relative z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-6 rounded-2xl shadow-2xl space-y-6 border border-gray-200 dark:border-gray-800 animate-popBounce">
         {/* Tabs */}
         <div className="flex space-x-2 relative">
           {['theme', 'share'].map((tab) => (

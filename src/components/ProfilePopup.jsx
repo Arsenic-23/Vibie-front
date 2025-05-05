@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 import toast from 'react-hot-toast';
-import { useUIContext } from '../context/UIContext';
 
 export default function ProfilePopup() {
-  const { setIsProfilePopupOpen } = useUIContext();
   const [activeTab, setActiveTab] = useState('theme');
   const [copied, setCopied] = useState(false);
 

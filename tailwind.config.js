@@ -16,7 +16,8 @@ export default {
       },
       animation: {
         spinSlow: 'spinSlow 20s linear infinite',
-        pop: 'pop 0.3s ease-in-out', // Heart animation
+        pop: 'pop 0.3s ease-in-out',
+        fadeInOut: 'fadeInOut 1.5s ease-in-out', // New animation
       },
       keyframes: {
         spinSlow: {
@@ -27,6 +28,12 @@ export default {
           '0%': { transform: 'scale(1)', opacity: 1 },
           '50%': { transform: 'scale(1.4)', opacity: 0.8 },
           '100%': { transform: 'scale(1)', opacity: 1 },
+        },
+        fadeInOut: {
+          '0%': { opacity: 0, transform: 'scale(0.95) translateY(-10px)' },
+          '30%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+          '70%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+          '100%': { opacity: 0, transform: 'scale(0.95) translateY(-10px)' },
         },
       },
       perspective: {

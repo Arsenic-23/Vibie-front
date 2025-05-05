@@ -12,7 +12,6 @@ export default function ProfilePopup({ onClose }) {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
-      toast.success('');
     } catch (err) {
       toast.error('Failed to copy the link.');
     }

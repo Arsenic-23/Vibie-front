@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Home, Search, Compass, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useUIContext } from '../context/UIContext';
 
 export default function NavigationBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setIsProfilePopupOpen } = useUIContext();
   const [popup, setPopup] = useState(null);
   let pressTimer;
 
@@ -59,8 +57,9 @@ export default function NavigationBar() {
       <NavItem
         icon={<User size={16} strokeWidth={2} />}
         label="Profile"
-        action={() => setIsProfilePopupOpen(true)} // Open popup
+        path="/profile"
         currentPath={location.pathname}
+        navigate={navigate}
         onLongPressStart={handleLongPressStart}
         onLongPressEnd={handleLongPressEnd}
       />
@@ -74,16 +73,12 @@ export default function NavigationBar() {
   );
 }
 
-function NavItem({ icon, label, path, action, currentPath, navigate, onLongPressStart, onLongPressEnd }) {
-  const isActive = path && currentPath === path;
+function NavItem({ icon, label, path, currentPath, navigate, onLongPressStart, onLongPressEnd }) {
+  const isActive = currentPath === path;
 
   const handleClick = () => {
     window.navigator.vibrate?.([10, 15, 10]); // Light tap
-    if (action) {
-      action();
-    } else if (path) {
-      navigate(path);
-    }
+    navigate(path);
   };
 
   return (

@@ -6,7 +6,7 @@ export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
   const [copied, setCopied] = useState(false);
 
-  const streamLink = 'https://yourapp.com/stream/abc123';
+  const streamLink = 'https://t.me/vibie_bot/Vibiebot';
 
   const copyToClipboard = async () => {
     try {

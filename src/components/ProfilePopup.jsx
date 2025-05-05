@@ -12,7 +12,7 @@ export default function ProfilePopup({ onClose }) {
     try {
       await navigator.clipboard.writeText(streamLink);
       setCopied(true);
-      toast.success('Link copied!');
+      toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       toast.error('Failed to copy the link.');
@@ -20,40 +20,33 @@ export default function ProfilePopup({ onClose }) {
   };
 
   const openTelegramShare = () => {
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream on vibie!🚀')}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream on Vibie!')}`;
     window.open(telegramUrl, '_blank');
   };
 
   return (
-    <div className="absolute top-14 right-4 z-30 w-72 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-4 rounded-2xl shadow-xl space-y-4">
+    <div className="absolute top-16 right-6 z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-2xl shadow-2xl space-y-5 border border-gray-200 dark:border-gray-800">
       {/* Tab Switch */}
-      <div className="flex space-x-2 mb-4">
-        <button
-          onClick={() => setActiveTab('theme')}
-          className={`px-3 py-1 rounded-lg text-sm font-medium ${
-            activeTab === 'theme'
-              ? 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white'
-              : 'text-gray-600 dark:text-gray-400'
-          }`}
-        >
-          Theme
-        </button>
-        <button
-          onClick={() => setActiveTab('share')}
-          className={`px-3 py-1 rounded-lg text-sm font-medium ${
-            activeTab === 'share'
-              ? 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white'
-              : 'text-gray-600 dark:text-gray-400'
-          }`}
-        >
-          Share
-        </button>
+      <div className="flex space-x-2">
+        {['theme', 'share'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 text-sm font-medium px-3 py-2 rounded-xl transition-all duration-200 ${
+              activeTab === tab
+                ? 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-inner'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
 
       {/* Theme Tab */}
       {activeTab === 'theme' && (
         <div>
-          <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Toggle Theme</h4>
+          <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Theme Preference</h4>
           <ThemeToggle />
         </div>
       )}
@@ -61,27 +54,29 @@ export default function ProfilePopup({ onClose }) {
       {/* Share Tab */}
       {activeTab === 'share' && (
         <div className="relative">
-          <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">Share Stream</h4>
-          <div className="text-xs text-gray-600 dark:text-gray-400 break-words mb-2">{streamLink}</div>
-          <div className="flex space-x-2">
+          <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Invite Others</h4>
+          <div className="text-xs text-gray-700 dark:text-gray-400 mb-3 break-words bg-gray-100 dark:bg-gray-900 p-2 rounded-md">
+            {streamLink}
+          </div>
+          <div className="flex gap-2">
             <button
               onClick={copyToClipboard}
-              className="px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
+              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
             >
               Copy
             </button>
             <button
               onClick={openTelegramShare}
-              className="px-3 py-1 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
             >
               Share
             </button>
           </div>
 
-          {/* Copy animation */}
+          {/* Copy Animation */}
           {copied && (
-            <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-full bg-white/70 dark:bg-gray-800/70 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full shadow-md backdrop-blur-lg animate-fade-in-out">
-              
+            <div className="absolute -top-5 right-2 bg-white dark:bg-gray-900 px-4 py-1 text-xs text-gray-800 dark:text-gray-200 rounded-full shadow-lg border border-gray-200 dark:border-gray-800 animate-fade-bounce">
+              Copied!
             </div>
           )}
         </div>

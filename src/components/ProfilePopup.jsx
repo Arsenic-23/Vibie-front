@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 
 export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
-  const [copied, setCopied] = useState(false);
   const popupRef = useRef(null);
 
   const streamLink = 'https://t.me/vibie_bot/Vibiebot';
@@ -13,8 +12,7 @@ export default function ProfilePopup({ onClose }) {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Link copied to clipboard!');
     } catch (err) {
       toast.error('Failed to copy the link.');
     }
@@ -39,14 +37,6 @@ export default function ProfilePopup({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
-      {/* Copy Notification */}
-      {copied && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] px-5 py-2.5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl text-sm text-black dark:text-white rounded-full shadow-2xl border border-white/30 dark:border-gray-700 animate-slideDownFade flex items-center gap-2">
-          <span className="tick-icon animate-tick" />
-          Link Copied!
-        </div>
-      )}
-
       {/* Popup */}
       <div
         ref={popupRef}
@@ -120,28 +110,6 @@ export default function ProfilePopup({ onClose }) {
           animation: gradientMove 1.5s linear infinite;
         }
 
-        @keyframes slideDownFade {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            transform: translateY(0);
-            opacity: 1;
-          }
-          90% {
-            transform: translateY(0);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(-20px);
-            opacity: 0;
-          }
-        }
-        .animate-slideDownFade {
-          animation: slideDownFade 2s ease-in-out forwards;
-        }
-
         @keyframes popBounce {
           0% {
             transform: translateY(-15px) scale(0.97);
@@ -157,45 +125,6 @@ export default function ProfilePopup({ onClose }) {
         }
         .animate-popBounce {
           animation: popBounce 0.4s ease-out forwards;
-        }
-
-        .tick-icon {
-          width: 16px;
-          height: 16px;
-          display: inline-block;
-          position: relative;
-        }
-
-        .tick-icon::before {
-          content: '';
-          position: absolute;
-          width: 4px;
-          height: 10px;
-          border-left: 2px solid #22c55e;
-          border-bottom: 2px solid #22c55e;
-          transform: rotate(-45deg) scale(0.6);
-          top: 2px;
-          left: 6px;
-          opacity: 0;
-        }
-
-        @keyframes tick {
-          0% {
-            opacity: 0;
-            transform: scale(0.5) rotate(-45deg);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2) rotate(-45deg);
-          }
-          100% {
-            transform: scale(1) rotate(-45deg);
-            opacity: 1;
-          }
-        }
-
-        .animate-tick::before {
-          animation: tick 0.4s ease-out forwards;
         }
       `}</style>
     </div>

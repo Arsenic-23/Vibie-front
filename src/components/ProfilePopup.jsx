@@ -20,7 +20,7 @@ export default function ProfilePopup({ onClose }) {
   };
 
   const openTelegramShare = () => {
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream!')}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(streamLink)}&text=${encodeURIComponent('Join my stream on vibie!🚀')}`;
     window.open(telegramUrl, '_blank');
   };
 

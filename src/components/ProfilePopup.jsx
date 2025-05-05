@@ -12,7 +12,7 @@ export default function ProfilePopup({ onClose }) {
     try {
       await navigator.clipboard.writeText(streamLink);
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toast.success('Link copied!');
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       toast.error('Failed to copy the link.');
@@ -27,18 +27,22 @@ export default function ProfilePopup({ onClose }) {
   return (
     <div className="absolute top-16 right-6 z-50 w-80 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-2xl shadow-2xl space-y-5 border border-gray-200 dark:border-gray-800">
       {/* Tab Switch */}
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 relative">
         {['theme', 'share'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 text-sm font-medium px-3 py-2 rounded-xl transition-all duration-200 ${
+            className={`flex-1 text-sm font-semibold relative px-3 py-2 rounded-xl transition-all duration-200 ${
               activeTab === tab
-                ? 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-inner'
+                ? 'text-black dark:text-white'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {/* Animated underline for active tab */}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 rounded-full bg-gradient-to-r from-primary to-secondary animate-[slideUnderline_1s_ease-in-out_1]"></span>
+            )}
           </button>
         ))}
       </div>
@@ -67,7 +71,7 @@ export default function ProfilePopup({ onClose }) {
             </button>
             <button
               onClick={openTelegramShare}
-              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
+              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-primary text-white hover:bg-secondary transition"
             >
               Share
             </button>
@@ -75,7 +79,7 @@ export default function ProfilePopup({ onClose }) {
 
           {/* Copy Animation */}
           {copied && (
-            <div className="absolute -top-5 right-2 bg-white dark:bg-gray-900 px-4 py-1 text-xs text-gray-800 dark:text-gray-200 rounded-full shadow-lg border border-gray-200 dark:border-gray-800 animate-fade-bounce">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-white dark:bg-gray-900 px-4 py-1 mt-2 text-xs text-gray-800 dark:text-gray-200 rounded-full shadow-lg border border-gray-200 dark:border-gray-800 animate-fadeBounce">
               Copied!
             </div>
           )}

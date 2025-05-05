@@ -84,9 +84,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen pb-24 px-4 pt-10 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
-      <div className="flex flex-col items-center gap-4 mb-6 relative">
+      <div className="flex flex-col items-center gap-4 mb-8 relative mt-2">
         {/* Vibie Branding */}
         <div className="flex items-center gap-1">
           <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
@@ -164,20 +164,20 @@ export default function Home() {
       )}
 
       {/* Song Art */}
-      <div className="flex flex-col items-center mt-4">
-        <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
+      <div className="flex flex-col items-center mt-6">
+        <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <h2 className="text-2xl font-bold text-center mb-1">Song Title</h2>
+        <h2 className="text-2xl font-bold text-center mb-2">Song Title</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
       </div>
 
       {/* Player + Action Buttons */}
-      <div className="my-6 relative flex items-center justify-center gap-6">
+      <div className="my-8 relative flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"

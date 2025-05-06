@@ -1,27 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from 'lucide-react';
+import { ThemeContext } from "../context/ThemeContext";
 
-const BASE_URL = "https://vibie-backend.onrender.com/api";
+// Mock Data
+const mockData = {
+  genres: ['Pop', 'Rock', 'Jazz', 'Hip-Hop', 'Classical', 'Electronic'],
+  explore: {
+    'Pop': {
+      top_songs: [
+        { title: 'Song 1', artist: 'Artist 1', thumbnail: '/song1.jpg' },
+        { title: 'Song 2', artist: 'Artist 2', thumbnail: '/song2.jpg' }
+      ],
+      new_releases: [
+        { title: 'New Song 1', artist: 'Artist 3', thumbnail: '/song3.jpg' },
+        { title: 'New Song 2', artist: 'Artist 4', thumbnail: '/song4.jpg' }
+      ]
+    },
+    // More genres data here...
+  }
+};
+
+// ThemeToggle Component
+const ThemeToggle = () => {
+  const { darkMode, setDarkMode } = useContext(ThemeContext);
+
+  const toggleTheme = () => {
+    navigator.vibrate?.(100); // Trigger vibration on toggle
+    setDarkMode(prev => !prev);
+  };
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={`w-14 h-8 flex items-center px-1 rounded-full transition-all duration-300 ${
+        darkMode ? 'bg-yellow-400' : 'bg-gray-700'
+      }`}
+      title="Toggle theme"
+    >
+      <div
+        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 transform ${
+          darkMode ? 'translate-x-6 bg-white' : 'translate-x-0 bg-black'
+        }`}
+      >
+        {darkMode ? (
+          <Moon size={16} className="text-yellow-400" />
+        ) : (
+          <Sun size={16} className="text-white" />
+        )}
+      </div>
+    </button>
+  );
+};
+
+// Song Card Component
+const SongCard = ({ song }) => (
+  <motion.div
+    whileHover={{ scale: 1.03 }}
+    className="bg-white/10 backdrop-blur-lg p-4 rounded-2xl transition shadow-md hover:shadow-xl cursor-pointer"
+  >
+    <img
+      src={song.thumbnail}
+      alt={song.title}
+      className="w-full h-44 object-cover rounded-xl mb-3"
+    />
+    <div className="text-white font-semibold truncate">{song.title}</div>
+    <div className="text-gray-300 text-sm truncate">{song.artist}</div>
+  </motion.div>
+);
+
+// Music Section Component
+const MusicSection = ({ title, songs }) => (
+  <div className="mb-10">
+    <motion.h2
+      className="text-2xl font-bold mb-4 tracking-wide"
+      initial={{ opacity: 0, x: -10 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {title}
+    </motion.h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      {songs.map((song, idx) => (
+        <SongCard key={idx} song={song} />
+      ))}
+    </div>
+  </div>
+);
 
 const ExplorePage = () => {
-  const [genres, setGenres] = useState([]);
+  const [genres, setGenres] = useState(mockData.genres);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [genreData, setGenreData] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // Fetch genres on mount
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const res = await axios.get(`${BASE_URL}/genres/`);
-        setGenres(res.data.genres);
-      } catch (err) {
-        console.error("Error loading genres", err);
-      }
-    };
-    fetchGenres();
-  }, []);
 
   // Fetch songs when genre changes
   useEffect(() => {
@@ -29,8 +100,8 @@ const ExplorePage = () => {
       if (!selectedGenre) return;
       setLoading(true);
       try {
-        const res = await axios.get(`${BASE_URL}/explore/${selectedGenre}`);
-        setGenreData(res.data);
+        const data = mockData.explore[selectedGenre]; // Using mock data
+        setGenreData(data);
       } catch (err) {
         console.error("Error loading genre data", err);
       } finally {
@@ -112,43 +183,11 @@ const ExplorePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Theme Toggle */}
+      <ThemeToggle />
     </div>
   );
 };
-
-// Song Card Component
-const SongCard = ({ song }) => (
-  <motion.div
-    whileHover={{ scale: 1.03 }}
-    className="bg-white/10 backdrop-blur-lg p-4 rounded-2xl transition shadow-md hover:shadow-xl cursor-pointer"
-  >
-    <img
-      src={song.thumbnail}
-      alt={song.title}
-      className="w-full h-44 object-cover rounded-xl mb-3"
-    />
-    <div className="text-white font-semibold truncate">{song.title}</div>
-    <div className="text-gray-300 text-sm truncate">{song.artist}</div>
-  </motion.div>
-);
-
-// Music Section Component
-const MusicSection = ({ title, songs }) => (
-  <div className="mb-10">
-    <motion.h2
-      className="text-2xl font-bold mb-4 tracking-wide"
-      initial={{ opacity: 0, x: -10 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {title}
-    </motion.h2>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      {songs.map((song, idx) => (
-        <SongCard key={idx} song={song} />
-      ))}
-    </div>
-  </div>
-);
 
 export default ExplorePage;

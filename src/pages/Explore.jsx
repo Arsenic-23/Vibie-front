@@ -4,7 +4,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { Play } from 'lucide-react';
 
 // Mock data for demonstration
-const mockGenres = ['Pop', 'Hip-hop', 'Jazz', 'Classical', 'Rock'];
+const mockGenres = ['Pop', 'Sleep', 'Sad', 'Classical', 'Focus', 'Relax', 'Feel good'];
 const mockSongs = [
   { title: 'Song 1', artist: 'Artist 1', thumbnail: '/path/to/thumbnail1.jpg' },
   { title: 'Song 2', artist: 'Artist 2', thumbnail: '/path/to/thumbnail2.jpg' },
@@ -30,6 +30,16 @@ const ExplorePage = () => {
 
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-neutral-950 text-white' : 'bg-white text-black'} transition-all`}>
+      {/* Header */}
+      <motion.h1
+        className="text-3xl font-bold mb-8 text-center tracking-wide"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        Explore
+      </motion.h1>
+
       {/* Genre Selector */}
       <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
         {genres.map((genre, idx) => (
@@ -38,7 +48,7 @@ const ExplorePage = () => {
             whileTap={{ scale: 0.95 }}
             whileHover={{ scale: 1.05 }}
             className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition 
-              ${selectedGenre === genre ? 'bg-purple-600 text-white shadow-xl' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+              ${selectedGenre === genre ? 'bg-purple-600 text-white shadow-xl' : 'bg-transparent text-white border border-gray-400 hover:bg-gray-100'}`}
             onClick={() => setSelectedGenre(genre)}
           >
             {genre}
@@ -77,16 +87,17 @@ const ExplorePage = () => {
 // Song Card Component
 const SongCard = ({ song }) => (
   <motion.div
-    whileHover={{ scale: 1.03 }}
-    className="bg-white/10 backdrop-blur-lg p-4 rounded-2xl transition shadow-md hover:shadow-xl cursor-pointer"
+    whileHover={{ scale: 1.05 }}
+    className="bg-white/10 backdrop-blur-lg p-4 rounded-xl transition shadow-md hover:shadow-xl cursor-pointer"
+    style={{ width: '150px', height: '230px' }} // Smaller card size
   >
     <img
       src={song.thumbnail}
       alt={song.title}
-      className="w-full h-44 object-cover rounded-xl mb-3"
+      className="w-full h-36 object-cover rounded-xl mb-3"
     />
-    <div className="text-white font-semibold truncate">{song.title}</div>
-    <div className="text-gray-300 text-sm truncate">{song.artist}</div>
+    <div className="text-white font-semibold text-sm truncate">{song.title}</div>
+    <div className="text-gray-300 text-xs truncate">{song.artist}</div>
     <button className="mt-2 bg-purple-600 p-2 rounded-full hover:scale-105">
       <Play size={18} className="text-white" />
     </button>
@@ -97,14 +108,14 @@ const SongCard = ({ song }) => (
 const MusicSection = ({ title, songs }) => (
   <div className="mb-10">
     <motion.h2
-      className="text-2xl font-bold mb-4 tracking-wide"
+      className="text-xl font-semibold mb-4 text-center tracking-wide"
       initial={{ opacity: 0, x: -10 }}
       whileInView={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
     >
       {title}
     </motion.h2>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+    <div className="flex overflow-x-auto gap-6 scrollbar-hide">
       {songs.map((song, idx) => (
         <SongCard key={idx} song={song} />
       ))}

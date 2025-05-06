@@ -1,139 +1,154 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BASE_URL = "https://vibie-backend.onrender.com/api";
-
-// Utility function to fetch genres
-const fetchGenres = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/genres/`);
-    return response.data.genres;
-  } catch (error) {
-    console.error("Error fetching genres:", error);
-    throw error;
-  }
-};
-
-// Utility function to fetch explore data by genre
-const fetchExploreByGenre = async (genre) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/explore/${genre}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching explore data for genre ${genre}:`, error);
-    throw error;
-  }
-};
 
 const ExplorePage = () => {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [genreData, setGenreData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch genres on mount
   useEffect(() => {
-    const getGenres = async () => {
+    const fetchGenres = async () => {
       try {
-        const genresList = await fetchGenres();
-        setGenres(genresList);
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
+        const res = await axios.get(`${BASE_URL}/genres/`);
+        setGenres(res.data.genres);
+      } catch (err) {
+        console.error("Error loading genres", err);
       }
     };
-
-    getGenres();
+    fetchGenres();
   }, []);
 
+  // Fetch songs when genre changes
   useEffect(() => {
-    const getExploreData = async () => {
-      if (selectedGenre) {
-        try {
-          const data = await fetchExploreByGenre(selectedGenre);
-          setGenreData(data);
-        } catch (error) {
-          console.error("Failed to fetch genre data:", error);
-        }
+    const fetchExploreData = async () => {
+      if (!selectedGenre) return;
+      setLoading(true);
+      try {
+        const res = await axios.get(`${BASE_URL}/explore/${selectedGenre}`);
+        setGenreData(res.data);
+      } catch (err) {
+        console.error("Error loading genre data", err);
+      } finally {
+        setLoading(false);
       }
     };
-
-    getExploreData();
+    fetchExploreData();
   }, [selectedGenre]);
 
   return (
-    <div className="p-4 pb-24">
-      {/* Title Section */}
-      <h1 className="text-4xl font-extrabold text-white mb-6">Explore Music</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] p-6 text-white">
+      {/* Hero Section */}
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">Explore Vibes</h1>
+        <p className="text-lg mt-2 text-gray-300">Discover trending songs, fresh releases, and your next favorite vibe</p>
+      </motion.div>
 
-      {/* Genre Section */}
-      <div className="mb-6">
-        <h2 className="text-2xl text-white font-semibold mb-4">Genres</h2>
-        <div className="flex flex-wrap gap-4">
-          {genres.map((genre, idx) => (
-            <div
-              key={idx}
-              className="bg-white/10 p-4 rounded-xl cursor-pointer hover:bg-white/20 transition-all duration-300"
-              onClick={() => setSelectedGenre(genre)}
-            >
-              <h3 className="text-xl text-white font-semibold">{genre}</h3>
-            </div>
-          ))}
-        </div>
+      {/* Genre Selector */}
+      <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
+        {genres.map((genre, idx) => (
+          <motion.div
+            key={idx}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.05 }}
+            className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition 
+              ${
+                selectedGenre === genre
+                  ? 'bg-pink-600 text-white shadow-xl'
+                  : 'bg-white/10 hover:bg-white/20 text-white'
+              }`}
+            onClick={() => setSelectedGenre(genre)}
+          >
+            {genre}
+          </motion.div>
+        ))}
       </div>
 
-      {/* Display Selected Genre's Songs */}
-      {selectedGenre && genreData && (
-        <div>
-          <h3 className="text-2xl text-white font-semibold mb-4">
-            Songs in {selectedGenre}
-          </h3>
+      {/* Loader or Content */}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            className="flex items-center justify-center h-48"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="animate-pulse text-white text-lg">Loading vibe...</div>
+          </motion.div>
+        ) : selectedGenre && genreData ? (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <MusicSection title="Top Songs" songs={genreData.top_songs} />
+            <MusicSection title="New Releases" songs={genreData.new_releases} />
 
-          {/* Top Songs */}
-          <div>
-            <h4 className="text-xl text-white mb-4">Top Songs</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {genreData.top_songs.map((song, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white/5 backdrop-blur-md p-4 rounded-lg hover:scale-105 transform transition-all duration-300 cursor-pointer"
-                >
-                  <img
-                    src={song.thumbnail}
-                    alt={song.title}
-                    className="rounded-lg w-full h-40 object-cover mb-3"
-                  />
-                  <div className="text-white text-sm font-semibold truncate">{song.title}</div>
-                  <div className="text-gray-400 text-xs truncate">{song.artist}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* New Releases */}
-          <div>
-            <h4 className="text-xl text-white mb-4">New Releases</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {genreData.new_releases.map((song, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white/5 backdrop-blur-md p-4 rounded-lg hover:scale-105 transform transition-all duration-300 cursor-pointer"
-                >
-                  <img
-                    src={song.thumbnail}
-                    alt={song.title}
-                    className="rounded-lg w-full h-40 object-cover mb-3"
-                  />
-                  <div className="text-white text-sm font-semibold truncate">{song.title}</div>
-                  <div className="text-gray-400 text-xs truncate">{song.artist}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {!selectedGenre && <p className="text-white">Please select a genre to explore.</p>}
+            {/* Bonus Section: Editor's Picks */}
+            <MusicSection
+              title="Editor's Picks"
+              songs={[...genreData.top_songs.slice(0, 2), ...genreData.new_releases.slice(0, 2)]}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="select"
+            className="text-center text-gray-400 mt-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p>Select a genre to discover music.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+
+// Song Card Component
+const SongCard = ({ song }) => (
+  <motion.div
+    whileHover={{ scale: 1.03 }}
+    className="bg-white/10 backdrop-blur-lg p-4 rounded-2xl transition shadow-md hover:shadow-xl cursor-pointer"
+  >
+    <img
+      src={song.thumbnail}
+      alt={song.title}
+      className="w-full h-44 object-cover rounded-xl mb-3"
+    />
+    <div className="text-white font-semibold truncate">{song.title}</div>
+    <div className="text-gray-300 text-sm truncate">{song.artist}</div>
+  </motion.div>
+);
+
+// Music Section Component
+const MusicSection = ({ title, songs }) => (
+  <div className="mb-10">
+    <motion.h2
+      className="text-2xl font-bold mb-4 tracking-wide"
+      initial={{ opacity: 0, x: -10 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {title}
+    </motion.h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      {songs.map((song, idx) => (
+        <SongCard key={idx} song={song} />
+      ))}
+    </div>
+  </div>
+);
 
 export default ExplorePage;

@@ -1,55 +1,76 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
 import { ThemeContext } from "../context/ThemeContext";
+import { Play } from 'lucide-react';
 
-// Mock Data
-const mockData = {
-  genres: ['Pop', 'Rock', 'Jazz', 'Hip-Hop', 'Classical', 'Electronic'],
-  explore: {
-    'Pop': {
-      top_songs: [
-        { title: 'Song 1', artist: 'Artist 1', thumbnail: '/song1.jpg' },
-        { title: 'Song 2', artist: 'Artist 2', thumbnail: '/song2.jpg' }
-      ],
-      new_releases: [
-        { title: 'New Song 1', artist: 'Artist 3', thumbnail: '/song3.jpg' },
-        { title: 'New Song 2', artist: 'Artist 4', thumbnail: '/song4.jpg' }
-      ]
-    },
-    // More genres data here...
-  }
-};
+// Mock data for demonstration
+const mockGenres = ['Pop', 'Hip-hop', 'Jazz', 'Classical', 'Rock'];
+const mockSongs = [
+  { title: 'Song 1', artist: 'Artist 1', thumbnail: '/path/to/thumbnail1.jpg' },
+  { title: 'Song 2', artist: 'Artist 2', thumbnail: '/path/to/thumbnail2.jpg' },
+  { title: 'Song 3', artist: 'Artist 3', thumbnail: '/path/to/thumbnail3.jpg' },
+  { title: 'Song 4', artist: 'Artist 4', thumbnail: '/path/to/thumbnail4.jpg' },
+];
 
-// ThemeToggle Component
-const ThemeToggle = () => {
-  const { darkMode, setDarkMode } = useContext(ThemeContext);
+const ExplorePage = () => {
+  const { darkMode } = useContext(ThemeContext);
+  const [genres, setGenres] = useState(mockGenres);
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [genreData, setGenreData] = useState(mockSongs);
+  const [loading, setLoading] = useState(false);
 
-  const toggleTheme = () => {
-    navigator.vibrate?.(100); // Trigger vibration on toggle
-    setDarkMode(prev => !prev);
-  };
+  useEffect(() => {
+    setLoading(true);
+    // Simulate data fetch
+    setTimeout(() => {
+      setLoading(false);
+      setGenreData(mockSongs); // mock data as placeholder
+    }, 1500);
+  }, [selectedGenre]);
 
   return (
-    <button
-      onClick={toggleTheme}
-      className={`w-14 h-8 flex items-center px-1 rounded-full transition-all duration-300 ${
-        darkMode ? 'bg-yellow-400' : 'bg-gray-700'
-      }`}
-      title="Toggle theme"
-    >
-      <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 transform ${
-          darkMode ? 'translate-x-6 bg-white' : 'translate-x-0 bg-black'
-        }`}
-      >
-        {darkMode ? (
-          <Moon size={16} className="text-yellow-400" />
-        ) : (
-          <Sun size={16} className="text-white" />
-        )}
+    <div className={`min-h-screen p-6 ${darkMode ? 'bg-neutral-950 text-white' : 'bg-white text-black'} transition-all`}>
+      {/* Genre Selector */}
+      <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
+        {genres.map((genre, idx) => (
+          <motion.div
+            key={idx}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.05 }}
+            className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition 
+              ${selectedGenre === genre ? 'bg-purple-600 text-white shadow-xl' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+            onClick={() => setSelectedGenre(genre)}
+          >
+            {genre}
+          </motion.div>
+        ))}
       </div>
-    </button>
+
+      {/* Loader or Content */}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            className="flex items-center justify-center h-48"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="animate-pulse text-gray-400 text-lg">Loading...</div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <MusicSection title="Top Songs" songs={genreData} />
+            <MusicSection title="New Releases" songs={genreData} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
@@ -66,6 +87,9 @@ const SongCard = ({ song }) => (
     />
     <div className="text-white font-semibold truncate">{song.title}</div>
     <div className="text-gray-300 text-sm truncate">{song.artist}</div>
+    <button className="mt-2 bg-purple-600 p-2 rounded-full hover:scale-105">
+      <Play size={18} className="text-white" />
+    </button>
   </motion.div>
 );
 
@@ -87,107 +111,5 @@ const MusicSection = ({ title, songs }) => (
     </div>
   </div>
 );
-
-const ExplorePage = () => {
-  const [genres, setGenres] = useState(mockData.genres);
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [genreData, setGenreData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch songs when genre changes
-  useEffect(() => {
-    const fetchExploreData = async () => {
-      if (!selectedGenre) return;
-      setLoading(true);
-      try {
-        const data = mockData.explore[selectedGenre]; // Using mock data
-        setGenreData(data);
-      } catch (err) {
-        console.error("Error loading genre data", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchExploreData();
-  }, [selectedGenre]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] p-6 text-white">
-      {/* Hero Section */}
-      <motion.div
-        className="text-center mb-12"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">Explore Vibes</h1>
-        <p className="text-lg mt-2 text-gray-300">Discover trending songs, fresh releases, and your next favorite vibe</p>
-      </motion.div>
-
-      {/* Genre Selector */}
-      <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
-        {genres.map((genre, idx) => (
-          <motion.div
-            key={idx}
-            whileTap={{ scale: 0.95 }}
-            whileHover={{ scale: 1.05 }}
-            className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition 
-              ${
-                selectedGenre === genre
-                  ? 'bg-pink-600 text-white shadow-xl'
-                  : 'bg-white/10 hover:bg-white/20 text-white'
-              }`}
-            onClick={() => setSelectedGenre(genre)}
-          >
-            {genre}
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Loader or Content */}
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key="loading"
-            className="flex items-center justify-center h-48"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="animate-pulse text-white text-lg">Loading vibe...</div>
-          </motion.div>
-        ) : selectedGenre && genreData ? (
-          <motion.div
-            key="content"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            <MusicSection title="Top Songs" songs={genreData.top_songs} />
-            <MusicSection title="New Releases" songs={genreData.new_releases} />
-
-            {/* Bonus Section: Editor's Picks */}
-            <MusicSection
-              title="Editor's Picks"
-              songs={[...genreData.top_songs.slice(0, 2), ...genreData.new_releases.slice(0, 2)]}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="select"
-            className="text-center text-gray-400 mt-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <p>Select a genre to discover music.</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Theme Toggle */}
-      <ThemeToggle />
-    </div>
-  );
-};
 
 export default ExplorePage;

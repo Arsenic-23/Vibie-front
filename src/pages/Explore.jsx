@@ -49,7 +49,7 @@ const ExplorePage = () => {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-neutral-800 dark:text-white leading-snug">
             Explore Vibes
           </h1>
-          <div className="w-20 h-0.5 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full flow-line" />
+          <div className="w-48 h-0.5 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full flow-line" />
         </div>
 
         {/* Loading Animation or Songs */}
@@ -105,10 +105,10 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Matched Vibie Branding */}
-      <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <PlayCircle size={18} className="text-purple-500" />
-        <span className="font-semibold">Vibie</span>
+      {/* Bold & Grey Vibie Branding */}
+      <div className="mt-12 flex justify-center items-center gap-2 text-base text-gray-600 dark:text-gray-300 font-bold">
+        <PlayCircle size={20} className="text-purple-500" />
+        <span>Vibie</span>
       </div>
     </div>
   );

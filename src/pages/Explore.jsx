@@ -10,27 +10,22 @@ const ExplorePage = () => {
   const [allData, setAllData] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch explore data on mount
   useEffect(() => {
     const fetchExploreData = async () => {
       try {
         setLoading(true);
         const res = await fetch('https://vibie-backend.onrender.com/api/explore/explore');
         const data = await res.json();
-
         const genreKeys = Object.keys(data);
         setGenres(genreKeys);
         setAllData(data);
-        if (genreKeys.length > 0) {
-          setSelectedGenre(genreKeys[0]);
-        }
+        if (genreKeys.length > 0) setSelectedGenre(genreKeys[0]);
       } catch (error) {
-        console.error('Failed to fetch explore data:', error);
+        console.error('Error fetching explore data:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchExploreData();
   }, []);
 
@@ -61,25 +56,25 @@ const ExplorePage = () => {
       <AnimatePresence mode="wait">
         {loading ? (
           <motion.div
-            key="loading"
-            className="flex items-center justify-center h-48"
+            key="loader"
+            className="flex justify-center items-center h-48"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="animate-pulse text-gray-400 text-lg">Loading...</div>
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
           </motion.div>
         ) : (
           <motion.div
             key="content"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
-            {selectedGenre && currentSongs.length > 0 ? (
+            {currentSongs.length > 0 ? (
               <MusicSection title={selectedGenre} songs={currentSongs} />
             ) : (
-              <div className="text-center text-gray-500">No songs available.</div>
+              <div className="text-center text-gray-400">No songs found.</div>
             )}
           </motion.div>
         )}

@@ -37,7 +37,7 @@ const ExplorePage = () => {
           <div className="w-20 h-0.5 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full" />
         </div>
 
-        {/* Loading Animation */}
+        {/* Loading Animation or Songs */}
         <AnimatePresence>
           {loading ? (
             <motion.div

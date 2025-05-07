@@ -11,8 +11,8 @@ const ExplorePage = () => {
     const fetchExplore = async () => {
       try {
         const res = await axios.get('https://vibie-backend.onrender.com/api/explore/explore');
-        if (res.data?.results) {
-          setSongs(res.data.results);
+        if (res.data?.trending) {  // Use `trending` instead of `results`
+          setSongs(res.data.trending);
         } else {
           setSongs([]);
         }

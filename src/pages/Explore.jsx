@@ -11,7 +11,11 @@ const ExplorePage = () => {
     const fetchExplore = async () => {
       try {
         const res = await axios.get('https://vibie-backend.onrender.com/api/explore/explore');
-        setSongs(res.data.results || []);
+        if (res.data?.results) {
+          setSongs(res.data.results);
+        } else {
+          setSongs([]);
+        }
       } catch (error) {
         console.error('Error fetching explore data:', error);
         setSongs([]);
@@ -46,9 +50,9 @@ const ExplorePage = () => {
               exit={{ opacity: 0 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2 mt-6"
             >
-              {songs.map((song, i) => (
+              {songs.map((song) => (
                 <motion.div
-                  key={i}
+                  key={`${song.title}-${song.artist}`}
                   className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-xl transition-all duration-300"
                 >
                   <div className="relative w-full h-32 rounded-lg overflow-hidden">

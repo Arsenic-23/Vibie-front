@@ -11,7 +11,7 @@ const ExplorePage = () => {
     const fetchExplore = async () => {
       try {
         const res = await axios.get('https://vibie-backend.onrender.com/api/explore/explore');
-        if (res.data?.trending) {  // Use `trending` instead of `results`
+        if (res.data?.trending) {
           setSongs(res.data.trending);
         } else {
           setSongs([]);
@@ -27,16 +27,16 @@ const ExplorePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
+    <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between font-sans">
       <div>
-        {/* Simple, Modern Header aligned to the right */}
-        <div className="text-right mb-8">
-          <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-white leading-tight tracking-tight">
+        {/* Header aligned to the left with a clean classy font */}
+        <div className="text-left mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-neutral-800 dark:text-white leading-snug">
             Explore Vibes
           </h1>
         </div>
 
-        {/* Loading Animation: Single Dot Bounce */}
+        {/* Loading Animation */}
         <AnimatePresence>
           {loading ? (
             <motion.div
@@ -89,12 +89,10 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Integrated Branding at the Bottom */}
-      <div className="absolute bottom-4 left-0 right-0 py-3 bg-neutral-900 text-center text-white">
-        <div className="flex items-center justify-center space-x-2">
-          <PlayCircle size={18} className="text-purple-500" />
-          <span className="font-semibold text-sm">Vibie</span>
-        </div>
+      {/* Bottom branding */}
+      <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>
       </div>
     </div>
   );

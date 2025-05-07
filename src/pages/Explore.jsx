@@ -8,52 +8,39 @@ const ExplorePage = () => {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [genreData, setGenreData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [allData, setAllData] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  const fetchExploreData = async () => {
-    try {
+  useEffect(() => {
+    const fetchExploreData = async () => {
       setLoading(true);
-      const response = await fetch('https://vibie-backend.onrender.com/api/explore/explore');
-      const data = await response.json();
-
-      setGenres(data.genres || []);
-      setGenreData(data.top || []);
-      if (!selectedGenre && data.genres.length > 0) {
-        setSelectedGenre(data.genres[0]);
-      }
-    } catch (error) {
-      console.error('Error fetching explore data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchExploreData();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedGenre) return;
-
-    const fetchGenreSongs = async () => {
       try {
-        setLoading(true);
-        const response = await fetch('/api/explore/explore');
-        const data = await response.json();
-
-        setGenreData(data.genre[selectedGenre] || []);
+        const res = await fetch('https://vibie-backend.onrender.com/api/explore/explore');
+        const data = await res.json();
+        const genreKeys = Object.keys(data);
+        setGenres(genreKeys);
+        setAllData(data);
+        setSelectedGenre(genreKeys[0]);
+        setGenreData(data[genreKeys[0]]);
       } catch (error) {
-        console.error('Error fetching genre data:', error);
+        console.error('Failed to fetch explore data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGenreSongs();
-  }, [selectedGenre]);
+    fetchExploreData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedGenre && allData[selectedGenre]) {
+      setGenreData(allData[selectedGenre]);
+    }
+  }, [selectedGenre, allData]);
 
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-neutral-950 text-white' : 'bg-white text-black'} transition-all`}>
+      {/* Genre Selector */}
       <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
         {genres.map((genre, idx) => (
           <motion.div
@@ -68,6 +55,7 @@ const ExplorePage = () => {
         ))}
       </div>
 
+      {/* Loader or Content */}
       <AnimatePresence mode="wait">
         {loading ? (
           <motion.div
@@ -86,8 +74,7 @@ const ExplorePage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
-            <MusicSection title="Top Songs" songs={genreData} />
-            <MusicSection title={`${selectedGenre} Picks`} songs={genreData} />
+            <MusicSection title={selectedGenre} songs={genreData} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -95,6 +82,7 @@ const ExplorePage = () => {
   );
 };
 
+// Song Card Component
 const SongCard = ({ song }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
@@ -118,10 +106,11 @@ const SongCard = ({ song }) => (
   </motion.div>
 );
 
+// Music Section Component
 const MusicSection = ({ title, songs }) => (
   <div className="mb-10">
     <motion.h2
-      className="text-2xl font-bold mb-4 tracking-wide"
+      className="text-2xl font-bold mb-4 tracking-wide capitalize"
       initial={{ opacity: 0, x: -10 }}
       whileInView={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}

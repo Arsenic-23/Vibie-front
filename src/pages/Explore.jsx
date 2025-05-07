@@ -88,11 +88,14 @@ const ExplorePage = () => {
 
       {/* Footer */}
       <div className="mt-12 flex justify-center items-center gap-2 text-sm font-medium text-gray-400 dark:text-gray-400">
-        <PlayCircle size={20} className="text-purple-500" strokeWidth={2} />
-        <span className="text-[15px]">Vibie</span>
+                <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>
       </div>
     </div>
   );
 };
 
 export default ExplorePage;
+
+        <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>

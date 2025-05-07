@@ -13,7 +13,7 @@ const ExplorePage = () => {
   const fetchExploreData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/explore/explore');
+      const response = await fetch('https://vibie-backend.onrender.com/api/explore/explore');
       const data = await response.json();
 
       setGenres(data.genres || []);

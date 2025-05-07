@@ -7,21 +7,23 @@ const ExplorePage = () => {
   const { darkMode } = useContext(ThemeContext);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
-  const [genreData, setGenreData] = useState([]);
   const [allData, setAllData] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Fetch explore data on mount
   useEffect(() => {
     const fetchExploreData = async () => {
-      setLoading(true);
       try {
+        setLoading(true);
         const res = await fetch('https://vibie-backend.onrender.com/api/explore/explore');
         const data = await res.json();
+
         const genreKeys = Object.keys(data);
         setGenres(genreKeys);
         setAllData(data);
-        setSelectedGenre(genreKeys[0]);
-        setGenreData(data[genreKeys[0]]);
+        if (genreKeys.length > 0) {
+          setSelectedGenre(genreKeys[0]);
+        }
       } catch (error) {
         console.error('Failed to fetch explore data:', error);
       } finally {
@@ -32,28 +34,28 @@ const ExplorePage = () => {
     fetchExploreData();
   }, []);
 
-  useEffect(() => {
-    if (selectedGenre && allData[selectedGenre]) {
-      setGenreData(allData[selectedGenre]);
-    }
-  }, [selectedGenre, allData]);
+  const currentSongs = selectedGenre && allData[selectedGenre] ? allData[selectedGenre] : [];
 
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-neutral-950 text-white' : 'bg-white text-black'} transition-all`}>
       {/* Genre Selector */}
-      <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
-        {genres.map((genre, idx) => (
-          <motion.div
-            key={idx}
-            whileTap={{ scale: 0.95 }}
-            whileHover={{ scale: 1.05 }}
-            className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition ${selectedGenre === genre ? 'bg-purple-600 text-white shadow-xl' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
-            onClick={() => setSelectedGenre(genre)}
-          >
-            {genre}
-          </motion.div>
-        ))}
-      </div>
+      {genres.length > 0 && (
+        <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
+          {genres.map((genre, idx) => (
+            <motion.div
+              key={idx}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+              className={`min-w-[120px] px-6 py-3 rounded-full cursor-pointer text-sm font-semibold transition ${
+                selectedGenre === genre ? 'bg-purple-600 text-white shadow-xl' : 'bg-gray-200 text-black hover:bg-gray-300'
+              }`}
+              onClick={() => setSelectedGenre(genre)}
+            >
+              {genre}
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Loader or Content */}
       <AnimatePresence mode="wait">
@@ -74,7 +76,11 @@ const ExplorePage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
-            <MusicSection title={selectedGenre} songs={genreData} />
+            {selectedGenre && currentSongs.length > 0 ? (
+              <MusicSection title={selectedGenre} songs={currentSongs} />
+            ) : (
+              <div className="text-center text-gray-500">No songs available.</div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -82,7 +88,6 @@ const ExplorePage = () => {
   );
 };
 
-// Song Card Component
 const SongCard = ({ song }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
@@ -93,6 +98,7 @@ const SongCard = ({ song }) => (
         src={song.thumbnail}
         alt={song.title}
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        onError={(e) => (e.target.src = '/fallback.jpg')}
       />
     </div>
     <div className="text-white font-semibold truncate">{song.title}</div>
@@ -106,7 +112,6 @@ const SongCard = ({ song }) => (
   </motion.div>
 );
 
-// Music Section Component
 const MusicSection = ({ title, songs }) => (
   <div className="mb-10">
     <motion.h2

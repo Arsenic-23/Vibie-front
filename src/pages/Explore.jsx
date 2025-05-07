@@ -3,34 +3,57 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from "../context/ThemeContext";
 import { Play } from 'lucide-react';
 
-// Mock data for demonstration
-const mockGenres = ['Pop', 'Hip-hop', 'Jazz', 'Classical', 'Rock'];
-const mockSongs = [
-  { title: 'Song 1', artist: 'Artist 1', thumbnail: '/path/to/thumbnail1.jpg' },
-  { title: 'Song 2', artist: 'Artist 2', thumbnail: '/path/to/thumbnail2.jpg' },
-  { title: 'Song 3', artist: 'Artist 3', thumbnail: '/path/to/thumbnail3.jpg' },
-  { title: 'Song 4', artist: 'Artist 4', thumbnail: '/path/to/thumbnail4.jpg' },
-];
-
 const ExplorePage = () => {
   const { darkMode } = useContext(ThemeContext);
-  const [genres, setGenres] = useState(mockGenres);
+  const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
-  const [genreData, setGenreData] = useState(mockSongs);
+  const [genreData, setGenreData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    // Simulate data fetch
-    setTimeout(() => {
+  const fetchExploreData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/explore/explore');
+      const data = await response.json();
+
+      setGenres(data.genres || []);
+      setGenreData(data.top || []);
+      if (!selectedGenre && data.genres.length > 0) {
+        setSelectedGenre(data.genres[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching explore data:', error);
+    } finally {
       setLoading(false);
-      setGenreData(mockSongs); // mock data as placeholder
-    }, 1500);
+    }
+  };
+
+  useEffect(() => {
+    fetchExploreData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedGenre) return;
+
+    const fetchGenreSongs = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/explore/explore');
+        const data = await response.json();
+
+        setGenreData(data.genre[selectedGenre] || []);
+      } catch (error) {
+        console.error('Error fetching genre data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGenreSongs();
   }, [selectedGenre]);
 
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-neutral-950 text-white' : 'bg-white text-black'} transition-all`}>
-      {/* Genre Selector */}
       <div className="flex overflow-x-auto gap-4 pb-2 mb-10 scrollbar-hide">
         {genres.map((genre, idx) => (
           <motion.div
@@ -45,7 +68,6 @@ const ExplorePage = () => {
         ))}
       </div>
 
-      {/* Loader or Content */}
       <AnimatePresence mode="wait">
         {loading ? (
           <motion.div
@@ -65,7 +87,7 @@ const ExplorePage = () => {
             exit={{ opacity: 0 }}
           >
             <MusicSection title="Top Songs" songs={genreData} />
-            <MusicSection title="New Releases" songs={genreData} />
+            <MusicSection title={`${selectedGenre} Picks`} songs={genreData} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -73,7 +95,6 @@ const ExplorePage = () => {
   );
 };
 
-// Song Card Component
 const SongCard = ({ song }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
@@ -97,7 +118,6 @@ const SongCard = ({ song }) => (
   </motion.div>
 );
 
-// Music Section Component
 const MusicSection = ({ title, songs }) => (
   <div className="mb-10">
     <motion.h2

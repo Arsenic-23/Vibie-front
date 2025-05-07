@@ -29,25 +29,29 @@ const ExplorePage = () => {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
+        {/* Redesigned Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-purple-600 tracking-tight leading-tight">
-            Discover New Vibes
+          <h1 className="text-4xl font-semibold text-neutral-800 dark:text-white leading-tight tracking-tight">
+            Explore Trending Music
           </h1>
           <p className="mt-2 text-lg text-gray-600 dark:text-gray-300 font-medium">
-            Explore the trending music tailored just for you.
+            Discover new vibes and trending tracks right here.
           </p>
         </div>
 
+        {/* Loading Animation: Dot Bounce */}
         <AnimatePresence>
           {loading ? (
             <motion.div
               key="loading"
-              className="flex items-center justify-center h-96"
+              className="flex items-center justify-center space-x-2 h-96"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" />
+              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce animation-delay-200" />
+              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce animation-delay-400" />
             </motion.div>
           ) : songs.length > 0 ? (
             <motion.div
@@ -90,11 +94,11 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Branding Section */}
-      <div className="absolute bottom-0 left-0 right-0 py-4 bg-neutral-900 text-center text-white">
+      {/* Bottom Branding Section */}
+      <div className="absolute bottom-4 left-0 right-0 py-3 bg-neutral-900 text-center text-white">
         <div className="flex items-center justify-center space-x-2">
           <PlayCircle size={18} className="text-purple-500" />
-          <span className="font-semibold text-lg">Vibie</span>
+          <span className="font-semibold text-sm">Vibie</span>
         </div>
       </div>
     </div>

@@ -29,11 +29,12 @@ const ExplorePage = () => {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between font-sans">
       <div>
-        {/* Header aligned to the left with a clean classy font */}
-        <div className="text-left mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-neutral-800 dark:text-white leading-snug">
+        {/* Sleek Header aligned to the left */}
+        <div className="mb-8 px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-neutral-800 dark:text-white leading-snug">
             Explore Vibes
           </h1>
+          <div className="w-20 h-0.5 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full" />
         </div>
 
         {/* Loading Animation */}
@@ -89,7 +90,7 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom branding */}
+      {/* Classy Footer Branding */}
       <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>

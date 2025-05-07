@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Play, PlayCircle } from 'lucide-react';
 
 const ExplorePage = () => {
   const [songs, setSongs] = useState([]);
@@ -29,7 +29,14 @@ const ExplorePage = () => {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Explore Vibes</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-purple-600 tracking-tight leading-tight">
+            Discover New Vibes
+          </h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300 font-medium">
+            Explore the trending music tailored just for you.
+          </p>
+        </div>
 
         <AnimatePresence>
           {loading ? (
@@ -81,6 +88,14 @@ const ExplorePage = () => {
             </div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Branding Section */}
+      <div className="absolute bottom-0 left-0 right-0 py-4 bg-neutral-900 text-center text-white">
+        <div className="flex items-center justify-center space-x-2">
+          <PlayCircle size={18} className="text-purple-500" />
+          <span className="font-semibold text-lg">Vibie</span>
+        </div>
       </div>
     </div>
   );

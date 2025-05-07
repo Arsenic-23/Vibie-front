@@ -29,29 +29,24 @@ const ExplorePage = () => {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
-        {/* Redesigned Header */}
+        {/* Simple, Modern Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-semibold text-neutral-800 dark:text-white leading-tight tracking-tight">
-            Explore Trending Music
+          <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-white leading-tight tracking-tight">
+            Explore Vibes
           </h1>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300 font-medium">
-            Discover new vibes and trending tracks right here.
-          </p>
         </div>
 
-        {/* Loading Animation: Dot Bounce */}
+        {/* Loading Animation: Modern Spinner */}
         <AnimatePresence>
           {loading ? (
             <motion.div
               key="loading"
-              className="flex items-center justify-center space-x-2 h-96"
+              className="flex items-center justify-center h-96"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" />
-              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce animation-delay-200" />
-              <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce animation-delay-400" />
+              <div className="w-16 h-16 border-4 border-t-transparent border-purple-500 rounded-full animate-spin" />
             </motion.div>
           ) : songs.length > 0 ? (
             <motion.div
@@ -94,7 +89,7 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom Branding Section */}
+      {/* Branding at the Bottom (Integrated) */}
       <div className="absolute bottom-4 left-0 right-0 py-3 bg-neutral-900 text-center text-white">
         <div className="flex items-center justify-center space-x-2">
           <PlayCircle size={18} className="text-purple-500" />

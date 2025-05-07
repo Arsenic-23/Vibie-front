@@ -25,9 +25,9 @@ const ExplorePage = () => {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       {/* Header */}
-      <div className="text-center mb-6">
+      <div className="mb-6 px-2">
         <h1 className="text-3xl font-bold tracking-tight">Explore Vibes</h1>
-        <div className="w-24 h-1 mt-2 mx-auto bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
+        <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
       </div>
 
       {/* Content */}

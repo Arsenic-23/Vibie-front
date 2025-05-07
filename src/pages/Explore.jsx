@@ -97,5 +97,4 @@ const ExplorePage = () => {
 
 export default ExplorePage;
 
-        <PlayCircle size={18} className="text-purple-500" />
-        <span className="font-semibold">Vibie</span>
+      

@@ -35,7 +35,6 @@ const ExplorePage = () => {
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
           }
-
           .flow-line {
             background-size: 200% 200%;
             animation: flow 4s linear infinite;
@@ -52,7 +51,6 @@ const ExplorePage = () => {
           <div className="w-48 h-0.5 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full flow-line" />
         </div>
 
-        {/* Loading Animation or Songs */}
         <AnimatePresence>
           {loading ? (
             <motion.div
@@ -105,10 +103,10 @@ const ExplorePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bold & Grey Vibie Branding */}
-      <div className="mt-12 flex justify-center items-center gap-2 text-base text-gray-600 dark:text-gray-300 font-bold">
-        <PlayCircle size={20} className="text-purple-500" />
-        <span>Vibie</span>
+      {/* Matching Vibie Branding */}
+      <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>
       </div>
     </div>
   );

@@ -33,12 +33,12 @@ export default function Profile({ user: propUser }) {
           <div className="relative w-36 h-36 shrink-0">
             {/* Rotating Gradient Ring */}
             <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
-              <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
+              <div className="w-[100%] h-[100%] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 p-[5px]" />
             </div>
 
             {/* Static Profile Container (overlay to clip the ring) */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[98%] h-[98%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden">
+              <div className="w-[90%] h-[90%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden z-10">
                 <img
                   src={user?.photo || 'https://placehold.co/150x150'}
                   alt="Profile"

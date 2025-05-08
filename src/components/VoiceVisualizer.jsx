@@ -7,10 +7,15 @@ export default function AdvancedVoiceVisualizer({ isListening }) {
   const analyserRef = useRef(null);
   const dataArrayRef = useRef(null);
   const sourceRef = useRef(null);
+  const mediaStreamRef = useRef(null);
 
   useEffect(() => {
     if (!isListening) {
       cancelAnimationFrame(animationRef.current);
+      if (audioContextRef.current?.state === 'running') {
+        audioContextRef.current.close();
+      }
+      mediaStreamRef.current?.getTracks().forEach(track => track.stop());
       return;
     }
 
@@ -20,10 +25,14 @@ export default function AdvancedVoiceVisualizer({ isListening }) {
     canvas.height = 80;
 
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      mediaStreamRef.current = stream;
+
       sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
+
       const bufferLength = analyserRef.current.frequencyBinCount;
       dataArrayRef.current = new Uint8Array(bufferLength);
 
@@ -31,8 +40,8 @@ export default function AdvancedVoiceVisualizer({ isListening }) {
 
       const draw = () => {
         animationRef.current = requestAnimationFrame(draw);
-        analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
 
+        analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const colors = ['#8e44ad', '#3498db', '#e67e22', '#2ecc71'];
@@ -57,7 +66,10 @@ export default function AdvancedVoiceVisualizer({ isListening }) {
 
     return () => {
       cancelAnimationFrame(animationRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (audioContextRef.current?.state === 'running') {
+        audioContextRef.current.close();
+      }
+      mediaStreamRef.current?.getTracks().forEach(track => track.stop());
     };
   }, [isListening]);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchIcon, Play, PlayCircle } from 'lucide-react';
+import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,6 +11,7 @@ export default function Search() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [listening, setListening] = useState(false);
   const observer = useRef();
 
   const lastSongElementRef = useCallback(
@@ -66,9 +67,35 @@ export default function Search() {
     }
   };
 
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Your browser does not support Speech Recognition.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
+
+    recognition.onresult = (event) => {
+      const spokenText = event.results[0][0].transcript;
+      setInput(spokenText);
+      setQuery(spokenText);
+      setResults([]);
+      setSearchSubmitted(true);
+    };
+
+    recognition.start();
+  };
+
   const handlePlay = (song) => {
     console.log('Playing:', song.title);
-    // Add player logic
+    // Add player logic here
   };
 
   return (
@@ -81,15 +108,19 @@ export default function Search() {
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
-              if (!e.target.value) {
-                setSearchSubmitted(false);
-              }
+              if (!e.target.value) setSearchSubmitted(false);
             }}
             onKeyDown={handleKeyDown}
             placeholder="Find your vibe..."
-            className="w-full p-3 pl-11 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
+            className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+          <button
+            onClick={handleVoiceInput}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white p-2 rounded-full shadow hover:scale-105 transition-transform"
+          >
+            <Mic className={`w-4 h-4 ${listening ? 'animate-pulse' : ''}`} />
+          </button>
         </div>
 
         <AnimatePresence>

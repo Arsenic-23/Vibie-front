@@ -29,16 +29,19 @@ export default function Profile({ user: propUser }) {
       <div className="max-w-4xl mx-auto flex flex-col gap-10">
         {/* Profile Section */}
         <div className="flex items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
-          {/* Animated Gradient Ring */}
+          {/* Profile Ring with Glow */}
           <div className="relative w-36 h-36 shrink-0">
-            {/* Rotating Gradient Ring */}
-            <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
-              <div className="w-[100%] h-[100%] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 p-[5px]" />
+            {/* Blurred Glow */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-xl opacity-40 z-0" />
+
+            {/* Animated Gradient Ring */}
+            <div className="absolute inset-0 flex items-center justify-center animate-spinSlow z-10">
+              <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
             </div>
 
-            {/* Static Profile Container (overlay to clip the ring) */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[90%] h-[90%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden z-10">
+            {/* Profile Image */}
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <div className="w-[94%] h-[94%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden">
                 <img
                   src={user?.photo || 'https://placehold.co/150x150'}
                   alt="Profile"

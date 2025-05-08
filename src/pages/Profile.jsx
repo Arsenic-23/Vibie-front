@@ -28,26 +28,28 @@ export default function Profile({ user: propUser }) {
 
       <div className="max-w-4xl mx-auto flex flex-col gap-10">
         {/* Profile Section */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
+        <div className="flex items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
           {/* Animated Gradient Ring */}
-          <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full shrink-0">
-            <div className="absolute inset-0 rounded-full animate-spinSlow">
-              <div className="w-full h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 p-[3px]">
-                <div className="w-full h-full rounded-full bg-white dark:bg-[#1e1e2f] p-1">
-                  <img
-                    src={user?.photo || 'https://placehold.co/150x150'}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-full"
-                    draggable={false}
-                  />
-                </div>
+          <div className="relative w-36 h-36 shrink-0">
+            {/* Rotating Gradient Ring */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 p-[3px] animate-spinSlow" />
+
+            {/* Static Profile Container */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-full h-full rounded-full bg-white dark:bg-[#1e1e2f] p-1">
+                <img
+                  src={user?.photo || 'https://placehold.co/150x150'}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-full"
+                  draggable={false}
+                />
               </div>
             </div>
           </div>
 
           {/* User Info */}
-          <div className="text-center sm:text-left flex-1">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
+          <div className="flex-1">
+            <h2 className="text-4xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
             <p className="text-purple-600 dark:text-violet-400 text-lg mt-1">
               {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
             </p>

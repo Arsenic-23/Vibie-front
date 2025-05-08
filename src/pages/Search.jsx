@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import VoiceVisualizer from '../components/VoiceVisualizer';
 
 export default function Search() {
   const [input, setInput] = useState('');
@@ -40,7 +39,7 @@ export default function Search() {
         });
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
-        setHasMore(newResults.length === 15); // Expecting page size of 15
+        setHasMore(newResults.length === 15);
       } catch (error) {
         console.error(error);
         setHasMore(false);
@@ -62,9 +61,7 @@ export default function Search() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+    if (e.key === 'Enter') handleSearch();
   };
 
   const handlePlay = (song) => {
@@ -124,29 +121,19 @@ export default function Search() {
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
 
-          {/* Mic Button or VoiceVisualizer */}
+          {/* Mic Button with animated ring */}
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-            {isListening ? (
-              <div className="w-6 h-6 flex items-center justify-center">
-                <VoiceVisualizer />
-              </div>
-            ) : (
-              <button
-                onClick={handleMicClick}
-                className="p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300 transition-all"
-              >
-                <Mic size={18} />
-              </button>
-            )}
+            <motion.button
+              onClick={handleMicClick}
+              className="relative p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
+              animate={isListening ? { boxShadow: ['0 0 0 0 rgba(168, 85, 247, 0.6)', '0 0 0 10px rgba(168, 85, 247, 0)'] } : {}}
+              transition={isListening ? { repeat: Infinity, duration: 1.2, ease: 'easeOut' } : {}}
+            >
+              <Mic size={18} />
+            </motion.button>
           </div>
         </div>
 
-        {/* Background dimming/blur when visualizer is active */}
-        {isListening && (
-          <div className="absolute inset-0 bg-black opacity-30 backdrop-blur-sm z-10"></div>
-        )}
-
-        {/* Search Results */}
         <AnimatePresence>
           {!searchSubmitted && (
             <motion.div

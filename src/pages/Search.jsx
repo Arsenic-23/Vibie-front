@@ -141,6 +141,12 @@ export default function Search() {
           </div>
         </div>
 
+        {/* Background dimming/blur when visualizer is active */}
+        {isListening && (
+          <div className="absolute inset-0 bg-black opacity-30 backdrop-blur-sm z-10"></div>
+        )}
+
+        {/* Search Results */}
         <AnimatePresence>
           {!searchSubmitted && (
             <motion.div

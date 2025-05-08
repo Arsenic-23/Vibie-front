@@ -126,7 +126,7 @@ export default function Search() {
             onClick={handleMicClick}
             disabled={isListening}
             className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all ${
-              isListening ? 'bg-purple-600 text-white animate-pulse' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600'
+              isListening ? 'bg-purple-600 text-white animate-pulse' : 'bg-gray-200 dark:bg-neutral-800 text-gray-300'
             }`}
           >
             <Mic size={18} />

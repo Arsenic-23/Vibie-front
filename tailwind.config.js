@@ -15,7 +15,7 @@ export default {
         secondary: '#6366F1',
       },
       animation: {
-        spinSlow: 'spinSlow 4s linear infinite',
+        spinSlow: 'spinSlow 2s linear infinite',
         pop: 'pop 0.3s ease-in-out',
         fadeInOut: 'fadeInOut 1.5s ease-in-out',
         fadeBounce: 'fadeBounce 1.5s ease-in-out',

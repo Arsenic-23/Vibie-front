@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Tabs, Tab } from './ProfileTabs';
-import { UserIcon, MusicIcon, SettingsIcon } from 'lucide-react';
+import { UserIcon, MusicIcon, SettingsIcon, PlayCircle } from 'lucide-react';
 
 export default function Profile({ user: propUser }) {
   const [user, setUser] = useState(propUser);

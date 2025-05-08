@@ -4,8 +4,8 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Search() {
-  const [query, setQuery] = useState('');
   const [input, setInput] = useState('');
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -13,7 +13,6 @@ export default function Search() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
-  const silenceTimerRef = useRef(null);
   const observer = useRef();
 
   const lastSongElementRef = useCallback(
@@ -31,12 +30,6 @@ export default function Search() {
   );
 
   useEffect(() => {
-    setResults([]);
-    setPage(1);
-    setHasMore(true);
-  }, [query]);
-
-  useEffect(() => {
     const fetchResults = async () => {
       if (!query) return;
       setLoading(true);
@@ -46,7 +39,7 @@ export default function Search() {
         });
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
-        if (newResults.length < 15) setHasMore(false);
+        setHasMore(newResults.length === 15); // Expecting page size of 15
       } catch (error) {
         console.error(error);
         setHasMore(false);
@@ -54,18 +47,22 @@ export default function Search() {
         setLoading(false);
       }
     };
-
-    const debounce = setTimeout(fetchResults, 300);
-    return () => clearTimeout(debounce);
+    fetchResults();
   }, [query, page]);
+
+  const handleSearch = () => {
+    if (input.trim()) {
+      setResults([]);
+      setPage(1);
+      setHasMore(true);
+      setQuery(input.trim());
+      setSearchSubmitted(true);
+    }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      if (input.trim()) {
-        setResults([]);
-        setQuery(input.trim());
-        setSearchSubmitted(true);
-      }
+      handleSearch();
     }
   };
 
@@ -82,39 +79,27 @@ export default function Search() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    recognition.lang = 'en-IN'; // Hinglish-friendly
+    recognition.lang = 'en-IN';
     recognition.interimResults = true;
     recognition.continuous = false;
 
     recognitionRef.current = recognition;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+    recognition.onstart = () => setIsListening(true);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
 
     recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0].transcript)
-        .join('')
-        .trim();
-
-      setInput(transcript);
-
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = setTimeout(() => {
-        if (transcript) {
-          setQuery(transcript);
-          setSearchSubmitted(true);
-        }
-      }, 1500);
+      const lastResult = event.results[event.results.length - 1];
+      if (lastResult.isFinal) {
+        const transcript = lastResult[0].transcript.trim();
+        setInput(transcript);
+        setSearchSubmitted(true);
+        setResults([]);
+        setPage(1);
+        setHasMore(true);
+        setQuery(transcript);
+      }
     };
 
     recognition.start();
@@ -130,19 +115,16 @@ export default function Search() {
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
-              if (!e.target.value) {
-                setSearchSubmitted(false);
-              }
+              if (!e.target.value) setSearchSubmitted(false);
             }}
             onKeyDown={handleKeyDown}
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
-
-          {/* Mic Button */}
           <button
             onClick={handleMicClick}
+            disabled={isListening}
             className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all ${
               isListening ? 'bg-purple-600 text-white animate-pulse' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600'
             }`}
@@ -184,6 +166,7 @@ export default function Search() {
                       src={song.thumbnail || '/placeholder.jpg'}
                       alt={song.title}
                       className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => (e.target.src = '/placeholder.jpg')}
                     />
                     <button
                       onClick={() => handlePlay(song)}

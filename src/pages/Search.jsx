@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchIcon, Mic, Play, PlayCircle } from 'lucide-react';
+import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,14 +11,9 @@ export default function Search() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  const [listening, setListening] = useState(false);
-  const micRef = useRef(null);
-  const canvasRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const dataArrayRef = useRef(null);
-  const sourceRef = useRef(null);
-
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const silenceTimerRef = useRef(null);
   const observer = useRef();
 
   const lastSongElementRef = useCallback(
@@ -74,78 +69,55 @@ export default function Search() {
     }
   };
 
-  const startListening = async () => {
-    setListening(true);
+  const handlePlay = (song) => {
+    console.log('Playing:', song.title);
+  };
+
+  const handleMicClick = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Voice recognition not supported in this browser');
+      return;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN,en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-      setQuery(transcript);
-      setSearchSubmitted(true);
-    };
+    recognition.lang = 'en-IN'; // Hinglish-friendly
+    recognition.interimResults = true;
+    recognition.continuous = false;
 
-    recognition.onend = () => {
-      setListening(false);
-      stopWaveform();
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => {
+      setIsListening(true);
     };
 
     recognition.onerror = () => {
-      setListening(false);
-      stopWaveform();
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0].transcript)
+        .join('')
+        .trim();
+
+      setInput(transcript);
+
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = setTimeout(() => {
+        if (transcript) {
+          setQuery(transcript);
+          setSearchSubmitted(true);
+        }
+      }, 1500);
     };
 
     recognition.start();
-    initWaveform();
-  };
-
-  const initWaveform = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    analyserRef.current = audioContextRef.current.createAnalyser();
-    sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
-    sourceRef.current.connect(analyserRef.current);
-    analyserRef.current.fftSize = 128;
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    dataArrayRef.current = new Uint8Array(bufferLength);
-    drawWaveform();
-  };
-
-  const drawWaveform = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    const draw = () => {
-      if (!listening) return;
-      requestAnimationFrame(draw);
-      analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const width = canvas.width;
-      const height = canvas.height;
-      const barWidth = width / dataArrayRef.current.length;
-
-      dataArrayRef.current.forEach((val, i) => {
-        const y = (val / 255) * height;
-        ctx.fillStyle = 'rgba(168, 85, 247, 0.8)';
-        ctx.fillRect(i * barWidth, height - y, barWidth - 1, y);
-      });
-    };
-
-    draw();
-  };
-
-  const stopWaveform = () => {
-    if (audioContextRef.current) audioContextRef.current.close();
-  };
-
-  const handlePlay = (song) => {
-    console.log('Playing:', song.title);
   };
 
   return (
@@ -164,35 +136,94 @@ export default function Search() {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Find your vibe..."
-            className="w-full p-3 pl-11 pr-14 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
+            className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
 
+          {/* Mic Button */}
           <button
-            onClick={startListening}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-9 h-9 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center"
+            onClick={handleMicClick}
+            className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all ${
+              isListening ? 'bg-purple-600 text-white animate-pulse' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600'
+            }`}
           >
-            <Mic size={16} />
+            <Mic size={18} />
           </button>
+        </div>
 
-          {listening && (
-            <canvas
-              ref={canvasRef}
-              width="220"
-              height="30"
-              className="absolute -bottom-8 left-1/2 -translate-x-1/2"
-            ></canvas>
+        <AnimatePresence>
+          {!searchSubmitted && (
+            <motion.div
+              key="discover-box"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
+              className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-violet-600" />
+              <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
+                <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
+              </h2>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
-        {/* Discover box and results here (same as before) */}
-        {/* ... */}
+        {!loading && results.length > 0 && (
+          <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
+            {results.map((song, i) => {
+              const isLast = results.length === i + 1;
+              return (
+                <div
+                  ref={isLast ? lastSongElementRef : null}
+                  key={i}
+                  className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                    <img
+                      src={song.thumbnail || '/placeholder.jpg'}
+                      alt={song.title}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <button
+                      onClick={() => handlePlay(song)}
+                      className="absolute bottom-2 right-2 p-2 rounded-full bg-purple-600 hover:scale-105 transition-transform"
+                    >
+                      <Play size={18} className="text-white" />
+                    </button>
+                  </div>
+                  <div className="mt-2 space-y-0.5 text-sm">
+                    <h2 className="font-semibold truncate">{song.title}</h2>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                    {song.duration && (
+                      <p className="text-[10px] text-gray-500 dark:text-gray-500">{formatDuration(song.duration)}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-        <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <PlayCircle size={18} className="text-purple-500" />
-          <span className="font-semibold">Vibie</span>
-        </div>
+        {!loading && searchSubmitted && results.length === 0 && page === 1 && (
+          <div className="text-center mt-10 text-sm text-gray-500 dark:text-gray-400">
+            No results found. Try a different vibe!
+          </div>
+        )}
+
+        {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
+      </div>
+
+      <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>
       </div>
     </div>
   );
+}
+
+function formatDuration(seconds) {
+  const min = Math.floor(seconds / 60);
+  const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
 }

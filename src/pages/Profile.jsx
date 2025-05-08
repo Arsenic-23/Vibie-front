@@ -33,7 +33,7 @@ export default function Profile({ user: propUser }) {
         <div className="flex items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
           {/* Animated Gradient Ring */}
           <div className="relative w-36 h-36 rounded-full">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 animate-spin-slow p-[3px]">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 animate-spinSlow p-[3px]">
               <div className="w-full h-full rounded-full bg-white dark:bg-[#1e1e2f] p-1">
                 <img
                   src={user?.photo || 'https://placehold.co/150x150'}

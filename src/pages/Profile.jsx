@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Tabs, Tab } from './ProfileTabs'; // Assume updated ProfileTabs supports icon + text
+import { Tabs, Tab } from './ProfileTabs';
 import { UserIcon, MusicIcon, SettingsIcon } from 'lucide-react';
 
 export default function Profile({ user: propUser }) {
@@ -24,23 +24,27 @@ export default function Profile({ user: propUser }) {
     <div className="bg-gradient-to-br from-[#12121c] to-[#1c1c2b] min-h-screen text-white p-6">
       <div className="max-w-4xl mx-auto flex flex-col gap-10">
         {/* Profile Section */}
-        <div className="flex items-center justify-between gap-6 bg-[#1e1e2f] rounded-2xl p-6 shadow-lg">
-          {/* Left: Text Info */}
+        <div className="flex items-center gap-6 bg-[#1e1e2f] rounded-2xl p-6 shadow-lg">
+          {/* Profile Image with animated gradient ring */}
+          <div className="relative w-36 h-36 rounded-full">
+            <div className="absolute inset-0 rounded-full animate-spin-slow bg-gradient-to-br from-violet-500 via-purple-600 to-violet-500 p-[3px]">
+              <div className="w-full h-full rounded-full bg-[#1e1e2f] p-1">
+                <img
+                  src={user?.photo || 'https://placehold.co/150x150'}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-full"
+                  draggable={false}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Text Info */}
           <div className="flex-1">
             <h2 className="text-4xl font-bold tracking-tight">{user?.name || 'Your Vibe'}</h2>
             <p className="text-violet-400 text-lg mt-1">
               {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
             </p>
-          </div>
-
-          {/* Right: Profile Image */}
-          <div className="w-36 h-36 rounded-full border-4 border-violet-600 overflow-hidden shadow-xl">
-            <img
-              src={user?.photo || 'https://placehold.co/150x150'}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              draggable={false}
-            />
           </div>
         </div>
 

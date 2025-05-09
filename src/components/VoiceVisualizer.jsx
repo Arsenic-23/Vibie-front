@@ -45,7 +45,7 @@ export default function VoiceVisualizer({ isActive }) {
 
           const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           const isIdle = average < 10;
-          if (isIdle) idlePhase += 0.08;
+          if (isIdle) idlePhase += 0.1;
 
           for (let i = 0; i < dots; i++) {
             const index = Math.floor((i / dots) * dataArray.length);
@@ -53,10 +53,10 @@ export default function VoiceVisualizer({ isActive }) {
             let target = (value / 255) * maxHeight + 4;
 
             if (isIdle) {
-              target = Math.sin(idlePhase + i * 0.6) * 4 + 6;
+              target = Math.sin(idlePhase + i * 0.5) * 3 + 6;
             }
 
-            smooth[i] += (target - smooth[i]) * 0.2;
+            smooth[i] += (target - smooth[i]) * 0.35;
 
             const height = smooth[i];
             const x = i * spacing + spacing / 2;
@@ -65,12 +65,12 @@ export default function VoiceVisualizer({ isActive }) {
             const ry = height / 2;
 
             const gradient = ctx.createLinearGradient(x, y - ry, x, y + ry);
-            gradient.addColorStop(0, '#9333ea'); // deep purple
-            gradient.addColorStop(1, '#f43f5e'); // bright pink-red
+            gradient.addColorStop(0, '#f0abfc'); // soft pink
+            gradient.addColorStop(1, '#7c3aed'); // soft purple
 
             ctx.fillStyle = gradient;
-            ctx.shadowColor = '#e11d48'; // neon pink shadow
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#c084fc'; // soft glow
+            ctx.shadowBlur = 4;
 
             ctx.beginPath();
             ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);

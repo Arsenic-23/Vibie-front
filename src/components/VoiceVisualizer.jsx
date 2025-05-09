@@ -29,7 +29,8 @@ export default function VoiceVisualizer({ isActive }) {
         source.connect(analyser);
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const smooth = new Float32Array(8).fill(0);
+        const dotCount = 8;
+        const smooth = new Float32Array(dotCount).fill(0);
         audioCtxRef.current = audioCtx;
 
         let idlePhase = 0;
@@ -39,16 +40,15 @@ export default function VoiceVisualizer({ isActive }) {
           analyser.getByteFrequencyData(dataArray);
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-          const dots = 8;
-          const spacing = canvas.width / dots;
+          const spacing = canvas.width / dotCount;
           const maxHeight = canvas.height * 0.75;
-
+          const centerX = canvas.width / 2;
           const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           const isIdle = average < 10;
           if (isIdle) idlePhase += 0.1;
 
-          for (let i = 0; i < dots; i++) {
-            const index = Math.floor((i / dots) * dataArray.length);
+          for (let i = 0; i < dotCount; i++) {
+            const index = Math.floor((i / dotCount) * dataArray.length);
             let value = dataArray[index] || 0;
             let target = (value / 255) * maxHeight + 4;
 
@@ -59,7 +59,8 @@ export default function VoiceVisualizer({ isActive }) {
             smooth[i] += (target - smooth[i]) * 0.35;
 
             const height = smooth[i];
-            const x = i * spacing + spacing / 2;
+            const offset = (i - (dotCount - 1) / 2) * spacing;
+            const x = centerX + offset;
             const y = canvas.height / 2;
             const rx = spacing * 0.18;
             const ry = height / 2;
@@ -69,7 +70,7 @@ export default function VoiceVisualizer({ isActive }) {
             gradient.addColorStop(1, '#7c3aed'); // soft purple
 
             ctx.fillStyle = gradient;
-            ctx.shadowColor = '#c084fc'; // soft glow
+            ctx.shadowColor = '#d8b4fe';
             ctx.shadowBlur = 4;
 
             ctx.beginPath();

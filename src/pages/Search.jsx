@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import VoiceVisualizer from '../components/VoiceVisualizer'; 
+import VoiceVisualizer from '../components/VoiceVisualizer';
 
 export default function Search() {
   const [input, setInput] = useState('');
@@ -127,16 +127,20 @@ export default function Search() {
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
-
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-            <motion.button
-              onClick={handleMicClick}
-              className="relative p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
-              animate={isListening ? { boxShadow: ['0 0 0 0 rgba(168, 85, 247, 0.6)', '0 0 0 10px rgba(168, 85, 247, 0)'] } : {}}
-              transition={isListening ? { repeat: Infinity, duration: 1.2, ease: 'easeOut' } : {}}
-            >
-              <Mic size={18} />
-            </motion.button>
+            {isListening ? (
+              <div className="flex items-center justify-end">
+                <VoiceVisualizer isActive={isListening} />
+              </div>
+            ) : (
+              <motion.button
+                onClick={handleMicClick}
+                className="relative p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
+                whileTap={{ scale: 0.9 }}
+              >
+                <Mic size={18} />
+              </motion.button>
+            )}
           </div>
         </div>
 

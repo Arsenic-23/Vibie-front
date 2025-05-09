@@ -28,7 +28,7 @@ export default function VoiceVisualizer({ isActive }) {
       const source = audioCtx.createMediaStreamSource(stream);
 
       source.connect(analyser);
-      analyser.fftSize = 256;
+      analyser.fftSize = 64;
 
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
@@ -40,31 +40,38 @@ export default function VoiceVisualizer({ isActive }) {
 
       const draw = () => {
         animationIdRef.current = requestAnimationFrame(draw);
-        analyser.getByteTimeDomainData(dataArray);
+        analyser.getByteFrequencyData(dataArray);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#a855f7';
-        ctx.beginPath();
 
-        const sliceWidth = canvas.width / bufferLength;
-        let x = 0;
+        const dotCount = 16;
+        const centerY = canvas.height / 2;
+        const spacing = canvas.width / dotCount;
+        const maxDotHeight = canvas.height / 2;
 
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = (v * canvas.height) / 2;
+        for (let i = 0; i < dotCount; i++) {
+          const value = dataArray[i] || 0;
+          const normalized = value / 255;
+          const dotHeight = normalized * maxDotHeight;
 
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
+          const x = spacing * i + spacing / 2;
+          const yTop = centerY - dotHeight;
+          const yBottom = centerY + dotHeight;
 
-          x += sliceWidth;
+          const radius = 3;
+
+          // Top dot
+          ctx.beginPath();
+          ctx.arc(x, yTop, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = '#a855f7';
+          ctx.fill();
+
+          // Bottom dot (symmetrical)
+          ctx.beginPath();
+          ctx.arc(x, yBottom, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = '#a855f7';
+          ctx.fill();
         }
-
-        ctx.lineTo(canvas.width, canvas.height / 2);
-        ctx.stroke();
       };
 
       draw();
@@ -81,9 +88,9 @@ export default function VoiceVisualizer({ isActive }) {
   return (
     <canvas
       ref={canvasRef}
-      className="h-6 w-24 md:w-28 lg:w-32"
-      width={120}
-      height={24}
+      className="h-8 w-32 md:w-40 lg:w-48"
+      width={160}
+      height={32}
     />
   );
 }

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import VoiceVisualizer from '../components/VoiceVisualizer'; 
+import VoiceVisualizer from '../components/VoiceVisualizer';
+
 export default function Search() {
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
@@ -12,6 +13,7 @@ export default function Search() {
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [audioStream, setAudioStream] = useState(null);
   const recognitionRef = useRef(null);
   const observer = useRef();
 
@@ -56,11 +58,15 @@ export default function Search() {
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-IN';
       recognition.interimResults = true;
-      recognition.continuous = false;
+      recognition.continuous = true;
 
       recognition.onstart = () => setIsListening(true);
       recognition.onerror = () => setIsListening(false);
-      recognition.onend = () => setIsListening(false);
+      recognition.onend = () => {
+        setIsListening(false);
+        // Restart recognition to keep it continuous
+        if (isListening) recognition.start();
+      };
       recognition.onresult = (event) => {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
@@ -76,7 +82,7 @@ export default function Search() {
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [isListening]);
 
   const handleSearch = () => {
     if (input.trim()) {
@@ -96,13 +102,17 @@ export default function Search() {
     console.log('Playing:', song.title);
   };
 
-  const handleMicClick = () => {
+  const handleMicClick = async () => {
     if (!recognitionRef.current) {
       alert('Voice recognition not supported in this browser');
       return;
     }
 
     try {
+      if (!audioStream) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setAudioStream(stream);
+      }
       recognitionRef.current.start();
     } catch (error) {
       console.error('Speech recognition error:', error);
@@ -125,11 +135,14 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+          <SearchIcon
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
+            size={18}
+          />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             {isListening ? (
               <div className="flex items-center justify-end">
-                <VoiceVisualizer isActive={isListening} />
+                <VoiceVisualizer isActive={isListening} audioStream={audioStream} />
               </div>
             ) : (
               <motion.button

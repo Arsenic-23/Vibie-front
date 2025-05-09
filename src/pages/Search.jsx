@@ -68,10 +68,21 @@ export default function Search() {
     console.log('Playing:', song.title);
   };
 
-  const handleMicClick = () => {
+  const handleMicClick = async () => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       alert('Voice recognition not supported in this browser');
       return;
+    }
+
+    // Request mic access only once per session
+    if (!sessionStorage.getItem('micGranted')) {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        sessionStorage.setItem('micGranted', 'true');
+      } catch (err) {
+        alert('Microphone access denied.');
+        return;
+      }
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

@@ -50,6 +50,34 @@ export default function Search() {
     fetchResults();
   }, [query, page]);
 
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
+      recognition.onresult = (event) => {
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult.isFinal) {
+          const transcript = lastResult[0].transcript.trim();
+          setInput(transcript);
+          setSearchSubmitted(true);
+          setResults([]);
+          setPage(1);
+          setHasMore(true);
+          setQuery(transcript);
+        }
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
   const handleSearch = () => {
     if (input.trim()) {
       setResults([]);
@@ -68,50 +96,17 @@ export default function Search() {
     console.log('Playing:', song.title);
   };
 
-  const handleMicClick = async () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+  const handleMicClick = () => {
+    if (!recognitionRef.current) {
       alert('Voice recognition not supported in this browser');
       return;
     }
 
-    // Request mic access only once per session
-    if (!sessionStorage.getItem('micGranted')) {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        sessionStorage.setItem('micGranted', 'true');
-      } catch (err) {
-        alert('Microphone access denied.');
-        return;
-      }
+    try {
+      recognitionRef.current.start();
+    } catch (error) {
+      console.error('Speech recognition error:', error);
     }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.lang = 'en-IN';
-    recognition.interimResults = true;
-    recognition.continuous = false;
-
-    recognitionRef.current = recognition;
-
-    recognition.onstart = () => setIsListening(true);
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-
-    recognition.onresult = (event) => {
-      const lastResult = event.results[event.results.length - 1];
-      if (lastResult.isFinal) {
-        const transcript = lastResult[0].transcript.trim();
-        setInput(transcript);
-        setSearchSubmitted(true);
-        setResults([]);
-        setPage(1);
-        setHasMore(true);
-        setQuery(transcript);
-      }
-    };
-
-    recognition.start();
   };
 
   return (
@@ -132,7 +127,6 @@ export default function Search() {
           />
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
 
-          {/* Mic Button with animated ring */}
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}

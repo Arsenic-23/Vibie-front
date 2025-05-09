@@ -28,7 +28,8 @@ export default function VoiceVisualizer({ isActive }) {
       const source = audioCtx.createMediaStreamSource(stream);
 
       source.connect(analyser);
-      analyser.fftSize = 64;
+      analyser.fftSize = 256;
+
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
@@ -39,17 +40,31 @@ export default function VoiceVisualizer({ isActive }) {
 
       const draw = () => {
         animationIdRef.current = requestAnimationFrame(draw);
+        analyser.getByteTimeDomainData(dataArray);
 
-        analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#a855f7';
+        ctx.beginPath();
 
-        const barWidth = canvas.width / bufferLength;
-        dataArray.forEach((value, i) => {
-          const barHeight = value / 2;
-          const x = i * barWidth;
-          ctx.fillStyle = '#a855f7';
-          ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
-        });
+        const sliceWidth = canvas.width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * canvas.height) / 2;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
       };
 
       draw();

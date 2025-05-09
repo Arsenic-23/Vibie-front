@@ -4,7 +4,6 @@ export default function VoiceVisualizer({ isActive }) {
   const canvasRef = useRef(null);
   const animationRef = useRef();
   const audioCtxRef = useRef();
-  const idlePulseRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -33,7 +32,7 @@ export default function VoiceVisualizer({ isActive }) {
         const smooth = new Float32Array(8).fill(0);
         audioCtxRef.current = audioCtx;
 
-        let idlePulsePhase = 0;
+        let idlePhase = 0;
 
         const draw = () => {
           animationRef.current = requestAnimationFrame(draw);
@@ -42,39 +41,36 @@ export default function VoiceVisualizer({ isActive }) {
 
           const dots = 8;
           const spacing = canvas.width / dots;
-          const maxH = canvas.height * 0.9;
+          const maxHeight = canvas.height * 0.75;
 
           const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           const isIdle = average < 10;
-
-          if (isIdle) idlePulsePhase += 0.05;
+          if (isIdle) idlePhase += 0.08;
 
           for (let i = 0; i < dots; i++) {
             const index = Math.floor((i / dots) * dataArray.length);
             let value = dataArray[index] || 0;
-            let target = (value / 255) * maxH + 4;
+            let target = (value / 255) * maxHeight + 4;
 
-            // Idle pulse effect
             if (isIdle) {
-              const pulse = Math.sin(idlePulsePhase + i * 0.5) * 6 + 6;
-              target = pulse;
+              target = Math.sin(idlePhase + i * 0.6) * 4 + 6;
             }
 
-            smooth[i] += (target - smooth[i]) * 0.25;
+            smooth[i] += (target - smooth[i]) * 0.2;
 
-            const h = smooth[i];
+            const height = smooth[i];
             const x = i * spacing + spacing / 2;
             const y = canvas.height / 2;
-            const rx = spacing * 0.25;
-            const ry = h / 2;
+            const rx = spacing * 0.18;
+            const ry = height / 2;
 
             const gradient = ctx.createLinearGradient(x, y - ry, x, y + ry);
-            gradient.addColorStop(0, '#f0abfc'); // bright pink
-            gradient.addColorStop(1, '#7c3aed'); // bright purple
+            gradient.addColorStop(0, '#9333ea'); // deep purple
+            gradient.addColorStop(1, '#f43f5e'); // bright pink-red
 
             ctx.fillStyle = gradient;
-            ctx.shadowColor = '#e879f9';
-            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#e11d48'; // neon pink shadow
+            ctx.shadowBlur = 8;
 
             ctx.beginPath();
             ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
@@ -104,9 +100,9 @@ export default function VoiceVisualizer({ isActive }) {
   return (
     <canvas
       ref={canvasRef}
-      className="h-8 w-40 sm:w-48 md:w-52"
-      width={208}
-      height={32}
+      className="h-6 w-36 sm:w-44 md:w-48"
+      width={192}
+      height={24}
     />
   );
 }

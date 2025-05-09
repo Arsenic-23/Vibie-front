@@ -41,42 +41,42 @@ export default function VoiceVisualizer({ isActive }) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           const spacing = canvas.width / (dotCount + 1);
-          const maxHeight = canvas.height * 0.7;
+          const maxHeight = canvas.height * 1.2; // Taller
           const centerX = canvas.width / 2;
           const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           const isIdle = average < 10;
-          if (isIdle) idlePhase += 0.1;
+          if (isIdle) idlePhase += 0.08;
 
           for (let i = 0; i < dotCount; i++) {
             const index = Math.floor((i / dotCount) * dataArray.length);
             let value = dataArray[index] || 0;
-            let target = (value / 255) * maxHeight + 3;
+            let target = (value / 255) * maxHeight + 6;
 
             if (isIdle) {
-              target = Math.sin(idlePhase + i * 0.6) * 2.5 + 5;
+              target = Math.sin(idlePhase + i * 0.5) * 3 + 6;
             }
 
             // Emphasize center propagation
             const distanceFromCenter = Math.abs(i - (dotCount - 1) / 2);
-            const scale = 1 - (distanceFromCenter / ((dotCount - 1) / 2)) * 0.3;
+            const scale = 1 - (distanceFromCenter / ((dotCount - 1) / 2)) * 0.25;
             target *= scale;
 
-            smooth[i] += (target - smooth[i]) * 0.3;
+            smooth[i] += (target - smooth[i]) * 0.25;
 
             const height = smooth[i];
             const offset = (i - (dotCount - 1) / 2) * spacing;
             const x = centerX + offset;
             const y = canvas.height / 2;
-            const rx = spacing * 0.14;
+            const rx = spacing * 0.2; // Wider
             const ry = height / 2;
 
             const gradient = ctx.createLinearGradient(x, y - ry, x, y + ry);
-            gradient.addColorStop(0, '#38bdf8'); // light blue
-            gradient.addColorStop(1, '#0ea5e9'); // darker blue
+            gradient.addColorStop(0, '#c084fc'); // lavender
+            gradient.addColorStop(1, '#9333ea'); // deep purple
 
             ctx.fillStyle = gradient;
-            ctx.shadowColor = '#7dd3fc';
-            ctx.shadowBlur = 3;
+            ctx.shadowColor = '#e9d5ff';
+            ctx.shadowBlur = 6;
 
             ctx.beginPath();
             ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
@@ -106,9 +106,9 @@ export default function VoiceVisualizer({ isActive }) {
   return (
     <canvas
       ref={canvasRef}
-      className="h-5 w-32 sm:w-40 md:w-44"
-      width={176}
-      height={20}
+      className="h-6 w-36 sm:w-44 md:w-48"
+      width={192}
+      height={24}
     />
   );
 }

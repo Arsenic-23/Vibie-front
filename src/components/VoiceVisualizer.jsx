@@ -33,7 +33,7 @@ export default function VoiceVisualizer({ isActive }) {
 
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
-        const smoothedArray = new Float32Array(12).fill(0); // one for each dot
+        const smoothedArray = new Float32Array(12).fill(0);
 
         analyserRef.current = analyser;
         dataArrayRef.current = dataArray;
@@ -52,23 +52,32 @@ export default function VoiceVisualizer({ isActive }) {
           for (let i = 0; i < dotCount; i++) {
             const index = Math.floor((i / dotCount) * bufferLength);
             const value = dataArray[index] || 0;
-            const targetHeight = (value / 255) * maxHeight + 4;
+            const targetHeight = (value / 255) * maxHeight + 6;
 
-            // Smooth interpolation
             smoothedArray[i] += (targetHeight - smoothedArray[i]) * 0.1;
 
             const barHeight = smoothedArray[i];
             const centerX = i * spacing + spacing / 2;
             const centerY = canvas.height / 2;
-            const radius = Math.min(spacing / 3, barHeight / 2);
+            const radiusX = Math.min(spacing / 3, barHeight / 2.5);
+            const radiusY = barHeight / 2;
 
-            ctx.fillStyle = '#a855f7';
+            // Create gradient
+            const gradient = ctx.createLinearGradient(centerX, centerY - radiusY, centerX, centerY + radiusY);
+            gradient.addColorStop(0, '#f472b6'); // pink
+            gradient.addColorStop(1, '#a855f7'); // purple
 
-            // Draw rounded capsule-like dot
+            ctx.fillStyle = gradient;
+            ctx.shadowColor = '#c084fc';
+            ctx.shadowBlur = 10;
+
             ctx.beginPath();
-            ctx.ellipse(centerX, centerY, radius, barHeight / 2, 0, 0, 2 * Math.PI);
+            ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
             ctx.fill();
           }
+
+          // Reset shadow after drawing
+          ctx.shadowBlur = 0;
         };
 
         draw();
@@ -91,9 +100,9 @@ export default function VoiceVisualizer({ isActive }) {
   return (
     <canvas
       ref={canvasRef}
-      className="h-8 w-40 sm:w-48 md:w-56"
-      width={224}
-      height={32}
+      className="h-10 w-48 sm:w-56 md:w-64"
+      width={256}
+      height={40}
     />
   );
 }

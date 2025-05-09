@@ -65,24 +65,33 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
           const height = smooth[i];
           const offset = (i - 2.5) * spacing;
           const x = centerX + offset;
-          const y = canvas.height / 2;
-          const rx = spacing * 0.2;
-          const ry = height / 2;
+          const y = (canvas.height - height) / 2;
+          const width = spacing * 0.3;
+          const radius = width / 2;
 
-          const gradient = ctx.createLinearGradient(x, y - ry, x, y + ry);
+          const gradient = ctx.createLinearGradient(x, y, x, y + height);
           gradient.addColorStop(0, '#c084fc');
           gradient.addColorStop(1, '#9333ea');
 
           ctx.fillStyle = gradient;
-          ctx.shadowColor = '#e9d5ff';
-          ctx.shadowBlur = 6;
 
           ctx.beginPath();
-          ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
+          if (ctx.roundRect) {
+            ctx.roundRect(x - width / 2, y, width, height, radius);
+          } else {
+            // Fallback for browsers without roundRect
+            ctx.moveTo(x - width / 2 + radius, y);
+            ctx.lineTo(x + width / 2 - radius, y);
+            ctx.quadraticCurveTo(x + width / 2, y, x + width / 2, y + radius);
+            ctx.lineTo(x + width / 2, y + height - radius);
+            ctx.quadraticCurveTo(x + width / 2, y + height, x + width / 2 - radius, y + height);
+            ctx.lineTo(x - width / 2 + radius, y + height);
+            ctx.quadraticCurveTo(x - width / 2, y + height, x - width / 2, y + height - radius);
+            ctx.lineTo(x - width / 2, y + radius);
+            ctx.quadraticCurveTo(x - width / 2, y, x - width / 2 + radius, y);
+          }
           ctx.fill();
         }
-
-        ctx.shadowBlur = 0;
       };
 
       draw();

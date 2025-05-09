@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import VoiceVisualizer from './components/VoiceVisualizer'; 
+import VoiceVisualizer from '../components/VoiceVisualizer'; 
 
 export default function Search() {
   const [input, setInput] = useState('');

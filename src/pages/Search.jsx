@@ -127,7 +127,7 @@ export default function Search() {
 
     // Vibrate if supported (iOS-like haptic)
     if (navigator.vibrate) {
-      navigator.vibrate(50);
+      navigator.vibrate(80);
     }
 
     // Start recognition

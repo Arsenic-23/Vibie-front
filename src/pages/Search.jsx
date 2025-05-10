@@ -49,8 +49,8 @@ export default function Search() {
   }, [query, page]);
 
   useEffect(() => {
-    // Initialize SiriWave on mount
-    if (!siriWaveRef.current) {
+    // Initialize SiriWave
+    if (!siriWaveRef.current && window.SiriWave) {
       const container = document.querySelector('.siri-voice-visualizer');
       if (container) {
         siriWaveRef.current = new SiriWave({
@@ -64,7 +64,7 @@ export default function Search() {
       }
     }
 
-    // Initialize speech recognition
+    // Initialize Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -97,6 +97,7 @@ export default function Search() {
           setResults([]);
           setPage(1);
           setHasMore(true);
+          siriWaveRef.current?.stop(); // Ensure wave stops here too
         }
       };
 
@@ -124,7 +125,12 @@ export default function Search() {
       return;
     }
 
-    // Reset state and start recognition
+    // Vibrate if supported (iOS-like haptic)
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+
+    // Start recognition
     setInput('');
     setSearchSubmitted(false);
     recognitionRef.current.start();
@@ -176,7 +182,7 @@ export default function Search() {
         </div>
 
         {/* Siri Wave Visualizer */}
-        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"></div>
+        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50" />
 
         <AnimatePresence>
           {!searchSubmitted && (

@@ -15,6 +15,7 @@ export default function Search() {
   const [audioStream, setAudioStream] = useState(null);
   const recognitionRef = useRef(null);
   const observer = useRef();
+  const siriWaveRef = useRef(null);
 
   const lastSongElementRef = useCallback(
     (node) => {
@@ -59,13 +60,23 @@ export default function Search() {
       recognition.interimResults = true;
       recognition.continuous = true;
 
-      recognition.onstart = () => setIsListening(true);
+      recognition.onstart = () => {
+        setIsListening(true);
+        if (siriWaveRef.current) {
+          siriWaveRef.current.start(); // Start SiriWave animation
+        }
+      };
+
       recognition.onerror = () => setIsListening(false);
       recognition.onend = () => {
         setIsListening(false);
+        if (siriWaveRef.current) {
+          siriWaveRef.current.stop(); // Stop SiriWave animation
+        }
         // Restart recognition to keep it continuous
         if (isListening) recognition.start();
       };
+
       recognition.onresult = (event) => {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
@@ -118,6 +129,19 @@ export default function Search() {
     }
   };
 
+  useEffect(() => {
+    if (isListening && !siriWaveRef.current) {
+      // Initialize SiriWave once the mic is activated
+      siriWaveRef.current = new SiriWave({
+        container: document.querySelector('.siri-voice-visualizer'),
+        width: 300,
+        height: 50,
+        speed: 0.1,
+        amplitude: 2,
+      });
+    }
+  }, [isListening]);
+
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
@@ -142,7 +166,7 @@ export default function Search() {
             {isListening ? (
               <div className="flex items-center justify-end">
                 <div className="siri-voice-visualizer">
-                  {/* Placeholder for your Siri-like animation */}
+                  {/* SiriWave Animation */}
                 </div>
               </div>
             ) : (

@@ -54,30 +54,46 @@ export default function Search() {
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-IN';
       recognition.interimResults = true;
-      recognition.continuous = true;
+      recognition.continuous = false;
 
       recognition.onstart = () => {
         setIsListening(true);
+        if (!siriWaveRef.current) {
+          siriWaveRef.current = new SiriWave({
+            container: document.querySelector('.siri-voice-visualizer'),
+            width: 250,
+            height: 60,
+            speed: 0.2,
+            amplitude: 3,
+          });
+        }
         siriWaveRef.current?.start();
       };
 
-      recognition.onerror = () => setIsListening(false);
+      recognition.onerror = () => {
+        setIsListening(false);
+        siriWaveRef.current?.stop();
+        siriWaveRef.current = null;
+      };
+
       recognition.onend = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
-        if (isListening) recognition.start();
+        siriWaveRef.current = null;
       };
 
       recognition.onresult = (event) => {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim();
-          setInput(transcript);
-          setSearchSubmitted(true);
-          setResults([]);
-          setPage(1);
-          setHasMore(true);
-          setQuery(transcript);
+          if (transcript) {
+            setInput(transcript);
+            setSearchSubmitted(true);
+            setResults([]);
+            setPage(1);
+            setHasMore(true);
+            setQuery(transcript);
+          }
         }
       };
 
@@ -104,20 +120,9 @@ export default function Search() {
       alert('Voice recognition not supported in this browser');
       return;
     }
+    if (isListening) return; // prevent multiple starts
     recognitionRef.current.start();
   };
-
-  useEffect(() => {
-    if (isListening && !siriWaveRef.current) {
-      siriWaveRef.current = new SiriWave({
-        container: document.querySelector('.siri-voice-visualizer'),
-        width: 250,
-        height: 60,
-        speed: 0.2,
-        amplitude: 3,
-      });
-    }
-  }, [isListening]);
 
   const handlePlay = (song) => {
     console.log('Playing:', song.title);
@@ -164,7 +169,9 @@ export default function Search() {
           </div>
         </div>
 
-        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"></div>
+        {isListening && (
+          <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50" />
+        )}
 
         <AnimatePresence>
           {!searchSubmitted && (

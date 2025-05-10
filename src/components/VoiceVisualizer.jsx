@@ -40,7 +40,7 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
         analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const spacing = canvas.width / 7;
+        const spacing = canvas.width / 6.5; // Tighter spacing
         const maxHeight = canvas.height * 1.2;
         const centerX = canvas.width / 2;
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
@@ -57,7 +57,7 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
           }
 
           const distanceFromCenter = Math.abs(i - 2.5);
-          const scale = 1 - (distanceFromCenter / 2.5) * 0.25;
+          const scale = 1 - (distanceFromCenter / 2.5) * 0.2;
           target *= scale;
 
           smooth[i] += (target - smooth[i]) * 0.25;
@@ -66,7 +66,7 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
           const offset = (i - 2.5) * spacing;
           const x = centerX + offset;
           const y = (canvas.height - height) / 2;
-          const width = spacing * 0.3;
+          const width = spacing * 0.25;
           const radius = width / 2;
 
           const gradient = ctx.createLinearGradient(x, y, x, y + height);
@@ -74,12 +74,11 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
           gradient.addColorStop(1, '#9333ea');
 
           ctx.fillStyle = gradient;
-
           ctx.beginPath();
           if (ctx.roundRect) {
             ctx.roundRect(x - width / 2, y, width, height, radius);
           } else {
-            // Fallback for browsers without roundRect
+            // Fallback for capsule shape
             ctx.moveTo(x - width / 2 + radius, y);
             ctx.lineTo(x + width / 2 - radius, y);
             ctx.quadraticCurveTo(x + width / 2, y, x + width / 2, y + radius);

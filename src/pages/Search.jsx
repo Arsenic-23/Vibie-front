@@ -60,7 +60,6 @@ export default function Search() {
           speed: 0.2,
           amplitude: 3,
           autostart: false,
-          style: 'ios9',
         });
       }
     }

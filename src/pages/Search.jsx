@@ -61,8 +61,9 @@ export default function Search() {
           container,
           width: 250,
           height: 60,
-          speed: 0.2,
-          amplitude: 3,
+          speed: 0.15,
+          amplitude: 2.5,
+          style: 'ios',
           autostart: false,
         });
       }
@@ -126,6 +127,7 @@ export default function Search() {
       setPage(1);
       setHasMore(true);
       setShowWave(false);
+      siriWaveRef.current?.stop();
     }
   };
 
@@ -181,9 +183,7 @@ export default function Search() {
             <motion.button
               onClick={handleMicClick}
               className={`relative p-2 rounded-full ${
-                isListening
-                  ? 'bg-purple-600 text-white shadow-lg animate-pulse'
-                  : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
+                isListening ? 'bg-purple-600 text-white shadow-lg animate-pulse' : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
               }`}
               whileTap={{ scale: 0.9 }}
             >

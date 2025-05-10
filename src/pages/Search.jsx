@@ -83,28 +83,34 @@ export default function Search() {
 
       recognition.onerror = () => {
         setIsListening(false);
-        siriWaveRef.current?.stop();
         setShowWave(false);
+        siriWaveRef.current?.stop();
       };
 
       recognition.onend = () => {
         setIsListening(false);
-        siriWaveRef.current?.stop();
         setShowWave(false);
+        siriWaveRef.current?.stop();
       };
 
       recognition.onresult = (event) => {
-        const lastResult = event.results[event.results.length - 1];
-        if (lastResult.isFinal) {
-          const transcript = lastResult[0].transcript.trim();
-          setInput(transcript);
-          setQuery(transcript);
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            setInput(transcript);
+          }
+        }
+        if (finalTranscript) {
+          const trimmed = finalTranscript.trim();
+          setInput(trimmed);
+          setQuery(trimmed);
           setSearchSubmitted(true);
           setResults([]);
           setPage(1);
           setHasMore(true);
-          siriWaveRef.current?.stop();
-          setShowWave(false);
         }
       };
 
@@ -133,7 +139,6 @@ export default function Search() {
       return;
     }
     if (navigator.vibrate) navigator.vibrate(80);
-
     setInput('');
     setSearchSubmitted(false);
     setResults([]);
@@ -141,11 +146,8 @@ export default function Search() {
     setQuery('');
     setShowWave(true);
 
-    siriWaveRef.current?.stop();
-    setTimeout(() => {
-      siriWaveRef.current?.start();
-      recognitionRef.current.start();
-    }, 100);
+    siriWaveRef.current?.start();
+    recognitionRef.current.start();
   };
 
   const handlePlay = (song) => {
@@ -194,9 +196,9 @@ export default function Search() {
           {showWave && (
             <motion.div
               key="siriwave"
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
               transition={{ duration: 0.5 }}
               className="siri-voice-visualizer fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
             />

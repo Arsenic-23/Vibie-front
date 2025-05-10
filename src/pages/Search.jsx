@@ -49,6 +49,23 @@ export default function Search() {
   }, [query, page]);
 
   useEffect(() => {
+    // Initialize SiriWave on mount
+    if (!siriWaveRef.current) {
+      const container = document.querySelector('.siri-voice-visualizer');
+      if (container) {
+        siriWaveRef.current = new SiriWave({
+          container,
+          width: 250,
+          height: 60,
+          speed: 0.2,
+          amplitude: 3,
+          autostart: false,
+          style: 'ios9',
+        });
+      }
+    }
+
+    // Initialize speech recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -58,42 +75,29 @@ export default function Search() {
 
       recognition.onstart = () => {
         setIsListening(true);
-        if (!siriWaveRef.current) {
-          siriWaveRef.current = new SiriWave({
-            container: document.querySelector('.siri-voice-visualizer'),
-            width: 250,
-            height: 60,
-            speed: 0.2,
-            amplitude: 3,
-          });
-        }
         siriWaveRef.current?.start();
       };
 
       recognition.onerror = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
-        siriWaveRef.current = null;
       };
 
       recognition.onend = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
-        siriWaveRef.current = null;
       };
 
       recognition.onresult = (event) => {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim();
-          if (transcript) {
-            setInput(transcript);
-            setSearchSubmitted(true);
-            setResults([]);
-            setPage(1);
-            setHasMore(true);
-            setQuery(transcript);
-          }
+          setInput(transcript);
+          setQuery(transcript);
+          setSearchSubmitted(true);
+          setResults([]);
+          setPage(1);
+          setHasMore(true);
         }
       };
 
@@ -103,11 +107,11 @@ export default function Search() {
 
   const handleSearch = () => {
     if (input.trim()) {
+      setQuery(input.trim());
+      setSearchSubmitted(true);
       setResults([]);
       setPage(1);
       setHasMore(true);
-      setQuery(input.trim());
-      setSearchSubmitted(true);
     }
   };
 
@@ -120,7 +124,10 @@ export default function Search() {
       alert('Voice recognition not supported in this browser');
       return;
     }
-    if (isListening) return; // prevent multiple starts
+
+    // Reset state and start recognition
+    setInput('');
+    setSearchSubmitted(false);
     recognitionRef.current.start();
   };
 
@@ -169,9 +176,8 @@ export default function Search() {
           </div>
         </div>
 
-        {isListening && (
-          <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50" />
-        )}
+        {/* Siri Wave Visualizer */}
+        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"></div>
 
         <AnimatePresence>
           {!searchSubmitted && (

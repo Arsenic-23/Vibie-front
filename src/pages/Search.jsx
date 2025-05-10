@@ -12,24 +12,20 @@ export default function Search() {
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [audioStream, setAudioStream] = useState(null);
   const recognitionRef = useRef(null);
   const observer = useRef();
   const siriWaveRef = useRef(null);
 
-  const lastSongElementRef = useCallback(
-    (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prevPage) => prevPage + 1);
-        }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore]
-  );
+  const lastSongElementRef = useCallback((node) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -62,18 +58,13 @@ export default function Search() {
 
       recognition.onstart = () => {
         setIsListening(true);
-        if (siriWaveRef.current) {
-          siriWaveRef.current.start();
-        }
+        siriWaveRef.current?.start();
       };
 
       recognition.onerror = () => setIsListening(false);
       recognition.onend = () => {
         setIsListening(false);
-        if (siriWaveRef.current) {
-          siriWaveRef.current.stop();
-        }
-        // Restart recognition to keep it continuous
+        siriWaveRef.current?.stop();
         if (isListening) recognition.start();
       };
 
@@ -92,7 +83,7 @@ export default function Search() {
 
       recognitionRef.current = recognition;
     }
-  }, [isListening]);
+  }, []);
 
   const handleSearch = () => {
     if (input.trim()) {
@@ -108,30 +99,16 @@ export default function Search() {
     if (e.key === 'Enter') handleSearch();
   };
 
-  const handlePlay = (song) => {
-    console.log('Playing:', song.title);
-  };
-
-  const handleMicClick = async () => {
+  const handleMicClick = () => {
     if (!recognitionRef.current) {
       alert('Voice recognition not supported in this browser');
       return;
     }
-
-    try {
-      if (!audioStream) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setAudioStream(stream);
-      }
-      recognitionRef.current.start();
-    } catch (error) {
-      console.error('Speech recognition error:', error);
-    }
+    recognitionRef.current.start();
   };
 
   useEffect(() => {
     if (isListening && !siriWaveRef.current) {
-      // Initialize SiriWave once the mic is activated
       siriWaveRef.current = new SiriWave({
         container: document.querySelector('.siri-voice-visualizer'),
         width: 300,
@@ -141,6 +118,16 @@ export default function Search() {
       });
     }
   }, [isListening]);
+
+  const handlePlay = (song) => {
+    console.log('Playing:', song.title);
+  };
+
+  const formatDuration = (duration) => {
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
@@ -177,9 +164,7 @@ export default function Search() {
           </div>
         </div>
 
-        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
-          {/* SiriWave Animation */}
-        </div>
+        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"></div>
 
         <AnimatePresence>
           {!searchSubmitted && (
@@ -244,21 +229,6 @@ export default function Search() {
 
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
-
-      <div className="mt-10 text-center">
-        {loading && hasMore && (
-          <div className="text-sm text-gray-400">Loading more results...</div>
-        )}
-        {!loading && !hasMore && (
-          <div className="text-sm text-gray-500 dark:text-gray-400">No more results available</div>
-        )}
-      </div>
     </div>
   );
-}
-
-function formatDuration(duration) {
-  const minutes = Math.floor(duration / 60);
-  const seconds = duration % 60;
-  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }

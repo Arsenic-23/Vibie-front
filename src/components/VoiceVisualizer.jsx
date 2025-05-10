@@ -41,8 +41,8 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
         analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const barWidth = canvas.width / (barCount * 1.2);
-        const spacing = canvas.width / (barCount + 0.5);
+        const totalWidth = canvas.width;
+        const barWidth = totalWidth / barCount; // No spacing
         const centerX = canvas.width / 2;
         const maxHeight = canvas.height;
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
@@ -59,15 +59,14 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
             target = Math.sin(idlePhase + i * 0.3) * 4 + 6;
           }
 
-          // Optional slight tapering from center outward
+          // Optional tapering
           const distanceFromCenter = Math.abs(i - (barCount - 1) / 2);
           const scale = 1 - (distanceFromCenter / (barCount / 2)) * 0.2;
           target *= scale;
 
           smooth[i] += (target - smooth[i]) * 0.25;
           const height = smooth[i];
-          const offset = (i - (barCount - 1) / 2) * spacing;
-          const x = centerX + offset;
+          const x = i * barWidth;
           const y = (canvas.height - height) / 2;
           const radius = barWidth / 2;
 
@@ -78,18 +77,18 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
           ctx.fillStyle = gradient;
           ctx.beginPath();
           if (ctx.roundRect) {
-            ctx.roundRect(x - barWidth / 2, y, barWidth, height, radius);
+            ctx.roundRect(x, y, barWidth, height, radius);
           } else {
-            // Fallback capsule
-            ctx.moveTo(x - barWidth / 2 + radius, y);
-            ctx.lineTo(x + barWidth / 2 - radius, y);
-            ctx.quadraticCurveTo(x + barWidth / 2, y, x + barWidth / 2, y + radius);
-            ctx.lineTo(x + barWidth / 2, y + height - radius);
-            ctx.quadraticCurveTo(x + barWidth / 2, y + height, x + barWidth / 2 - radius, y + height);
-            ctx.lineTo(x - barWidth / 2 + radius, y + height);
-            ctx.quadraticCurveTo(x - barWidth / 2, y + height, x - barWidth / 2, y + height - radius);
-            ctx.lineTo(x - barWidth / 2, y + radius);
-            ctx.quadraticCurveTo(x - barWidth / 2, y, x - barWidth / 2 + radius, y);
+            // Fallback capsule shape
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + barWidth - radius, y);
+            ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + radius);
+            ctx.lineTo(x + barWidth, y + height - radius);
+            ctx.quadraticCurveTo(x + barWidth, y + height, x + barWidth - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
           }
           ctx.fill();
         }

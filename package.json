@@ -17,8 +17,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
-    "react-hot-toast": "^2.4.1"
-    "siri-wave": "^1.0.0"
+    "react-hot-toast": "^2.4.1",
+    "siri-wave": "^1.0.0"  // Added siri-wave
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",

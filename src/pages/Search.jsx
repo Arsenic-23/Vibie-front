@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
+import { SearchIcon, Play, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,8 +14,12 @@ export default function Search() {
   const [isListening, setIsListening] = useState(false);
   const [audioStream, setAudioStream] = useState(null);
   const recognitionRef = useRef(null);
-  const observer = useRef();
   const siriWaveRef = useRef(null);
+  const animationFrameIdRef = useRef(null);
+  const analyserRef = useRef(null);
+  const dataArrayRef = useRef(null);
+  const observer = useRef();
+  const lastTranscriptRef = useRef('');
 
   const lastSongElementRef = useCallback(
     (node) => {
@@ -60,20 +64,13 @@ export default function Search() {
       recognition.interimResults = true;
       recognition.continuous = true;
 
-      recognition.onstart = () => {
-        setIsListening(true);
-        if (siriWaveRef.current) {
-          siriWaveRef.current.start(); // Start SiriWave animation
-        }
-      };
+      recognition.onstart = () => setIsListening(true);
 
       recognition.onerror = () => setIsListening(false);
+
       recognition.onend = () => {
         setIsListening(false);
-        if (siriWaveRef.current) {
-          siriWaveRef.current.stop(); // Stop SiriWave animation
-        }
-        // Restart recognition to keep it continuous
+        stopSiriWave();
         if (isListening) recognition.start();
       };
 
@@ -81,12 +78,15 @@ export default function Search() {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim();
-          setInput(transcript);
-          setSearchSubmitted(true);
-          setResults([]);
-          setPage(1);
-          setHasMore(true);
-          setQuery(transcript);
+          if (transcript && transcript !== lastTranscriptRef.current) {
+            lastTranscriptRef.current = transcript;
+            setInput(transcript);
+            setSearchSubmitted(true);
+            setResults([]);
+            setPage(1);
+            setHasMore(true);
+            setQuery(transcript);
+          }
         }
       };
 
@@ -96,11 +96,11 @@ export default function Search() {
 
   const handleSearch = () => {
     if (input.trim()) {
+      setSearchSubmitted(true);
       setResults([]);
       setPage(1);
       setHasMore(true);
       setQuery(input.trim());
-      setSearchSubmitted(true);
     }
   };
 
@@ -122,25 +122,56 @@ export default function Search() {
       if (!audioStream) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         setAudioStream(stream);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyserRef.current = analyser;
+        dataArrayRef.current = dataArray;
+
+        startSiriWave();
+        animate();
       }
+
       recognitionRef.current.start();
     } catch (error) {
       console.error('Speech recognition error:', error);
     }
   };
 
-  useEffect(() => {
-    if (isListening && !siriWaveRef.current) {
-      // Initialize SiriWave once the mic is activated
-      siriWaveRef.current = new SiriWave({
-        container: document.querySelector('.siri-voice-visualizer'),
+  const startSiriWave = () => {
+    if (!siriWaveRef.current && window.SiriWave) {
+      siriWaveRef.current = new window.SiriWave({
+        container: document.getElementById('siri-wave'),
         width: 300,
         height: 50,
-        speed: 0.1,
-        amplitude: 2,
+        style: 'ios9',
+        speed: 0.2,
+        amplitude: 1,
+        frequency: 6,
+        color: '#9333ea',
+        autostart: true,
       });
     }
-  }, [isListening]);
+  };
+
+  const stopSiriWave = () => {
+    if (siriWaveRef.current) {
+      siriWaveRef.current.stop();
+      cancelAnimationFrame(animationFrameIdRef.current);
+    }
+  };
+
+  const animate = () => {
+    if (!analyserRef.current || !dataArrayRef.current || !siriWaveRef.current) return;
+    analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+    const avg = dataArrayRef.current.reduce((a, b) => a + b, 0) / dataArrayRef.current.length;
+    siriWaveRef.current.setAmplitude(Math.max(avg / 128, 0.1));
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+  };
 
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
@@ -162,24 +193,20 @@ export default function Search() {
             className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
             size={18}
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-            {isListening ? (
-              <div className="flex items-center justify-end">
-                <div className="siri-voice-visualizer">
-                  {/* SiriWave Animation */}
-                </div>
-              </div>
-            ) : (
-              <motion.button
-                onClick={handleMicClick}
-                className="relative p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
-                whileTap={{ scale: 0.9 }}
-              >
-                <Mic size={18} />
-              </motion.button>
-            )}
-          </div>
+          <motion.button
+            onClick={handleMicClick}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Mic size={18} />
+          </motion.button>
         </div>
+
+        {isListening && (
+          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+            <div id="siri-wave" className="w-[300px] h-[50px]"></div>
+          </div>
+        )}
 
         <AnimatePresence>
           {!searchSubmitted && (

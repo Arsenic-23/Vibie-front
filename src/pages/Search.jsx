@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, PlayCircle, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import VoiceVisualizer from '../components/VoiceVisualizer';
 
 export default function Search() {
   const [input, setInput] = useState('');
@@ -142,7 +141,9 @@ export default function Search() {
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             {isListening ? (
               <div className="flex items-center justify-end">
-                <VoiceVisualizer isActive={isListening} audioStream={audioStream} />
+                <div className="siri-voice-visualizer">
+                  {/* Placeholder for your Siri-like animation */}
+                </div>
               </div>
             ) : (
               <motion.button
@@ -220,16 +221,20 @@ export default function Search() {
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
 
-      <div className="mt-12 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <PlayCircle size={18} className="text-purple-500" />
-        <span className="font-semibold">Vibie</span>
+      <div className="mt-10 text-center">
+        {loading && hasMore && (
+          <div className="text-sm text-gray-400">Loading more results...</div>
+        )}
+        {!loading && !hasMore && (
+          <div className="text-sm text-gray-500 dark:text-gray-400">No more results available</div>
+        )}
       </div>
     </div>
   );
 }
 
-function formatDuration(seconds) {
-  const min = Math.floor(seconds / 60);
-  const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
-  return `${min}:${sec}`;
+function formatDuration(duration) {
+  const minutes = Math.floor(duration / 60);
+  const seconds = duration % 60;
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }

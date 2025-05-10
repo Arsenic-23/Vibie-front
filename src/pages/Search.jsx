@@ -111,10 +111,10 @@ export default function Search() {
     if (isListening && !siriWaveRef.current) {
       siriWaveRef.current = new SiriWave({
         container: document.querySelector('.siri-voice-visualizer'),
-        width: 300,
+        width: 250,
         height: 50,
-        speed: 0.1,
-        amplitude: 2,
+        speed: 0.2,
+        amplitude: 3,
       });
     }
   }, [isListening]);

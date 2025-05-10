@@ -33,6 +33,7 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const barCount = 10;
+      const barWidth = 2; // ultra thin bars
       const smooth = new Float32Array(barCount).fill(0);
       let idlePhase = 0;
 
@@ -41,9 +42,9 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
         analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const totalWidth = canvas.width;
-        const barWidth = totalWidth / barCount; // No spacing
+        const totalWidth = barCount * barWidth;
         const centerX = canvas.width / 2;
+        const startX = centerX - totalWidth / 2;
         const maxHeight = canvas.height;
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
         const isIdle = average < 10;
@@ -59,27 +60,24 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
             target = Math.sin(idlePhase + i * 0.3) * 4 + 6;
           }
 
-          // Optional tapering
           const distanceFromCenter = Math.abs(i - (barCount - 1) / 2);
           const scale = 1 - (distanceFromCenter / (barCount / 2)) * 0.2;
           target *= scale;
 
           smooth[i] += (target - smooth[i]) * 0.25;
           const height = smooth[i];
-          const x = i * barWidth;
+          const x = startX + i * barWidth;
           const y = (canvas.height - height) / 2;
           const radius = barWidth / 2;
 
           const gradient = ctx.createLinearGradient(x, y, x, y + height);
-          gradient.addColorStop(0, '#e9d5ff'); // Light purple
-          gradient.addColorStop(1, '#9333ea'); // Rich purple
+          gradient.addColorStop(0, '#e9d5ff');
+          gradient.addColorStop(1, '#9333ea');
 
           ctx.fillStyle = gradient;
           ctx.beginPath();
-          if (ctx.roundRect) {
-            ctx.roundRect(x, y, barWidth, height, radius);
-          } else {
-            // Fallback capsule shape
+          ctx.roundRect?.(x, y, barWidth, height, radius) ?? (() => {
+            // Fallback if roundRect isn't supported
             ctx.moveTo(x + radius, y);
             ctx.lineTo(x + barWidth - radius, y);
             ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + radius);
@@ -89,7 +87,7 @@ export default function VoiceVisualizer({ isActive, audioStream }) {
             ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
             ctx.lineTo(x, y + radius);
             ctx.quadraticCurveTo(x, y, x + radius, y);
-          }
+          })();
           ctx.fill();
         }
       };

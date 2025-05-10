@@ -1,3 +1,4 @@
+// File: components/Search.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchIcon, Play, Mic } from 'lucide-react';
 import axios from 'axios';
@@ -12,20 +13,24 @@ export default function Search() {
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [hideWave, setHideWave] = useState(false);
   const recognitionRef = useRef(null);
   const observer = useRef();
   const siriWaveRef = useRef(null);
 
-  const lastSongElementRef = useCallback((node) => {
-    if (loading) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) {
-        setPage((prevPage) => prevPage + 1);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  const lastSongElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -49,22 +54,23 @@ export default function Search() {
   }, [query, page]);
 
   useEffect(() => {
-    // Initialize SiriWave
+    // Init SiriWave
     if (!siriWaveRef.current && window.SiriWave) {
       const container = document.querySelector('.siri-voice-visualizer');
       if (container) {
-        siriWaveRef.current = new SiriWave({
+        siriWaveRef.current = new window.SiriWave({
           container,
           width: 250,
           height: 60,
           speed: 0.2,
           amplitude: 3,
           autostart: false,
+          style: 'ios9',
         });
       }
     }
 
-    // Initialize Speech Recognition
+    // Init Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -74,17 +80,20 @@ export default function Search() {
 
       recognition.onstart = () => {
         setIsListening(true);
+        setHideWave(false);
         siriWaveRef.current?.start();
       };
 
       recognition.onerror = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
+        setTimeout(() => setHideWave(true), 600);
       };
 
       recognition.onend = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
+        setTimeout(() => setHideWave(true), 600);
       };
 
       recognition.onresult = (event) => {
@@ -97,7 +106,8 @@ export default function Search() {
           setResults([]);
           setPage(1);
           setHasMore(true);
-          siriWaveRef.current?.stop(); // Ensure wave stops here too
+          siriWaveRef.current?.stop();
+          setTimeout(() => setHideWave(true), 600);
         }
       };
 
@@ -112,6 +122,7 @@ export default function Search() {
       setResults([]);
       setPage(1);
       setHasMore(true);
+      setHideWave(true);
     }
   };
 
@@ -124,15 +135,15 @@ export default function Search() {
       alert('Voice recognition not supported in this browser');
       return;
     }
+    if (navigator.vibrate) navigator.vibrate(80);
 
-    // Vibrate if supported (iOS-like haptic)
-    if (navigator.vibrate) {
-      navigator.vibrate(80);
-    }
-
-    // Start recognition
     setInput('');
     setSearchSubmitted(false);
+    setResults([]);
+    setPage(1);
+    setQuery('');
+    setHideWave(false);
+    siriWaveRef.current?.start();
     recognitionRef.current.start();
   };
 
@@ -162,10 +173,7 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            size={18}
-          />
+          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}
@@ -181,8 +189,18 @@ export default function Search() {
           </div>
         </div>
 
-        {/* Siri Wave Visualizer */}
-        <div className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50" />
+        <AnimatePresence>
+          {!hideWave && (
+            <motion.div
+              key="siriwave"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.5 }}
+              className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"
+            />
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {!searchSubmitted && (

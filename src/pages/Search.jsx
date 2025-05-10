@@ -13,7 +13,7 @@ export default function Search() {
   const [page, setPage] = useState(1);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [hideWave, setHideWave] = useState(false);
+  const [showWave, setShowWave] = useState(false);
   const recognitionRef = useRef(null);
   const observer = useRef();
   const siriWaveRef = useRef(null);
@@ -54,7 +54,6 @@ export default function Search() {
   }, [query, page]);
 
   useEffect(() => {
-    // Init SiriWave
     if (!siriWaveRef.current && window.SiriWave) {
       const container = document.querySelector('.siri-voice-visualizer');
       if (container) {
@@ -69,7 +68,6 @@ export default function Search() {
       }
     }
 
-    // Init Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -79,20 +77,20 @@ export default function Search() {
 
       recognition.onstart = () => {
         setIsListening(true);
-        setHideWave(false);
+        setShowWave(true);
         siriWaveRef.current?.start();
       };
 
       recognition.onerror = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
-        setTimeout(() => setHideWave(true), 600);
+        setShowWave(false);
       };
 
       recognition.onend = () => {
         setIsListening(false);
         siriWaveRef.current?.stop();
-        setTimeout(() => setHideWave(true), 600);
+        setShowWave(false);
       };
 
       recognition.onresult = (event) => {
@@ -106,7 +104,7 @@ export default function Search() {
           setPage(1);
           setHasMore(true);
           siriWaveRef.current?.stop();
-          setTimeout(() => setHideWave(true), 600);
+          setShowWave(false);
         }
       };
 
@@ -121,7 +119,7 @@ export default function Search() {
       setResults([]);
       setPage(1);
       setHasMore(true);
-      setHideWave(true);
+      setShowWave(false);
     }
   };
 
@@ -141,9 +139,13 @@ export default function Search() {
     setResults([]);
     setPage(1);
     setQuery('');
-    setHideWave(false);
-    siriWaveRef.current?.start();
-    recognitionRef.current.start();
+    setShowWave(true);
+
+    siriWaveRef.current?.stop();
+    setTimeout(() => {
+      siriWaveRef.current?.start();
+      recognitionRef.current.start();
+    }, 100);
   };
 
   const handlePlay = (song) => {
@@ -189,14 +191,14 @@ export default function Search() {
         </div>
 
         <AnimatePresence>
-          {!hideWave && (
+          {showWave && (
             <motion.div
               key="siriwave"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
+              exit={{ opacity: 0, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="siri-voice-visualizer fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50"
+              className="siri-voice-visualizer fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
             />
           )}
         </AnimatePresence>

@@ -112,7 +112,7 @@ export default function Search() {
       siriWaveRef.current = new SiriWave({
         container: document.querySelector('.siri-voice-visualizer'),
         width: 250,
-        height: 50,
+        height: 60,
         speed: 0.2,
         amplitude: 3,
       });

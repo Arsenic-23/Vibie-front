@@ -28,14 +28,14 @@ export default function Profile({ user: propUser }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-4 p-4 rounded-lg transition-all duration-200 font-medium shadow-sm
-         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
+        `flex items-center gap-3 p-3 rounded-lg text-sm transition-all font-medium shadow-sm 
+        ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
-      <div className={`w-10 h-10 flex items-center justify-center rounded-md ${color} text-white`}>
-        <Icon size={20} />
+      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
+        <Icon size={18} />
       </div>
-      <span className="text-lg tracking-tight">{label}</span>
+      <span className="tracking-tight">{label}</span>
     </NavLink>
   );
 
@@ -49,9 +49,9 @@ export default function Profile({ user: propUser }) {
 
       <div className="max-w-4xl mx-auto flex flex-col gap-10">
         {/* Profile Section */}
-        <div className="flex items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
+        <div className="flex items-center gap-5 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-5 shadow-lg transition-all">
           {/* Profile Ring with Glow */}
-          <div className="relative w-36 h-36 shrink-0">
+          <div className="relative w-28 h-28 shrink-0">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-xl opacity-40 z-0" />
             <div className="absolute inset-0 flex items-center justify-center animate-spinSlow z-10">
               <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
@@ -70,8 +70,8 @@ export default function Profile({ user: propUser }) {
 
           {/* User Info */}
           <div className="flex-1">
-            <h2 className="text-4xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
-            <p className="text-purple-600 dark:text-violet-400 text-lg mt-1">
+            <h2 className="text-3xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
+            <p className="text-purple-600 dark:text-violet-400 text-base mt-1">
               {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
             </p>
           </div>
@@ -79,7 +79,7 @@ export default function Profile({ user: propUser }) {
 
         {/* Tabs */}
         <div className="bg-gray-100 dark:bg-[#2b2b3c] rounded-xl p-4 shadow-inner transition-all">
-          <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
+          <div className="flex flex-wrap gap-3 justify-between max-w-3xl mx-auto w-full">
             {tabs.map(({ to, icon: Icon, color, label }) => (
               <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
             ))}

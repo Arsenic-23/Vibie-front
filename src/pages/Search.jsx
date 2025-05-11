@@ -112,8 +112,25 @@ export default function Search() {
           height: 60,
           speed: 0.15,
           amplitude: 2.5,
+          frequency: 2,
           style: 'ios',
           autostart: true,
+        });
+        // Animate with real amplitude from microphone
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          const mic = context.createMediaStreamSource(stream);
+          const analyser = context.createAnalyser();
+          mic.connect(analyser);
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+          const animate = () => {
+            analyser.getByteTimeDomainData(dataArray);
+            const amplitude = Math.max(...dataArray) / 128;
+            siriWaveRef.current.setAmplitude(amplitude);
+            requestAnimationFrame(animate);
+          };
+          animate();
         });
       } else {
         requestAnimationFrame(tryInit);
@@ -189,18 +206,11 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            size={18}
-          />
+          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}
-              className={`relative p-2 rounded-full ${
-                isListening
-                  ? 'bg-purple-600 text-white shadow-lg animate-pulse'
-                  : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
-              }`}
+              className={`relative p-2 rounded-full ${isListening ? 'bg-purple-600 text-white shadow-lg animate-pulse' : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'}`}
               whileTap={{ scale: 0.9 }}
             >
               <Mic size={18} />
@@ -282,7 +292,7 @@ export default function Search() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
             transition={{ duration: 0.5 }}
-            className="siri-voice-visualizer fixed bottom-28 left-1/2 transform -translate-x-1/2 z-50"
+            className="siri-voice-visualizer fixed bottom-28 left-[45%] transform -translate-x-1/2 z-50"
           />
         )}
       </AnimatePresence>

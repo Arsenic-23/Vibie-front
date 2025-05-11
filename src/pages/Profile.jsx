@@ -29,9 +29,11 @@ export default function Profile({ user: propUser }) {
       to={to}
       className={({ isActive }) =>
         `flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all
-         ${isActive
-           ? 'bg-indigo-700 text-white dark:bg-white dark:text-black'
-           : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600 dark:bg-gray-200 dark:text-gray-800 hover:dark:bg-gray-300'}`
+        ${
+          isActive
+            ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'
+        }`
       }
     >
       <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
@@ -42,11 +44,13 @@ export default function Profile({ user: propUser }) {
   );
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-white dark:text-black">
-      {/* Header Title - left aligned and b/w */}
-      <div className="mb-8 w-full text-left">
-        <h1 className="text-3xl font-bold tracking-wide text-white dark:text-black">Viber</h1>
-        <div className="mt-1 h-1 w-16 bg-white dark:bg-black rounded-full" />
+    <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center dark:text-white text-black">
+      {/* Viber Header Title - Restored */}
+      <div className="mb-6 w-full text-left">
+        <h1 className="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
+          Viber
+        </h1>
+        <div className="mt-1 h-1 w-24 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
       </div>
 
       {/* Profile Card */}
@@ -67,7 +71,7 @@ export default function Profile({ user: propUser }) {
             </div>
           </div>
         </div>
-        <div>
+        <div className="flex flex-col">
           <h2 className="text-2xl font-bold">{user?.name || 'Viber'}</h2>
           <p className="text-violet-400 dark:text-violet-600 text-sm">
             {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
@@ -76,19 +80,19 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Tabs */}
-      <div className="w-full flex flex-col gap-4 px-2 mt-4 mb-6">
+      <div className="w-full flex flex-col gap-4 px-2 mt-2 mb-6">
         {tabs.map(({ to, icon: Icon, color, label }) => (
           <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
         ))}
       </div>
 
-      {/* Outlet */}
+      {/* Page Outlet */}
       <div className="w-full px-2">
         <Outlet />
       </div>
 
       {/* Footer Branding */}
-      <div className="mt-10 flex justify-center items-center text-sm text-gray-400 dark:text-gray-600">
+      <div className="mt-10 flex justify-center items-center text-sm text-gray-400 dark:text-gray-500">
         <PlayCircle size={18} className="text-purple-500 mr-2" />
         <span className="font-semibold text-base tracking-wide">Vibie</span>
       </div>

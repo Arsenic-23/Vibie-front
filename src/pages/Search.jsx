@@ -285,7 +285,7 @@ export default function Search() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
             transition={{ duration: 0.5 }}
-            className="fixed bottom-16 left-0 w-full flex justify-center z-50"
+            className="fixed bottom-14 left-0 w-full flex justify-center z-50"
          >
             <div className="siri-voice-visualizer w-[250px] h-[60px]" />
             </motion.div>

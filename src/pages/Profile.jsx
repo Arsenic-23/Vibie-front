@@ -28,68 +28,57 @@ export default function Profile({ user: propUser }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-all
-         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
+        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all 
+         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-white hover:bg-indigo-600'}`
       }
     >
       <div className={`w-8 h-8 flex items-center justify-center rounded-md ${color} text-white`}>
         <Icon size={16} />
       </div>
-      <span className="text-sm tracking-tight">{label}</span>
+      <span className="text-sm">{label}</span>
     </NavLink>
   );
 
   return (
-    <div className="min-h-screen px-4 pt-6 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col gap-8">
+    <div className="min-h-screen px-4 pt-6 pb-6 bg-black text-white transition-all flex flex-col gap-6">
       {/* Header */}
-      <div className="mb-2 px-2">
+      <div>
         <h1 className="text-3xl font-bold tracking-tight">Viber</h1>
-        <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
+        <div className="w-20 h-1 mt-1 bg-purple-500 rounded-full animate-pulse" />
       </div>
 
-      <div className="max-w-4xl mx-auto flex flex-col gap-8">
-        {/* Profile Section */}
-        <div className="flex items-center gap-5 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-5 shadow-lg transition-all">
-          <div className="relative w-24 h-24 shrink-0">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-xl opacity-40 z-0" />
-            <div className="absolute inset-0 flex items-center justify-center animate-spinSlow z-10">
-              <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center z-20">
-              <div className="w-[94%] h-[94%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden">
-                <img
-                  src={user?.photo || 'https://placehold.co/150x150'}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-full"
-                  draggable={false}
-                />
-              </div>
-            </div>
+      <div className="max-w-md w-full mx-auto flex flex-col gap-6">
+        {/* Profile Card */}
+        <div className="flex items-center gap-4 bg-[#1e1e2f] rounded-2xl p-4 shadow-md">
+          <div className="relative w-16 h-16 shrink-0 rounded-full border-2 border-pink-500 overflow-hidden">
+            <img
+              src={user?.photo || 'https://placehold.co/150x150'}
+              alt="Profile"
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
           </div>
-
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
-            <p className="text-purple-600 dark:text-violet-400 text-sm mt-1">
-              {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
-            </p>
+          <div>
+            <h2 className="text-xl font-bold">{user?.name || 'Viber'}</h2>
+            <p className="text-sm text-purple-300">{user?.username ? `@${user.username}` : 'Welcome back!'}</p>
           </div>
         </div>
 
-        {/* Vertical Tabs */}
-        <div className="flex flex-col gap-2 w-full max-w-sm mx-auto">
+        {/* Tabs */}
+        <div className="flex flex-col gap-3">
           {tabs.map(({ to, icon: Icon, color, label }) => (
             <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
           ))}
         </div>
 
         {/* Outlet */}
-        <div className="bg-white dark:bg-[#1c1c2b] rounded-xl p-6 shadow-md transition-all">
+        <div className="bg-[#1c1c2b] rounded-xl p-4 shadow-md transition-all">
           <Outlet />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-6 mb-2">
+      <div className="mt-auto pt-4 flex justify-center items-center gap-2 text-sm text-gray-400">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>
       </div>

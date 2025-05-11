@@ -28,14 +28,14 @@ export default function Profile({ user: propUser }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-3 p-3 rounded-lg text-sm transition-all font-medium shadow-sm 
+        `flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all font-medium w-full 
         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
-      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
-        <Icon size={18} />
+      <div className={`w-11 h-11 flex items-center justify-center rounded-lg ${color} text-white`}>
+        <Icon size={20} />
       </div>
-      <span className="tracking-tight">{label}</span>
+      <span className="text-sm">{label}</span>
     </NavLink>
   );
 
@@ -75,13 +75,11 @@ export default function Profile({ user: propUser }) {
           </div>
         </div>
 
-        {/* Tabs - Vertical Layout */}
-        <div className="bg-gray-100 dark:bg-[#2b2b3c] rounded-xl p-6 shadow-inner transition-all max-w-sm w-full mx-auto">
-          <div className="flex flex-col gap-3">
-            {tabs.map(({ to, icon: Icon, color, label }) => (
-              <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
-            ))}
-          </div>
+        {/* Horizontal Tabs */}
+        <div className="flex flex-wrap gap-4 justify-between w-full">
+          {tabs.map(({ to, icon: Icon, color, label }) => (
+            <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
+          ))}
         </div>
 
         {/* Outlet */}

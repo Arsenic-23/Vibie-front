@@ -113,7 +113,7 @@ export default function Search() {
           container,
           width: 270,
           height: 60,
-          speed: 0.1,
+          speed: 0.13,
           amplitude: 2.5,
           style: 'ios',
           autostart: true,

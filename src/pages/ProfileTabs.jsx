@@ -4,8 +4,8 @@ import { History, BarChart2, Heart, Settings } from 'lucide-react';
 
 const tabs = [
   { to: '/profile/history', icon: History, color: 'bg-blue-500', label: 'History' },
-  { to: '/profile/statistics', icon: BarChart2, color: 'bg-green-500', label: 'Stats' },
-  { to: '/profile/favourites', icon: Heart, color: 'bg-pink-500', label: 'Faves' },
+  { to: '/profile/statistics', icon: BarChart2, color: 'bg-green-500', label: 'Statistics' },
+  { to: '/profile/favourites', icon: Heart, color: 'bg-pink-500', label: 'Favourites' },
   { to: '/profile/settings', icon: Settings, color: 'bg-purple-500', label: 'Settings' },
 ];
 

@@ -292,7 +292,7 @@ export default function Search() {
         )}
       </AnimatePresence>
       {/* Footer */}
-      <div className="mt-12 -mb-6 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-12 -mb-0.5 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
   <PlayCircle size={18} className="text-purple-500" />
   <span className="font-semibold">Vibie</span>
 </div>

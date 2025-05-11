@@ -112,7 +112,7 @@ export default function Search() {
         siriWaveRef.current = new window.SiriWave({
           container,
           width: 270,
-          height: 60,
+          height: 100,
           speed: 0.13,
           amplitude: 2.5,
           style: 'ios',

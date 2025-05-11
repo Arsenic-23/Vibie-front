@@ -11,7 +11,7 @@ const tabs = [
 
 export function Tabs() {
   return (
-    <div className="flex justify-center gap-4 flex-wrap">
+    <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
       {tabs.map(({ to, icon: Icon, color, label }) => (
         <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
       ))}
@@ -24,18 +24,14 @@ export function Tab({ to, Icon, color, label }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-5 py-3 rounded-xl transition-all duration-200 text-base font-semibold 
-         shadow-md hover:scale-105 ${
-           isActive
-             ? 'bg-indigo-700 text-white'
-             : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'
-         }`
+        `flex items-center gap-4 p-4 rounded-lg transition-all duration-200 font-medium shadow-sm
+         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
-      <div className={`w-10 h-10 flex items-center justify-center rounded-full ${color} text-white`}>
+      <div className={`w-10 h-10 flex items-center justify-center rounded-md ${color} text-white`}>
         <Icon size={20} />
       </div>
-      <span className="tracking-tight">{label}</span>
+      <span className="text-lg tracking-tight">{label}</span>
     </NavLink>
   );
 }

@@ -114,7 +114,7 @@ export default function Search() {
           width: 270,
           height: 80,
           speed: 0.13,
-          amplitude: 2.7,
+          amplitude: 2.5,
           style: 'ios',
           autostart: true,
         });

@@ -28,58 +28,67 @@ export default function Profile({ user: propUser }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all 
-         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-white hover:bg-indigo-600'}`
+        `flex items-center gap-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all
+        ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
       <div className={`w-8 h-8 flex items-center justify-center rounded-md ${color} text-white`}>
         <Icon size={16} />
       </div>
-      <span className="text-sm">{label}</span>
+      <span className="tracking-tight">{label}</span>
     </NavLink>
   );
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-6 bg-black text-white transition-all flex flex-col gap-6">
+    <div className="min-h-screen px-4 pt-6 pb-4 bg-black text-white flex flex-col items-center gap-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Viber</h1>
-        <div className="w-20 h-1 mt-1 bg-purple-500 rounded-full animate-pulse" />
+      <div className="w-full max-w-md px-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">Viber</h1>
+        <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
       </div>
 
-      <div className="max-w-md w-full mx-auto flex flex-col gap-6">
-        {/* Profile Card */}
-        <div className="flex items-center gap-4 bg-[#1e1e2f] rounded-2xl p-4 shadow-md">
-          <div className="relative w-16 h-16 shrink-0 rounded-full border-2 border-pink-500 overflow-hidden">
-            <img
-              src={user?.photo || 'https://placehold.co/150x150'}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              draggable={false}
-            />
+      {/* Profile */}
+      <div className="w-full max-w-md flex items-center gap-4 bg-[#1e1e2f] rounded-2xl p-4 shadow-md">
+        <div className="relative w-20 h-20 shrink-0">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
+          <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
+            <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
           </div>
-          <div>
-            <h2 className="text-xl font-bold">{user?.name || 'Viber'}</h2>
-            <p className="text-sm text-purple-300">{user?.username ? `@${user.username}` : 'Welcome back!'}</p>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-[92%] h-[92%] rounded-full bg-black overflow-hidden">
+              <img
+                src={user?.photo || 'https://placehold.co/150x150'}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+                draggable={false}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-col gap-3">
-          {tabs.map(({ to, icon: Icon, color, label }) => (
-            <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
-          ))}
+        <div>
+          <h2 className="text-xl font-semibold">{user?.name || 'Viber'}</h2>
+          <p className="text-violet-400 text-sm">
+            {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
+          </p>
         </div>
+      </div>
 
-        {/* Outlet */}
-        <div className="bg-[#1c1c2b] rounded-xl p-4 shadow-md transition-all">
-          <Outlet />
-        </div>
+      {/* Tabs */}
+      <div className="w-full max-w-md flex flex-col gap-3 px-2">
+        {tabs.map(({ to, icon: Icon, color, label }) => (
+          <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
+        ))}
+      </div>
+
+      {/* Outlet */}
+      <div className="w-full max-w-md px-2">
+        <Outlet />
       </div>
 
       {/* Footer */}
-      <div className="mt-auto pt-4 flex justify-center items-center gap-2 text-sm text-gray-400">
-        <PlayCircle size={18} className="text-purple-500" />
+      <div className="mt-6 flex justify-center items-center text-sm text-gray-400">
+        <PlayCircle size={16} className="text-purple-500 mr-1" />
         <span className="font-semibold">Vibie</span>
       </div>
     </div>

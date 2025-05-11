@@ -44,24 +44,22 @@ export default function Profile({ user: propUser }) {
   );
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center dark:text-white text-black">
-      {/* Viber Header Title - Restored */}
+    <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-black dark:text-white">
+      {/* Viber Header Title */}
       <div className="mb-6 w-full text-left">
-        <h1 className="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
-          Viber
-        </h1>
-        <div className="mt-1 h-1 w-24 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
+        <h1 className="text-3xl font-bold tracking-wide">Viber</h1>
+        <div className="mt-1 h-1 w-24 bg-purple-600 rounded-full animate-pulse" />
       </div>
 
       {/* Profile Card */}
-      <div className="w-full flex items-center gap-5 bg-[#1e1e2f] dark:bg-gray-100 rounded-2xl p-5 shadow-lg mb-8">
+      <div className="w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-8 bg-white dark:bg-[#1e1e2f]">
         <div className="relative w-24 h-24 shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
           <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
             <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-[92%] h-[92%] rounded-full bg-black overflow-hidden">
+            <div className="w-[92%] h-[92%] rounded-full overflow-hidden bg-gray-100 dark:bg-black">
               <img
                 src={user?.photo || 'https://placehold.co/150x150'}
                 alt="Profile"
@@ -73,7 +71,7 @@ export default function Profile({ user: propUser }) {
         </div>
         <div className="flex flex-col">
           <h2 className="text-2xl font-bold">{user?.name || 'Viber'}</h2>
-          <p className="text-violet-400 dark:text-violet-600 text-sm">
+          <p className="text-gray-600 dark:text-violet-400 text-sm">
             {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
           </p>
         </div>

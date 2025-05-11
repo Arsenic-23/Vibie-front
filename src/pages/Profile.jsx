@@ -41,7 +41,15 @@ export default function Profile({ user: propUser }) {
 
   return (
     <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-white">
-      {/* Profile Header */}
+      {/* Header Title */}
+      <div className="mb-4 text-center">
+        <h1 className="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
+          Viber
+        </h1>
+        <div className="mt-1 h-1 w-24 mx-auto bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
+      </div>
+
+      {/* Profile Card */}
       <div className="w-full flex items-center gap-5 bg-[#1e1e2f] rounded-2xl p-5 shadow-lg mb-6">
         <div className="relative w-24 h-24 shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
@@ -80,7 +88,7 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Footer Branding */}
-      <div className="mt-8 flex justify-center items-center text-sm text-gray-400">
+      <div className="mt-10 flex justify-center items-center text-sm text-gray-400">
         <PlayCircle size={18} className="text-purple-500 mr-2" />
         <span className="font-semibold text-base tracking-wide">Vibie</span>
       </div>

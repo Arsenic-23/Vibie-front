@@ -285,8 +285,10 @@ export default function Search() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
             transition={{ duration: 0.5 }}
-            className="siri-voice-visualizer fixed bottom-28 left-1/2 -translate-x-1/2 z-50 w-[250px] h-[60px]"
-          />
+            className="fixed bottom-28 left-0 w-full flex justify-center z-50"
+         >
+            <div className="siri-voice-visualizer w-[250px] h-[60px]" />
+            </motion.div>
         )}
       </AnimatePresence>
     </div>

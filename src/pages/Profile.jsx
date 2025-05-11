@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Tabs, Tab } from './ProfileTabs';
-import { UserIcon, MusicIcon, SettingsIcon, PlayCircle } from 'lucide-react';
+import { NavLink, Outlet } from 'react-router-dom';
+import { History, BarChart2, Heart, Settings, PlayCircle } from 'lucide-react';
 
 export default function Profile({ user: propUser }) {
   const [user, setUser] = useState(propUser);
@@ -18,6 +17,28 @@ export default function Profile({ user: propUser }) {
     }
   }, []);
 
+  const tabs = [
+    { to: '/profile/history', icon: History, color: 'bg-blue-500', label: 'History' },
+    { to: '/profile/statistics', icon: BarChart2, color: 'bg-green-500', label: 'Statistics' },
+    { to: '/profile/favourites', icon: Heart, color: 'bg-pink-500', label: 'Favourites' },
+    { to: '/profile/settings', icon: Settings, color: 'bg-purple-500', label: 'Settings' },
+  ];
+
+  const Tab = ({ to, Icon, color, label }) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex items-center gap-4 p-4 rounded-lg transition-all duration-200 font-medium shadow-sm
+         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
+      }
+    >
+      <div className={`w-10 h-10 flex items-center justify-center rounded-md ${color} text-white`}>
+        <Icon size={20} />
+      </div>
+      <span className="text-lg tracking-tight">{label}</span>
+    </NavLink>
+  );
+
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col gap-10">
       {/* Header */}
@@ -31,15 +52,10 @@ export default function Profile({ user: propUser }) {
         <div className="flex items-center gap-6 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-6 shadow-lg transition-all">
           {/* Profile Ring with Glow */}
           <div className="relative w-36 h-36 shrink-0">
-            {/* Blurred Glow */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-xl opacity-40 z-0" />
-
-            {/* Animated Gradient Ring */}
             <div className="absolute inset-0 flex items-center justify-center animate-spinSlow z-10">
               <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
             </div>
-
-            {/* Profile Image */}
             <div className="absolute inset-0 flex items-center justify-center z-20">
               <div className="w-[94%] h-[94%] rounded-full bg-white dark:bg-[#1e1e2f] overflow-hidden">
                 <img
@@ -63,14 +79,14 @@ export default function Profile({ user: propUser }) {
 
         {/* Tabs */}
         <div className="bg-gray-100 dark:bg-[#2b2b3c] rounded-xl p-4 shadow-inner transition-all">
-          <Tabs>
-            <Tab icon={<UserIcon className="w-6 h-6" />} label="Profile" />
-            <Tab icon={<MusicIcon className="w-6 h-6" />} label="Tracks" />
-            <Tab icon={<SettingsIcon className="w-6 h-6" />} label="Settings" />
-          </Tabs>
+          <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
+            {tabs.map(({ to, icon: Icon, color, label }) => (
+              <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
+            ))}
+          </div>
         </div>
 
-        {/* Outlet Section */}
+        {/* Outlet */}
         <div className="bg-white dark:bg-[#1c1c2b] rounded-xl p-6 shadow-md transition-all">
           <Outlet />
         </div>

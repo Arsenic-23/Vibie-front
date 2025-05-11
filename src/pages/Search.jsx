@@ -1,6 +1,6 @@
 // Search.jsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchIcon, Play, Mic } from 'lucide-react';
+import { SearchIcon, Play, Mic, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 

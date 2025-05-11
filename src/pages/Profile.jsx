@@ -50,7 +50,6 @@ export default function Profile({ user: propUser }) {
       <div className="max-w-4xl mx-auto flex flex-col gap-10">
         {/* Profile Section */}
         <div className="flex items-center gap-5 bg-gray-100 dark:bg-[#1e1e2f] rounded-2xl p-5 shadow-lg transition-all">
-          {/* Profile Ring with Glow */}
           <div className="relative w-28 h-28 shrink-0">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-xl opacity-40 z-0" />
             <div className="absolute inset-0 flex items-center justify-center animate-spinSlow z-10">
@@ -68,7 +67,6 @@ export default function Profile({ user: propUser }) {
             </div>
           </div>
 
-          {/* User Info */}
           <div className="flex-1">
             <h2 className="text-3xl font-bold tracking-tight">{user?.name || 'Viber'}</h2>
             <p className="text-purple-600 dark:text-violet-400 text-base mt-1">
@@ -77,9 +75,9 @@ export default function Profile({ user: propUser }) {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-gray-100 dark:bg-[#2b2b3c] rounded-xl p-4 shadow-inner transition-all">
-          <div className="flex flex-wrap gap-3 justify-between max-w-3xl mx-auto w-full">
+        {/* Tabs - Vertical Layout */}
+        <div className="bg-gray-100 dark:bg-[#2b2b3c] rounded-xl p-6 shadow-inner transition-all max-w-sm w-full mx-auto">
+          <div className="flex flex-col gap-3">
             {tabs.map(({ to, icon: Icon, color, label }) => (
               <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
             ))}

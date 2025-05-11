@@ -29,7 +29,7 @@ export default function Profile({ user: propUser }) {
       to={to}
       className={({ isActive }) =>
         `flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-all
-        ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
+         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
       <div className={`w-8 h-8 flex items-center justify-center rounded-md ${color} text-white`}>
@@ -40,7 +40,7 @@ export default function Profile({ user: propUser }) {
   );
 
   return (
-    <div className="min-h-screen px-4 pt-6 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col gap-10">
+    <div className="min-h-screen px-4 pt-6 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col gap-8">
       {/* Header */}
       <div className="mb-2 px-2">
         <h1 className="text-3xl font-bold tracking-tight">Viber</h1>
@@ -75,8 +75,8 @@ export default function Profile({ user: propUser }) {
           </div>
         </div>
 
-        {/* Tabs Row */}
-        <div className="flex flex-wrap gap-3 justify-between">
+        {/* Vertical Tabs */}
+        <div className="flex flex-col gap-2 w-full max-w-sm mx-auto">
           {tabs.map(({ to, icon: Icon, color, label }) => (
             <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
           ))}
@@ -89,7 +89,7 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Footer */}
-      <div className="flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400 py-6">
+      <div className="flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-6 mb-2">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>
       </div>

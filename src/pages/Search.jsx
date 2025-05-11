@@ -111,7 +111,7 @@ export default function Search() {
       if (window.SiriWave && container && !siriWaveRef.current) {
         siriWaveRef.current = new window.SiriWave({
           container,
-          width: 270,
+          width: 200,
           height: 80,
           speed: 0.13,
           amplitude: 2.5,

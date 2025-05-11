@@ -28,28 +28,22 @@ export default function Profile({ user: propUser }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all
-        ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
+        `flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all
+         ${isActive ? 'bg-indigo-700 text-white' : 'bg-[#2e2e40] text-gray-300 hover:bg-indigo-600'}`
       }
     >
-      <div className={`w-8 h-8 flex items-center justify-center rounded-md ${color} text-white`}>
-        <Icon size={16} />
+      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
+        <Icon size={18} />
       </div>
-      <span className="tracking-tight">{label}</span>
+      {label}
     </NavLink>
   );
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-4 bg-black text-white flex flex-col items-center gap-8">
-      {/* Header */}
-      <div className="w-full max-w-md px-2">
-        <h1 className="text-4xl font-extrabold tracking-tight">Viber</h1>
-        <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
-      </div>
-
-      {/* Profile */}
-      <div className="w-full max-w-md flex items-center gap-4 bg-[#1e1e2f] rounded-2xl p-4 shadow-md">
-        <div className="relative w-20 h-20 shrink-0">
+    <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-white">
+      {/* Profile Header */}
+      <div className="w-full flex items-center gap-5 bg-[#1e1e2f] rounded-2xl p-5 shadow-lg mb-6">
+        <div className="relative w-24 h-24 shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
           <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
             <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
@@ -65,9 +59,8 @@ export default function Profile({ user: propUser }) {
             </div>
           </div>
         </div>
-
         <div>
-          <h2 className="text-xl font-semibold">{user?.name || 'Viber'}</h2>
+          <h2 className="text-2xl font-bold">{user?.name || 'Viber'}</h2>
           <p className="text-violet-400 text-sm">
             {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
           </p>
@@ -75,21 +68,21 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Tabs */}
-      <div className="w-full max-w-md flex flex-col gap-3 px-2">
+      <div className="w-full flex flex-col gap-4 px-2 mt-2 mb-6">
         {tabs.map(({ to, icon: Icon, color, label }) => (
           <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
         ))}
       </div>
 
       {/* Outlet */}
-      <div className="w-full max-w-md px-2">
+      <div className="w-full px-2">
         <Outlet />
       </div>
 
-      {/* Footer */}
-      <div className="mt-6 flex justify-center items-center text-sm text-gray-400">
-        <PlayCircle size={16} className="text-purple-500 mr-1" />
-        <span className="font-semibold">Vibie</span>
+      {/* Footer Branding */}
+      <div className="mt-8 flex justify-center items-center text-sm text-gray-400">
+        <PlayCircle size={18} className="text-purple-500 mr-2" />
+        <span className="font-semibold text-base tracking-wide">Vibie</span>
       </div>
     </div>
   );

@@ -111,7 +111,7 @@ export default function Search() {
       if (window.SiriWave && container && !siriWaveRef.current) {
         siriWaveRef.current = new window.SiriWave({
           container,
-          width: 250,
+          width: 270,
           height: 60,
           speed: 0.15,
           amplitude: 2.5,
@@ -285,7 +285,7 @@ export default function Search() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
             transition={{ duration: 0.5 }}
-            className="siri-voice-visualizer fixed bottom-28 left-[48%] transform -translate-x-1/2 z-50"
+            className="siri-voice-visualizer fixed bottom-28 left-1/2 transform -translate-x-[55%] z-50"
           />
         )}
       </AnimatePresence>

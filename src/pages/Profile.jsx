@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { History, BarChart2, Heart, Settings, PlayCircle } from 'lucide-react';
-import '../context/twinkle.css';
 
 export default function Profile({ user: propUser }) {
   const [user, setUser] = useState(propUser);
-  const tabRefs = useRef({});
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -19,15 +17,6 @@ export default function Profile({ user: propUser }) {
     }
   }, []);
 
-  const handleTwinkle = (key) => {
-    const el = tabRefs.current[key];
-    if (el) {
-      el.classList.remove('twinkle');
-      void el.offsetWidth; // Force reflow
-      el.classList.add('twinkle');
-    }
-  };
-
   const tabs = [
     { to: '/profile/history', icon: History, color: 'bg-blue-500', label: 'History' },
     { to: '/profile/statistics', icon: BarChart2, color: 'bg-green-500', label: 'Statistics' },
@@ -35,30 +24,42 @@ export default function Profile({ user: propUser }) {
     { to: '/profile/settings', icon: Settings, color: 'bg-purple-500', label: 'Settings' },
   ];
 
-  const Tab = ({ to, Icon, color, label }) => (
-    <NavLink
-      to={to}
-      onClick={() => handleTwinkle(to)}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        handleTwinkle(to);
-      }}
-      className={({ isActive }) =>
-        `tab-button flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all
-        ${
-          isActive
-            ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'
-        }`
-      }
-      ref={(el) => (tabRefs.current[to] = el)}
-    >
-      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
-        <Icon size={18} />
-      </div>
-      {label}
-    </NavLink>
-  );
+  const Tab = ({ to, Icon, color, label }) => {
+    const [pressed, setPressed] = useState(false);
+    let timeout = null;
+
+    const handlePressStart = () => {
+      timeout = setTimeout(() => setPressed(true), 400); // Long press threshold
+    };
+
+    const handlePressEnd = () => {
+      clearTimeout(timeout);
+      setPressed(false);
+    };
+
+    return (
+      <NavLink
+        to={to}
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onMouseLeave={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
+        className={({ isActive }) =>
+          `flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all transform duration-200 ${
+            isActive
+              ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'
+          } ${pressed ? 'scale-95' : 'active:scale-95'}`
+        }
+      >
+        <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
+          <Icon size={18} />
+        </div>
+        {label}
+      </NavLink>
+    );
+  };
 
   return (
     <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-black dark:text-white">

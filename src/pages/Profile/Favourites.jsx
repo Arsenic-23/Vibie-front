@@ -7,7 +7,7 @@ const mockSongs = [
     id: 1,
     title: "Blinding Lights",
     artist: "The Weeknd",
-    cover: "https://i.scdn.co/image/ab67616d00001e02a01d5e725e6562c43ab58a75"
+    cover: "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228"
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ const mockSongs = [
     id: 3,
     title: "Levitating",
     artist: "Dua Lipa",
-    cover: "https://i.scdn.co/image/ab67616d00001e02e3b99d6c0bc97aa56f2587c4"
+    cover: "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228"
   },
   {
     id: 4,

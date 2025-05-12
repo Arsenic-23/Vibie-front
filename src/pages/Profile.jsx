@@ -78,7 +78,7 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Tabs */}
-      <div className="w-full flex flex-col gap-4 px-2 mt-4 mb-6">
+      <div className="w-full flex flex-col gap-4 px-2 mt-6 mb-6">
         {tabs.map(({ to, icon: Icon, color, label }) => (
           <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
         ))}

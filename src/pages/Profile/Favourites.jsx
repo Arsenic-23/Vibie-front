@@ -21,6 +21,12 @@ const mockSongs = [
     artist: "Dua Lipa",
     cover: "https://i.scdn.co/image/ab67616d00001e02e3b99d6c0bc97aa56f2587c4"
   }
+  {
+    id: 4,
+    title: "Watermelon Sugar",
+    artist: "Harry Styles",
+    cover: "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228"
+  }
 ];
 
 export default function Favourites() {

@@ -48,7 +48,7 @@ export default function Profile({ user: propUser }) {
       {/* Viber Header Title */}
       <div className="mb-8 w-full text-left">
         <h1 className="text-3xl font-bold tracking-wide">Viber</h1>
-        <div className="mt-2 h-1 w-28 bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 rounded-full animate-pulse" />
+
       </div>
 
       {/* Profile Card */}

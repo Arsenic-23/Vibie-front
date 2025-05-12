@@ -23,8 +23,8 @@ const mockSongs = [
   }
   {
     id: 4,
-    title: "Watermelon Sugar",
-    artist: "Harry Styles",
+    title: "Apocalypse",
+    artist: "Ciggerate after sex",
     cover: "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228"
   }
 ];

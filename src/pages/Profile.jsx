@@ -27,12 +27,15 @@ export default function Profile({ user: propUser }) {
   const Tab = ({ to, Icon, color, label }) => (
     <NavLink
       to={to}
-      onMouseDown={(e) => e.preventDefault()}
-      onTouchStart={(e) => e.preventDefault()}
+      onContextMenu={(e) => e.preventDefault()}
       className={({ isActive }) =>
         `flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all duration-200
-         ${isActive ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'}
-         select-none pointer-events-auto`
+        ${
+          isActive
+            ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'
+        }
+        select-none pointer-events-auto`
       }
       draggable={false}
     >
@@ -53,8 +56,8 @@ export default function Profile({ user: propUser }) {
       {/* Profile Card */}
       <div className="mt-2 w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-10 bg-white dark:bg-[#1e1e2f] select-none">
         <div className="relative w-24 h-24 shrink-0 pointer-events-none">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50" />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
+          <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
             <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
           </div>
           <div className="absolute inset-0 flex items-center justify-center">

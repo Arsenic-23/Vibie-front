@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { History, BarChart2, Heart, Settings, PlayCircle } from 'lucide-react';
+import './twinkle.css'; 
 
 export default function Profile({ user: propUser }) {
   const [user, setUser] = useState(propUser);
+  const tabRefs = useRef({});
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -17,6 +19,15 @@ export default function Profile({ user: propUser }) {
     }
   }, []);
 
+  const handleTwinkle = (key) => {
+    const el = tabRefs.current[key];
+    if (el) {
+      el.classList.remove('twinkle');
+      void el.offsetWidth; // Force reflow
+      el.classList.add('twinkle');
+    }
+  };
+
   const tabs = [
     { to: '/profile/history', icon: History, color: 'bg-blue-500', label: 'History' },
     { to: '/profile/statistics', icon: BarChart2, color: 'bg-green-500', label: 'Statistics' },
@@ -27,14 +38,20 @@ export default function Profile({ user: propUser }) {
   const Tab = ({ to, Icon, color, label }) => (
     <NavLink
       to={to}
+      onClick={() => handleTwinkle(to)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        handleTwinkle(to);
+      }}
       className={({ isActive }) =>
-        `flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all
+        `tab-button flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all
         ${
           isActive
             ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white'
             : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'
         }`
       }
+      ref={(el) => (tabRefs.current[to] = el)}
     >
       <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
         <Icon size={18} />
@@ -45,13 +62,10 @@ export default function Profile({ user: propUser }) {
 
   return (
     <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-black dark:text-white">
-      {/* Viber Header Title */}
       <div className="mb-8 w-full text-left">
         <h1 className="text-3xl font-bold tracking-wide">Viber</h1>
-
       </div>
 
-      {/* Profile Card */}
       <div className="mt-2 w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-10 bg-white dark:bg-[#1e1e2f]">
         <div className="relative w-24 h-24 shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
@@ -77,19 +91,16 @@ export default function Profile({ user: propUser }) {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="w-full flex flex-col gap-4 px-2 mt-6 mb-6">
         {tabs.map(({ to, icon: Icon, color, label }) => (
           <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
         ))}
       </div>
 
-      {/* Page Outlet */}
       <div className="w-full px-2">
         <Outlet />
       </div>
 
-      {/* Footer Branding */}
       <div className="mt-10 flex justify-center items-center text-sm text-gray-400 dark:text-gray-500">
         <PlayCircle size={18} className="text-purple-500 mr-2" />
         <span className="font-semibold text-base tracking-wide">Vibie</span>

@@ -46,13 +46,13 @@ export default function Profile({ user: propUser }) {
   return (
     <div className="w-full max-w-md mx-auto p-4 flex flex-col items-center text-black dark:text-white">
       {/* Viber Header Title */}
-      <div className="mb-6 w-full text-left">
+      <div className="mb-8 w-full text-left">
         <h1 className="text-3xl font-bold tracking-wide">Viber</h1>
-        <div className="mt-1 h-1 w-24 bg-purple-600 rounded-full animate-pulse" />
+        <div className="mt-2 h-1 w-28 bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 rounded-full animate-pulse" />
       </div>
 
       {/* Profile Card */}
-      <div className="w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-8 bg-white dark:bg-[#1e1e2f]">
+      <div className="mt-2 w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-10 bg-white dark:bg-[#1e1e2f]">
         <div className="relative w-24 h-24 shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
           <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
@@ -78,7 +78,7 @@ export default function Profile({ user: propUser }) {
       </div>
 
       {/* Tabs */}
-      <div className="w-full flex flex-col gap-4 px-2 mt-2 mb-6">
+      <div className="w-full flex flex-col gap-4 px-2 mt-4 mb-6">
         {tabs.map(({ to, icon: Icon, color, label }) => (
           <Tab key={to} to={to} Icon={Icon} color={color} label={label} />
         ))}

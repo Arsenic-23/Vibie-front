@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { History, BarChart2, Heart, Settings, PlayCircle } from 'lucide-react';
-import './twinkle.css'; 
+import '../context/twinkle.css';
 
 export default function Profile({ user: propUser }) {
   const [user, setUser] = useState(propUser);

@@ -20,7 +20,7 @@ const mockSongs = [
     title: "Levitating",
     artist: "Dua Lipa",
     cover: "https://i.scdn.co/image/ab67616d00001e02e3b99d6c0bc97aa56f2587c4"
-  }
+  },
   {
     id: 4,
     title: "Apocalypse",

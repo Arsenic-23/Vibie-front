@@ -19,28 +19,25 @@ export default function Home() {
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
-  // Setup for fullscreen only on Home page
+  // Fullscreen setup only for Home page
   useEffect(() => {
-    const setupFullscreen = async () => {
+    const enableFullscreen = async () => {
       if (await telegram.isTMA()) {
         telegram.init(); // Initialize the Telegram WebApp SDK
 
-        if (telegram.viewport.mount.isAvailable()) {
-          await telegram.viewport.mount();
-          telegram.viewport.expand(); // Expand to top
-        }
-
+        // Check if fullscreen is available
         if (telegram.viewport.requestFullscreen.isAvailable()) {
           await telegram.viewport.requestFullscreen(); // Enable fullscreen
         }
 
-        telegram.setHeaderColor('#ffffff'); // Optional: Set header color
+        // Set header color (optional but recommended for fullscreen)
+        telegram.setHeaderColor('#ffffff');
       }
     };
 
-    setupFullscreen(); // Only execute on Home page
+    enableFullscreen(); // Call fullscreen setup only on Home page
 
-  }, []);
+  }, []); // Empty dependency array ensures it runs only once when the component is mounted
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;

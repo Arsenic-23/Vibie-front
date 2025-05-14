@@ -6,7 +6,7 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
 import ProfilePopup from '../components/ProfilePopup';
-import { init, isTMA, viewport } from '@telegram-apps/sdk'; // Import SDK
+import telegram from '@telegram-apps/sdk'; // Correct import
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
@@ -18,38 +18,15 @@ export default function Home() {
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
-  // === Enable Fullscreen only on Home page ===
+  // === Enable Fullscreen and Close Confirmation ===
   useEffect(() => {
-    async function enableFullscreen() {
-      if (!(await isTMA())) return;
-
-      init(); // Initialize Telegram WebApp SDK
-
-      try {
-        // Fullscreen only for the Home page
-        if (viewport.mount.isAvailable()) {
-          await viewport.mount();
-          viewport.expand();
-        }
-
-        if (viewport.requestFullscreen.isAvailable()) {
-          await viewport.requestFullscreen();
-        }
-
-        window.Telegram?.WebApp?.enableClosingConfirmation(); // Close confirmation
-      } catch (error) {
-        console.error('Fullscreen setup failed:', error);
-      }
+    telegram.init();
+    if (telegram.isTMA) {
+      telegram.viewport.expand();
+      telegram.closeConfirmation.enable();
     }
-
-    enableFullscreen(); // Run fullscreen setup
-
-    return () => {
-      // Clean up any resources or listeners if needed when component unmounts
-    };
   }, []);
 
-  // === Long press functionality for buttons ===
   useEffect(() => {
     const setupLongPress = (ref, onLongPress) => {
       let pressTimer = null;

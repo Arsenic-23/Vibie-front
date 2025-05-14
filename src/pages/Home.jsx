@@ -6,7 +6,7 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
 import ProfilePopup from '../components/ProfilePopup';
-import telegram from '@telegram-apps/sdk'; // Correct import
+import * as telegram from '@telegram-apps/sdk';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();

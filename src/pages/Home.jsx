@@ -17,6 +17,15 @@ export default function Home() {
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
+  // === Enable Fullscreen and Close Confirmation ===
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.expand();
+      tg.enableClosingConfirmation();
+    }
+  }, []);
+
   useEffect(() => {
     const setupLongPress = (ref, onLongPress) => {
       let pressTimer = null;
@@ -81,7 +90,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
-      
+
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
@@ -124,7 +133,6 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              {/* Overlay to close on outside click */}
               <div
                 className="fixed inset-0 z-40"
                 onClick={() => setShowProfilePopup(false)}

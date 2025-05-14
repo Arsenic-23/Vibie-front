@@ -7,8 +7,6 @@ import VibersPopup from '../components/VibersPopup';
 import SongControls from '../components/SongControls';
 import ProfilePopup from '../components/ProfilePopup';
 
-import * as telegram from '@telegram-apps/sdk'; // Correct import
-
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);
@@ -21,23 +19,25 @@ export default function Home() {
 
   // Fullscreen setup only for Home page
   useEffect(() => {
+    // Function to enable fullscreen when WebApp SDK is ready
     const enableFullscreen = async () => {
-      if (await telegram.isTMA()) {
-        telegram.init(); // Initialize the Telegram WebApp SDK
+      if (window.Telegram && window.Telegram.WebApp) {
+        const tgWebApp = window.Telegram.WebApp;
 
-        // Check if fullscreen is available
-        if (telegram.viewport.requestFullscreen.isAvailable()) {
-          await telegram.viewport.requestFullscreen(); // Enable fullscreen
+        // Ensure the WebApp SDK is initialized
+        if (tgWebApp.initDataUnsafe) {
+          // Check if fullscreen is available and then trigger it
+          if (tgWebApp.viewport && tgWebApp.viewport.requestFullscreen) {
+            await tgWebApp.viewport.requestFullscreen(); // Enable fullscreen
+            tgWebApp.setHeaderColor("#ffffff"); // Optional: Set a header color for fullscreen
+          }
         }
-
-        // Set header color (optional but recommended for fullscreen)
-        telegram.setHeaderColor('#ffffff');
       }
     };
 
-    enableFullscreen(); // Call fullscreen setup only on Home page
+    enableFullscreen(); // Trigger fullscreen only on the Home page
 
-  }, []); // Empty dependency array ensures it runs only once when the component is mounted
+  }, []); // Empty dependency array ensures it runs once when the component mounts
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;

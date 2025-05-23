@@ -9,15 +9,15 @@ A high-quality mini music app inspired by Spotify & YouTube Music.
 - Total Vibers popup to show participants
 - Dark/Light theme toggle
 - Premium fonts, colors, and smooth transitions
-- Stylish iPhone-like bottom nav (Home, Search, Hits, Profile)
+- Stylish iPhone-like bottom nav
+- SIRI ANIMATION
 
 ## Tech Stack
 - Vite + React
 - TailwindCSS for styling
 - Lucide React for icons
 
-## Getting Started
+[Link Text](https://t.me/vibie_bot/vibiebot)
 
-```bash
-npm install
-npm run dev
+
+

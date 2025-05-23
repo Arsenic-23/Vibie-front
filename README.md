@@ -1,4 +1,4 @@
-# VIBIE — Join the Vibe
+# VIBIE — Join the Vibe {under development}
 
 A high-quality mini music app inspired by Spotify & YouTube Music.
 

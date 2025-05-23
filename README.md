@@ -17,7 +17,7 @@ A high-quality mini music app inspired by Spotify & YouTube Music.
 - TailwindCSS for styling
 - Lucide React for icons
 
-[Link Text](https://t.me/vibie_bot/vibiebot)
+[try it out](https://t.me/vibie_bot/vibiebot)
 
 
 

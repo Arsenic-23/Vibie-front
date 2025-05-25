@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, PlayCircle } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -13,17 +13,18 @@ export default function Home() {
   const [showVibers, setShowVibers] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
   useEffect(() => {
     const enableFullscreen = async () => {
-      if (window.Telegram && window.Telegram.WebApp) {
+      if (window.Telegram?.WebApp?.initDataUnsafe) {
         const tgWebApp = window.Telegram.WebApp;
-        if (tgWebApp.initDataUnsafe && tgWebApp.viewport?.requestFullscreen) {
+        if (tgWebApp.viewport?.requestFullscreen) {
           await tgWebApp.viewport.requestFullscreen();
-          tgWebApp.setHeaderColor("#ffffff");
+          tgWebApp.setHeaderColor('#ffffff');
         }
       }
     };
@@ -71,7 +72,7 @@ export default function Home() {
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <Play size={20} className="text-purple-500 drop-shadow-sm" />
+          <PlayCircle size={22} className="text-purple-500 drop-shadow-sm" />
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
@@ -152,19 +153,20 @@ export default function Home() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex-1 w-full md:mt-4 space-y-3 text-left">
-          <div className="overflow-hidden whitespace-nowrap">
+        <div className="flex-1 w-full space-y-2 text-left mt-2 md:mt-6">
+          <div className="overflow-hidden whitespace-nowrap w-full">
             <div className="animate-marquee inline-block min-w-full">
-              <h2 className="text-2xl font-bold">Song Title That Is Very Long And Needs Scrolling</h2>
+              <h2 className="text-2xl font-bold">Very Long Song Title That Scrolls Forever and Loops</h2>
             </div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">Artist Name</p>
         </div>
       </div>
 
-      {/* Player Line */}
-      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full my-6 overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-pink-500 to-purple-600 w-[40%] transition-all duration-300" />
+      {/* Thin Player Line with Dot */}
+      <div className="w-full relative h-1.5 mt-8 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-500 to-purple-600 w-[35%] transition-all duration-300" />
+        <div className="absolute -top-[3px] left-[35%] w-3 h-3 bg-white dark:bg-black border-2 border-purple-500 rounded-full shadow-md transition-all duration-300" />
       </div>
 
       {/* Player + Action Buttons */}
@@ -178,8 +180,9 @@ export default function Home() {
 
         <button
           className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+          onClick={() => setIsPlaying(!isPlaying)}
         >
-          <Play size={32} />
+          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
         </button>
 
         <button

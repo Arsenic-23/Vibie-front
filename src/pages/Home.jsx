@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, PlayCircle } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -22,16 +21,12 @@ export default function Home() {
     const enableFullscreen = async () => {
       if (window.Telegram && window.Telegram.WebApp) {
         const tgWebApp = window.Telegram.WebApp;
-
-        if (tgWebApp.initDataUnsafe) {
-          if (tgWebApp.viewport && tgWebApp.viewport.requestFullscreen) {
-            await tgWebApp.viewport.requestFullscreen();
-            tgWebApp.setHeaderColor("#ffffff");
-          }
+        if (tgWebApp.initDataUnsafe && tgWebApp.viewport?.requestFullscreen) {
+          await tgWebApp.viewport.requestFullscreen();
+          tgWebApp.setHeaderColor("#ffffff");
         }
       }
     };
-
     enableFullscreen();
   }, []);
 
@@ -76,7 +71,7 @@ export default function Home() {
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
+          <Play size={20} className="text-purple-500 drop-shadow-sm" />
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
@@ -148,17 +143,28 @@ export default function Home() {
         </div>
       )}
 
-      {/* Song Art */}
-      <div className="flex flex-col items-center mt-4">
-        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
+      {/* Song Art & Info */}
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mt-4">
+        <div className="w-[300px] h-[300px] md:w-[400px] md:h-[400px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <h2 className="text-2xl font-bold text-center mb-1">Song Title</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
+        <div className="flex-1 w-full md:mt-4 space-y-3 text-left">
+          <div className="overflow-hidden whitespace-nowrap">
+            <div className="animate-marquee inline-block min-w-full">
+              <h2 className="text-2xl font-bold">Song Title That Is Very Long And Needs Scrolling</h2>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Artist Name</p>
+        </div>
+      </div>
+
+      {/* Player Line */}
+      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full my-6 overflow-hidden">
+        <div className="h-full bg-gradient-to-r from-pink-500 to-purple-600 w-[40%] transition-all duration-300" />
       </div>
 
       {/* Player + Action Buttons */}
@@ -167,9 +173,15 @@ export default function Home() {
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
-          <Mic2 size={20} />
+          <Mic2 size={22} />
         </button>
-        <SongControls size="large" />
+
+        <button
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+        >
+          <Play size={32} />
+        </button>
+
         <button
           ref={queueBtnRef}
           onClick={() => {
@@ -179,11 +191,10 @@ export default function Home() {
           }}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
-          <ListMusic size={20} />
+          <ListMusic size={22} />
         </button>
       </div>
 
-      {/* Bottom Navigation */}
       {!popupVisible && <NavigationBar />}
     </div>
   );

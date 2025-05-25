@@ -73,33 +73,32 @@ const ExplorePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4 max-w-5xl mx-auto w-full px-2"
+            className="space-y-4 max-w-4xl w-full mx-auto px-2"
           >
             {songs.map((song, index) => (
               <motion.div
                 key={`${song.title}-${song.artist}-${index}`}
-                className="flex items-center justify-between rounded-xl bg-gray-100 dark:bg-neutral-900 p-4 shadow hover:shadow-lg transition-all duration-300"
+                className="flex items-center w-full rounded-xl bg-gray-100 dark:bg-neutral-900 p-4 shadow hover:shadow-lg transition-all duration-300"
               >
                 {/* Thumbnail */}
                 <img
                   src={song.thumbnail || '/placeholder.jpg'}
                   alt={song.title}
-                  className="w-20 h-20 object-cover rounded-lg mr-4"
+                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0 mr-4"
                 />
 
                 {/* Song Info */}
-                <div className="flex flex-col justify-center flex-grow pr-4">
+                <div className="flex flex-col justify-center flex-grow overflow-hidden">
                   <h2 className="font-semibold text-base truncate">{song.title}</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
-                  <span className="text-xs mt-1 text-gray-500 dark:text-gray-400">{song.duration || '3:45'}</span>
+                  <span className="text-xs mt-1 text-gray-500 dark:text-gray-400 truncate">{song.duration || '3:45'}</span>
                 </div>
 
                 {/* Play Button */}
                 <button
                   onClick={() => console.log('Play', song.title)}
-                  className="p-3 rounded-full transition-transform hover:scale-110"
+                  className="p-3 ml-4 rounded-full transition-transform hover:scale-110"
                   style={{
-                    backgroundColor: 'var(--tw-bg-opacity)',
                     background: 'linear-gradient(135deg, #8e2de2, #4a00e0)',
                   }}
                 >

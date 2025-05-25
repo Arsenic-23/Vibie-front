@@ -19,7 +19,8 @@ export default {
         pop: 'pop 0.3s ease-in-out',
         fadeInOut: 'fadeInOut 1.5s ease-in-out',
         fadeBounce: 'fadeBounce 1.5s ease-in-out',
-        bump: 'bump 0.2s ease-in-out', // Added bump animation
+        bump: 'bump 0.2s ease-in-out',
+        marquee: 'marquee 12s linear infinite', // added
       },
       keyframes: {
         spinSlow: {
@@ -47,6 +48,10 @@ export default {
           '0%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.1)' },
           '100%': { transform: 'scale(1)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
         },
       },
       perspective: {

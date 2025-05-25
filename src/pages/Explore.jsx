@@ -3,6 +3,15 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, PlayCircle } from 'lucide-react';
 
+const dummyArtists = [
+  { name: 'Drake', image: '/artist1.jpg' },
+  { name: 'Billie Eilish', image: '/artist2.jpg' },
+  { name: 'The Weeknd', image: '/artist3.jpg' },
+  { name: 'Adele', image: '/artist4.jpg' },
+  { name: 'Taylor Swift', image: '/artist5.jpg' },
+  { name: 'Kanye West', image: '/artist6.jpg' },
+];
+
 const ExplorePage = () => {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +39,22 @@ const ExplorePage = () => {
         <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
       </div>
 
+      {/* Artist Profiles */}
+      <div className="mb-6 overflow-x-auto whitespace-nowrap px-2">
+        <div className="flex gap-4">
+          {dummyArtists.map((artist, idx) => (
+            <div key={idx} className="flex flex-col items-center min-w-[70px]">
+              <img
+                src={artist.image}
+                alt={artist.name}
+                className="w-14 h-14 rounded-full object-cover border-2 border-purple-500"
+              />
+              <span className="text-xs mt-1 truncate w-16 text-center">{artist.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Content */}
       <AnimatePresence>
         {loading ? (
@@ -48,29 +73,29 @@ const ExplorePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2"
+            className="space-y-4 max-w-4xl mx-auto w-full px-2"
           >
             {songs.map((song, index) => (
               <motion.div
                 key={`${song.title}-${song.artist}-${index}`}
-                className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-xl transition-all duration-300"
+                className="flex items-center justify-between rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-lg transition-all duration-300"
               >
-                <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                <div className="flex flex-col w-2/3 pr-4">
+                  <h2 className="font-semibold text-base truncate">{song.title}</h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                </div>
+                <div className="flex items-center gap-2">
                   <img
                     src={song.thumbnail || '/placeholder.jpg'}
                     alt={song.title}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    className="w-16 h-16 object-cover rounded-lg"
                   />
                   <button
                     onClick={() => console.log('Play', song.title)}
-                    className="absolute bottom-2 right-2 p-2 rounded-full bg-purple-600 hover:scale-105 transition-transform"
+                    className="p-2 rounded-full bg-purple-600 hover:scale-105 transition-transform"
                   >
                     <Play size={18} className="text-white" />
                   </button>
-                </div>
-                <div className="mt-2 space-y-0.5 text-sm">
-                  <h2 className="font-semibold truncate">{song.title}</h2>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
                 </div>
               </motion.div>
             ))}

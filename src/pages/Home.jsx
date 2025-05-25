@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, ListMusic, Mic2, PlayCircle } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
@@ -17,27 +18,22 @@ export default function Home() {
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
-  // Fullscreen setup only for Home page
   useEffect(() => {
-    // Function to enable fullscreen when WebApp SDK is ready
     const enableFullscreen = async () => {
       if (window.Telegram && window.Telegram.WebApp) {
         const tgWebApp = window.Telegram.WebApp;
 
-        // Ensure the WebApp SDK is initialized
         if (tgWebApp.initDataUnsafe) {
-          // Check if fullscreen is available and then trigger it
           if (tgWebApp.viewport && tgWebApp.viewport.requestFullscreen) {
-            await tgWebApp.viewport.requestFullscreen(); // Enable fullscreen
-            tgWebApp.setHeaderColor("#ffffff"); // Optional: Set a header color for fullscreen
+            await tgWebApp.viewport.requestFullscreen();
+            tgWebApp.setHeaderColor("#ffffff");
           }
         }
       }
     };
 
-    enableFullscreen(); // Trigger fullscreen only on the Home page
-
-  }, []); // Empty dependency array ensures it runs once when the component mounts
+    enableFullscreen();
+  }, []);
 
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -79,13 +75,11 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Vibie Branding Centered */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
           <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
-        {/* Profile with subtle ring */}
         <div className="relative">
           <div
             className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full transition-transform duration-200 ${
@@ -105,7 +99,6 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              {/* Overlay to close on outside click */}
               <div
                 className="fixed inset-0 z-40"
                 onClick={() => setShowProfilePopup(false)}
@@ -157,7 +150,7 @@ export default function Home() {
 
       {/* Song Art */}
       <div className="flex flex-col items-center mt-4">
-        <div className="w-full max-w-sm h-[42vh] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
+        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, Pause, PlayCircle } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, PlayCircle, Heart } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -143,10 +143,10 @@ export default function Home() {
 
       {/* Progress Bar */}
       <div className="w-full mt-6">
-        <div className="relative h-[4px] bg-white/40 dark:bg-white/20 rounded-full overflow-hidden">
-          <div className="absolute left-[40%] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow" />
+        <div className="relative h-1 bg-white/60 dark:bg-white/20 rounded-full overflow-hidden">
+          <div className="absolute left-[40%] -top-[3px] w-2.5 h-2.5 bg-white rounded-full shadow" />
         </div>
-        <div className="flex justify-between text-xs mt-1 text-gray-500 dark:text-gray-400 px-1">
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           <span>1:24</span>
           <span>3:45</span>
         </div>
@@ -165,7 +165,7 @@ export default function Home() {
           className="w-16 h-16 rounded-full bg-white text-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
         >
-          {isPlaying ? <Pause size={28} color="black" /> : <Play size={28} color="black" />}
+          {isPlaying ? <Pause size={32} color="black" /> : <Play size={32} color="black" />}
         </button>
 
         <button

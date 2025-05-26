@@ -142,8 +142,14 @@ export default function Home() {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full relative h-1 mt-6 bg-white rounded-full overflow-hidden">
-        <div className="absolute left-[40%] -top-[4px] w-3 h-3 bg-white rounded-full shadow" />
+      <div className="w-full mt-6">
+        <div className="relative h-[4px] bg-white/40 dark:bg-white/20 rounded-full overflow-hidden">
+          <div className="absolute left-[40%] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow" />
+        </div>
+        <div className="flex justify-between text-xs mt-1 text-gray-500 dark:text-gray-400 px-1">
+          <span>1:24</span>
+          <span>3:45</span>
+        </div>
       </div>
 
       {/* Player + Action Buttons */}
@@ -156,10 +162,10 @@ export default function Home() {
         </button>
 
         <button
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+          className="w-16 h-16 rounded-full bg-white text-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
         >
-          {isPlaying ? <Pause size={32} color="white" /> : <Play size={32} color="white" />}
+          {isPlaying ? <Pause size={28} color="black" /> : <Play size={28} color="black" />}
         </button>
 
         <button

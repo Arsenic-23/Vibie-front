@@ -14,6 +14,7 @@ export default function Home() {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDotTapped, setIsDotTapped] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -52,7 +53,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen pb-32 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
@@ -142,9 +143,16 @@ export default function Home() {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full mt-6">
-        <div className="relative h-1 bg-white/60 dark:bg-white/20 rounded-full overflow-hidden">
-          <div className="absolute left-[40%] -top-[3px] w-2.5 h-2.5 bg-white rounded-full shadow" />
+      <div className="w-full mt-6 px-1">
+        <div className="relative h-1.5 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="absolute h-full bg-white rounded-full transition-all duration-300" style={{ width: '40%' }} />
+          <div
+            onClick={() => {
+              setIsDotTapped(true);
+              setTimeout(() => setIsDotTapped(false), 200);
+            }}
+            className={`absolute left-[40%] -top-2.5 w-3.5 h-3.5 rounded-full bg-white shadow-md cursor-pointer transition-transform duration-200 ${isDotTapped ? 'scale-150' : 'scale-100'}`}
+          />
         </div>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           <span>1:24</span>
@@ -153,7 +161,7 @@ export default function Home() {
       </div>
 
       {/* Player + Action Buttons */}
-      <div className="my-6 relative flex items-center justify-center gap-6">
+      <div className="mt-10 relative flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"

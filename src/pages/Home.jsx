@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, ListMusic, Mic2, Play, Pause, PlayCircle, Heart } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
@@ -21,12 +20,10 @@ export default function Home() {
 
   useEffect(() => {
     const enableFullscreen = async () => {
-      if (window.Telegram?.WebApp?.initDataUnsafe) {
-        const tgWebApp = window.Telegram.WebApp;
-        if (tgWebApp.viewport?.requestFullscreen) {
-          await tgWebApp.viewport.requestFullscreen();
-          tgWebApp.setHeaderColor('#ffffff');
-        }
+      const tgWebApp = window.Telegram?.WebApp;
+      if (tgWebApp?.initDataUnsafe && tgWebApp.viewport?.requestFullscreen) {
+        await tgWebApp.viewport.requestFullscreen();
+        tgWebApp.setHeaderColor('#ffffff');
       }
     };
     enableFullscreen();
@@ -73,16 +70,12 @@ export default function Home() {
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <PlayCircle size={22} className="text-purple-500 drop-shadow-sm" />
+          <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
           <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
         <div className="relative">
-          <div
-            className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full transition-transform duration-200 ${
-              showProfilePopup ? 'scale-105' : ''
-            }`}
-          >
+          <div className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full ${showProfilePopup ? 'scale-105' : ''}`}>
             <img
               src={userPhoto || 'https://placehold.co/thumbnail'}
               alt="Profile"
@@ -96,10 +89,7 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowProfilePopup(false)}
-              />
+              <div className="fixed inset-0 z-40" onClick={() => setShowProfilePopup(false)} />
               <div className="absolute z-50 right-0 mt-2">
                 <ProfilePopup onClose={() => setShowProfilePopup(false)} />
               </div>
@@ -111,65 +101,49 @@ export default function Home() {
       {/* Modals */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
-          <VibersPopup
-            onClose={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
+          <VibersPopup onClose={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
-          <SongQueue
-            onClose={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
+          <SongQueue onClose={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
         </div>
       )}
 
-      {/* Song Art & Info */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mt-4">
-        <div className="w-[300px] h-[300px] md:w-[400px] md:h-[400px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800">
+      {/* Song Art */}
+      <div className="flex flex-col items-center mt-4">
+        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex-1 w-full space-y-2 text-left mt-2 md:mt-6 overflow-hidden">
-          <div className="w-full h-8 relative overflow-hidden">
-            <div className="absolute animate-marquee whitespace-nowrap will-change-transform">
-              <h2 className="text-2xl font-bold px-2">
-                Very Long Song Title That Scrolls Forever and Loops
-              </h2>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Artist Name</p>
+        <div className="flex items-center gap-2 mb-1">
+          <Heart className="text-pink-500" size={22} />
+          <h2 className="text-2xl font-bold text-center">Song Title</h2>
         </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
       </div>
 
-      {/* Thin Player Line with Dot */}
-      <div className="w-full relative h-1 mt-8 bg-neutral-300 dark:bg-neutral-700 rounded-full overflow-hidden">
-        <div className="absolute top-0 left-0 h-full bg-purple-500 w-[35%] transition-all duration-300" />
-        <div className="absolute -top-[3px] left-[35%] w-3 h-3 bg-white dark:bg-black border-2 border-purple-500 rounded-full shadow-md transition-all duration-300" />
+      {/* Progress Bar */}
+      <div className="w-full relative h-1 mt-6 bg-white rounded-full overflow-hidden">
+        <div className="absolute left-[40%] -top-[4px] w-3 h-3 bg-white rounded-full shadow" />
       </div>
 
       {/* Player + Action Buttons */}
@@ -178,7 +152,7 @@ export default function Home() {
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
-          <Mic2 size={22} />
+          <Mic2 size={20} />
         </button>
 
         <button
@@ -186,12 +160,6 @@ export default function Home() {
           onClick={() => setIsPlaying(!isPlaying)}
         >
           {isPlaying ? <Pause size={32} color="white" /> : <Play size={32} color="white" />}
-        </button>
-
-        <button
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
-        >
-          <Heart size={22} />
         </button>
 
         <button
@@ -203,7 +171,7 @@ export default function Home() {
           }}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
         >
-          <ListMusic size={22} />
+          <ListMusic size={20} />
         </button>
       </div>
 

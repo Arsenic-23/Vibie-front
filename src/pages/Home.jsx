@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, Pause, PlayCircle, Heart } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, PlayCircle } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
-import SongControls from '../components/SongControls';
 import ProfilePopup from '../components/ProfilePopup';
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isDotTapped, setIsDotTapped] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -53,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-32 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen pb-36 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
@@ -126,32 +124,27 @@ export default function Home() {
         </div>
       )}
 
-      {/* Song Art */}
+      {/* Song Art + Info */}
       <div className="flex flex-col items-center mt-4">
-        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4">
+        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex items-center gap-2 mb-1">
-          <Heart className="text-pink-500" size={22} />
-          <h2 className="text-2xl font-bold text-center">Song Title</h2>
+        <div className="w-full px-2 mb-1">
+          <h2 className="text-xl font-bold">Song Title</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Artist Name</p>
       </div>
 
       {/* Progress Bar */}
       <div className="w-full mt-6 px-1">
-        <div className="relative h-1.5 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden">
+        <div className="relative h-1 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden">
           <div className="absolute h-full bg-white rounded-full transition-all duration-300" style={{ width: '40%' }} />
           <div
-            onClick={() => {
-              setIsDotTapped(true);
-              setTimeout(() => setIsDotTapped(false), 200);
-            }}
-            className={`absolute left-[40%] -top-2.5 w-3.5 h-3.5 rounded-full bg-white shadow-md cursor-pointer transition-transform duration-200 ${isDotTapped ? 'scale-150' : 'scale-100'}`}
+            className="absolute left-[40%] -top-[6px] w-4 h-4 rounded-full bg-white shadow-md border border-gray-300 dark:border-gray-600"
           />
         </div>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
@@ -161,7 +154,7 @@ export default function Home() {
       </div>
 
       {/* Player + Action Buttons */}
-      <div className="mt-10 relative flex items-center justify-center gap-6">
+      <div className="mt-16 relative flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
@@ -173,7 +166,9 @@ export default function Home() {
           className="w-16 h-16 rounded-full bg-white text-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
         >
-          {isPlaying ? <Pause size={32} color="black" /> : <Play size={32} color="black" />}
+          {isPlaying
+            ? <Pause size={32} color="black" fill="black" />
+            : <Play size={32} color="black" fill="black" />}
         </button>
 
         <button

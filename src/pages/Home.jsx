@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, Pause, PlayCircle } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, PlayCircle, Heart } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -153,10 +154,12 @@ export default function Home() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex-1 w-full space-y-2 text-left mt-2 md:mt-6">
-          <div className="overflow-hidden whitespace-nowrap w-full">
-            <div className="animate-marquee inline-block min-w-full">
-              <h2 className="text-2xl font-bold">Very Long Song Title That Scrolls Forever and Loops</h2>
+        <div className="flex-1 w-full space-y-2 text-left mt-2 md:mt-6 overflow-hidden">
+          <div className="w-full h-8 relative overflow-hidden">
+            <div className="absolute animate-marquee whitespace-nowrap will-change-transform">
+              <h2 className="text-2xl font-bold px-2">
+                Very Long Song Title That Scrolls Forever and Loops
+              </h2>
             </div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">Artist Name</p>
@@ -164,8 +167,8 @@ export default function Home() {
       </div>
 
       {/* Thin Player Line with Dot */}
-      <div className="w-full relative h-1.5 mt-8 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-500 to-purple-600 w-[35%] transition-all duration-300" />
+      <div className="w-full relative h-1 mt-8 bg-neutral-300 dark:bg-neutral-700 rounded-full overflow-hidden">
+        <div className="absolute top-0 left-0 h-full bg-purple-500 w-[35%] transition-all duration-300" />
         <div className="absolute -top-[3px] left-[35%] w-3 h-3 bg-white dark:bg-black border-2 border-purple-500 rounded-full shadow-md transition-all duration-300" />
       </div>
 
@@ -182,7 +185,13 @@ export default function Home() {
           className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
         >
-          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+          {isPlaying ? <Pause size={32} color="white" /> : <Play size={32} color="white" />}
+        </button>
+
+        <button
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Heart size={22} />
         </button>
 
         <button

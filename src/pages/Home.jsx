@@ -39,7 +39,7 @@ export default function Home() {
     try {
       const res = await fetch('https://vibie-backend.onrender.com/lyrics', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
       });
       const data = await res.json();
@@ -74,7 +74,11 @@ export default function Home() {
         </div>
 
         <div className="relative">
-          <div className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full ${showProfilePopup ? 'scale-105' : ''}`}>
+          <div
+            className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full ${
+              showProfilePopup ? 'scale-105' : ''
+            }`}
+          >
             <img
               src={userPhoto || 'https://placehold.co/thumbnail'}
               alt="Profile"
@@ -88,7 +92,10 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowProfilePopup(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowProfilePopup(false)}
+              />
               <div className="absolute z-50 right-0 mt-2">
                 <ProfilePopup onClose={() => setShowProfilePopup(false)} />
               </div>
@@ -100,31 +107,41 @@ export default function Home() {
       {/* Modals */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowVibers(false);
-            setIsVibersPopupOpen(false);
-          }} />
-          <VibersPopup onClose={() => {
-            setShowVibers(false);
-            setIsVibersPopupOpen(false);
-          }} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowVibers(false);
+              setIsVibersPopupOpen(false);
+            }}
+          />
+          <VibersPopup
+            onClose={() => {
+              setShowVibers(false);
+              setIsVibersPopupOpen(false);
+            }}
+          />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowQueue(false);
-            setIsSongQueueOpen(false);
-          }} />
-          <SongQueue onClose={() => {
-            setShowQueue(false);
-            setIsSongQueueOpen(false);
-          }} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowQueue(false);
+              setIsSongQueueOpen(false);
+            }}
+          />
+          <SongQueue
+            onClose={() => {
+              setShowQueue(false);
+              setIsSongQueueOpen(false);
+            }}
+          />
         </div>
       )}
 
-      {/* Song Art + Info */}
+      {/* Song Art */}
       <div className="flex flex-col items-center mt-4">
         <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6">
           <img
@@ -133,18 +150,23 @@ export default function Home() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="w-full px-2 mb-1">
+        <div className="w-full px-2 mb-1 text-center">
           <h2 className="text-xl font-bold">Song Title</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Artist Name
+          </p>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full mt-6 px-1">
-        <div className="relative h-1 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden">
-          <div className="absolute h-full bg-white rounded-full transition-all duration-300" style={{ width: '40%' }} />
+      <div className="w-full mt-6 px-2">
+        <div className="relative h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
           <div
-            className="absolute left-[40%] -top-[6px] w-4 h-4 rounded-full bg-white shadow-md border border-gray-300 dark:border-gray-600"
+            className="absolute top-0 left-0 h-full rounded-full bg-black dark:bg-white transition-all duration-500"
+            style={{ width: '40%' }}
+          />
+          <div
+            className="absolute left-[40%] -top-[6px] w-4 h-4 rounded-full bg-white dark:bg-white border border-gray-300 dark:border-gray-700 shadow-md"
           />
         </div>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
@@ -153,8 +175,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Player + Action Buttons */}
-      <div className="mt-16 relative flex items-center justify-center gap-6">
+      {/* Player Buttons */}
+      <div className="mt-16 flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
@@ -163,12 +185,14 @@ export default function Home() {
         </button>
 
         <button
-          className="w-16 h-16 rounded-full bg-white text-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+          className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
         >
-          {isPlaying
-            ? <Pause size={32} color="black" fill="black" />
-            : <Play size={32} color="black" fill="black" />}
+          {isPlaying ? (
+            <Pause size={36} className="fill-white" />
+          ) : (
+            <Play size={36} className="fill-white" />
+          )}
         </button>
 
         <button

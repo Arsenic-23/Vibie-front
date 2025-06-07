@@ -35,27 +35,33 @@ const ExplorePage = () => {
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       {/* Header */}
       <div className="mb-6 px-2">
-        <h1 className="text-3xl font-bold tracking-tight">Explore Vibes</h1>
-        <div className="w-24 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
+        <h1 className="text-4xl font-extrabold tracking-tight text-gradient bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 inline-block text-transparent bg-clip-text">
+          Explore Vibes
+        </h1>
+        <div className="w-28 h-1 mt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full animate-pulse" />
       </div>
 
       {/* Artist Profiles */}
-      <div className="mb-8 overflow-x-auto whitespace-nowrap px-2">
+      <div className="mb-10 overflow-x-auto whitespace-nowrap px-2">
         <div className="flex gap-6">
           {dummyArtists.map((artist, idx) => (
-            <div key={idx} className="flex flex-col items-center min-w-[90px]">
-              <img
-                src={artist.image}
-                alt={artist.name}
-                className="w-20 h-20 rounded-full object-cover border-2 border-purple-500"
-              />
-              <span className="text-sm mt-2 truncate w-20 text-center">{artist.name}</span>
+            <div key={idx} className="flex flex-col items-center min-w-[90px] group transition-all hover:scale-105">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-purple-500 shadow-md">
+                <img
+                  src={artist.image}
+                  alt={artist.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-sm mt-2 truncate w-20 text-center text-gray-800 dark:text-gray-300">
+                {artist.name}
+              </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Content */}
+      {/* Songs List */}
       <AnimatePresence>
         {loading ? (
           <motion.div
@@ -73,33 +79,35 @@ const ExplorePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4 max-w-4xl w-full mx-auto px-2"
+            className="space-y-5 max-w-3xl w-full mx-auto px-2"
           >
             {songs.map((song, index) => (
               <motion.div
                 key={`${song.title}-${song.artist}-${index}`}
-                className="flex items-center w-full rounded-xl bg-gray-100 dark:bg-neutral-900 p-4 shadow hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center w-full rounded-2xl bg-white/10 dark:bg-neutral-900/50 backdrop-blur-md p-4 shadow-md hover:shadow-xl transition-all duration-300 border border-purple-500/10"
               >
                 {/* Thumbnail */}
                 <img
                   src={song.thumbnail || '/placeholder.jpg'}
                   alt={song.title}
-                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0 mr-4"
+                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0 mr-4 shadow"
                 />
 
                 {/* Song Info */}
                 <div className="flex flex-col justify-center flex-grow overflow-hidden">
-                  <h2 className="font-semibold text-base truncate">{song.title}</h2>
+                  <h2 className="font-bold text-lg truncate">{song.title}</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
-                  <span className="text-xs mt-1 text-gray-500 dark:text-gray-400 truncate">{song.duration || '3:45'}</span>
+                  <span className="text-xs mt-1 text-gray-500 dark:text-gray-400">{song.duration || '3:45'}</span>
                 </div>
 
                 {/* Play Button */}
                 <button
                   onClick={() => console.log('Play', song.title)}
-                  className="p-3 ml-4 rounded-full transition-transform hover:scale-110"
+                  className="p-3 ml-4 rounded-full transition-transform hover:scale-110 shadow-lg"
                   style={{
                     background: 'linear-gradient(135deg, #8e2de2, #4a00e0)',
+                    boxShadow: '0 4px 14px rgba(142, 45, 226, 0.5)',
                   }}
                 >
                   <Play size={20} className="text-white" />

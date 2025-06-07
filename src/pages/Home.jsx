@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, Pause, PlayCircle } from 'lucide-react';
+import { Users, ListMusic, Mic2, PlayCircle, Pause, Play } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -12,6 +12,7 @@ export default function Home() {
   const [showVibers, setShowVibers] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
+  const [progress, setProgress] = useState(40);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const vibersBtnRef = useRef(null);
@@ -50,6 +51,8 @@ export default function Home() {
     }
   };
 
+  const progressColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'white' : 'black';
+
   return (
     <div className="min-h-screen pb-36 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
       {/* Top Bar */}
@@ -74,11 +77,7 @@ export default function Home() {
         </div>
 
         <div className="relative">
-          <div
-            className={`w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full ${
-              showProfilePopup ? 'scale-105' : ''
-            }`}
-          >
+          <div className="w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full">
             <img
               src={userPhoto || 'https://placehold.co/thumbnail'}
               alt="Profile"
@@ -92,10 +91,7 @@ export default function Home() {
 
           {showProfilePopup && (
             <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowProfilePopup(false)}
-              />
+              <div className="fixed inset-0 z-40" onClick={() => setShowProfilePopup(false)} />
               <div className="absolute z-50 right-0 mt-2">
                 <ProfilePopup onClose={() => setShowProfilePopup(false)} />
               </div>
@@ -104,40 +100,30 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Popups */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
-          <VibersPopup
-            onClose={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
+          <VibersPopup onClose={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
-          <SongQueue
-            onClose={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
+          <SongQueue onClose={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
         </div>
       )}
 
@@ -152,23 +138,23 @@ export default function Home() {
         </div>
         <div className="w-full px-2 mb-1 text-center">
           <h2 className="text-xl font-bold">Song Title</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Artist Name
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full mt-6 px-2">
-        <div className="relative h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-          <div
-            className="absolute top-0 left-0 h-full rounded-full bg-black dark:bg-white transition-all duration-500"
-            style={{ width: '40%' }}
-          />
-          <div
-            className="absolute left-[40%] -top-[6px] w-4 h-4 rounded-full bg-white dark:bg-white border border-gray-300 dark:border-gray-700 shadow-md"
-          />
-        </div>
+      {/* Spotify-style Range Slider */}
+      <div className="w-full mt-6 px-4">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress}
+          onChange={(e) => setProgress(e.target.value)}
+          className="w-full h-2 appearance-none bg-transparent cursor-pointer"
+          style={{
+            background: `linear-gradient(to right, ${progressColor} ${progress}%, transparent ${progress}%)`,
+          }}
+        />
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           <span>1:24</span>
           <span>3:45</span>
@@ -179,20 +165,16 @@ export default function Home() {
       <div className="mt-16 flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-100 transition-transform"
         >
           <Mic2 size={20} />
         </button>
 
         <button
-          className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
           onClick={() => setIsPlaying(!isPlaying)}
+          className="w-20 h-20 rounded-full bg-white dark:bg-black text-black dark:text-white shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-100"
         >
-          {isPlaying ? (
-            <Pause size={36} className="fill-white" />
-          ) : (
-            <Play size={36} className="fill-white" />
-          )}
+          {isPlaying ? <Pause size={36} /> : <Play size={36} />}
         </button>
 
         <button
@@ -202,7 +184,7 @@ export default function Home() {
             setShowQueue(true);
             setIsSongQueueOpen(true);
           }}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-95 transition-transform"
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-100 transition-transform"
         >
           <ListMusic size={20} />
         </button>

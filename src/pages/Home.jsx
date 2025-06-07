@@ -12,7 +12,7 @@ export default function Home() {
   const [showVibers, setShowVibers] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
-  const [progress, setProgress] = useState(40); // percent 0-100
+  const [progress, setProgress] = useState(40);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const vibersBtnRef = useRef(null);
@@ -36,26 +36,6 @@ export default function Home() {
 
   const popupVisible = showQueue || showVibers;
 
-  // Assume total song duration is 3:45 (225 seconds)
-  const totalSeconds = 225;
-  // Calculate current time in seconds based on progress %
-  const currentSeconds = Math.floor((progress / 100) * totalSeconds);
-
-  // Format seconds to mm:ss
-  const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  // Progress bar color based on theme
-  const progressColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000';
-
-  // Handle progress change from slider input
-  const handleProgressChange = (e) => {
-    setProgress(Number(e.target.value));
-  };
-
   const fetchLyrics = async () => {
     try {
       const res = await fetch('https://vibie-backend.onrender.com/lyrics', {
@@ -71,8 +51,13 @@ export default function Home() {
     }
   };
 
+  const progressColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'white' : 'black';
+
   return (
-    <div className="min-h-screen pb-36 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300 max-w-screen-xl mx-auto">
+    <div
+      className="min-h-screen w-full pb-36 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300"
+      style={{ overscrollBehavior: 'none', touchAction: 'none' }}
+    >
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 relative">
         <div className="flex items-center space-x-3">
@@ -89,9 +74,9 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
           <PlayCircle size={20} className="text-purple-500 drop-shadow-sm" />
-          <span className="text-base font-semibold tracking-wide select-none">Vibie</span>
+          <span className="text-base font-semibold tracking-wide">Vibie</span>
         </div>
 
         <div className="relative">
@@ -121,84 +106,77 @@ export default function Home() {
       {/* Popups */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
-          <VibersPopup
-            onClose={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
+          <VibersPopup onClose={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
-          <SongQueue
-            onClose={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
+          <SongQueue onClose={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
         </div>
       )}
 
       {/* Song Art */}
       <div className="flex flex-col items-center mt-4">
-        <div
-          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6"
-          style={{
-            width: '90vw',
-            maxWidth: 600,
-            height: '90vw',
-            maxHeight: 600,
-          }}
-        >
+        <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6">
           <img
             src="https://placehold.co/thumbnail"
             alt="Now Playing"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="w-full px-2 mb-1 text-center max-w-md">
-          <h2 className="text-xl font-bold truncate">Song Title</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">Artist Name</p>
+        <div className="w-full px-2 mb-1 text-center">
+          <h2 className="text-xl font-bold">Song Title</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
         </div>
       </div>
 
-      {/* Spotify-style Range Slider */}
-      <div className="w-full mt-6 px-4 max-w-xl mx-auto">
-        <div className="flex items-center gap-3">
-          <span className="text-xs w-10 text-left text-gray-500 dark:text-gray-400 select-none">
-            {formatTime(currentSeconds)}
-          </span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={progress}
-            onChange={handleProgressChange}
-            className="flex-grow h-1 rounded-lg appearance-none cursor-pointer"
-            style={{
-              background: `linear-gradient(to right, ${progressColor} ${progress}%, #d1d5db ${progress}%)`,
-              // #d1d5db is a light gray for unfilled track
-            }}
-          />
-          <span className="text-xs w-10 text-right text-gray-500 dark:text-gray-400 select-none">
-            3:45
-          </span>
+      {/* Custom Range Slider */}
+      <div className="w-full mt-6 px-4">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress}
+          onChange={(e) => setProgress(e.target.value)}
+          className="w-full h-2 appearance-none cursor-pointer"
+          style={{
+            background: `linear-gradient(to right, ${progressColor} ${progress}%, rgba(128,128,128,0.2) ${progress}%)`,
+            borderRadius: '10px',
+          }}
+        />
+        <style>{`
+          input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            background: ${progressColor};
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+          }
+          input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: transparent;
+          }
+        `}</style>
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+          <span>{Math.floor((progress / 100) * 3.75 * 60 / 60)}:{String(Math.floor((progress / 100) * 3.75 * 60 % 60)).padStart(2, '0')}</span>
+          <span>3:45</span>
         </div>
       </div>
 
@@ -207,7 +185,6 @@ export default function Home() {
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-100 transition-transform"
-          aria-label="Fetch Lyrics"
         >
           <Mic2 size={20} />
         </button>
@@ -215,7 +192,6 @@ export default function Home() {
         <button
           onClick={() => setIsPlaying(!isPlaying)}
           className="w-20 h-20 rounded-full bg-white dark:bg-black text-black dark:text-white shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-100"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause size={36} /> : <Play size={36} />}
         </button>
@@ -228,7 +204,6 @@ export default function Home() {
             setIsSongQueueOpen(true);
           }}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md hover:scale-105 active:scale-100 transition-transform"
-          aria-label="Show Queue"
         >
           <ListMusic size={20} />
         </button>

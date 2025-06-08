@@ -91,33 +91,27 @@ export default function Landing() {
           <button
             onClick={handleJoin}
             disabled={isLoading}
-            className="relative z-10 w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out active:scale-[0.98]"
+            className="relative w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out active:scale-[0.98]"
           >
-            {/* Purple fill overlay */}
+            {/* Smooth fill animation */}
             <div
-              className="absolute top-0 left-0 h-full z-0 rounded-full transition-all duration-75 ease-linear"
+              className="absolute top-0 left-0 h-full rounded-full z-0"
               style={{
                 width: `${fillProgress}%`,
+                transition: 'width 0.15s linear',
                 background: 'linear-gradient(90deg, #a855f7, #9333ea)',
                 boxShadow: '0 0 12px rgba(168, 85, 247, 0.5)',
               }}
             />
 
-            {/* Button content container */}
-            <div className="relative z-10 flex items-center justify-center transition-all duration-300 ease-in-out">
+            {/* Content overlay */}
+            <div className="relative z-10 flex items-center justify-center transition-opacity duration-300">
               {!showCheckmark ? (
-                <span
-                  className={`transition-opacity duration-300 ${
-                    isLoading ? 'opacity-0' : 'opacity-100'
-                  }`}
-                >
+                <span className={`transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
                   Join the Vibe
                 </span>
               ) : (
-                <Check
-                  size={22}
-                  className="text-white transition-all duration-300 transform scale-100"
-                />
+                <Check size={22} className="text-white transition-transform duration-300 scale-100" />
               )}
             </div>
           </button>

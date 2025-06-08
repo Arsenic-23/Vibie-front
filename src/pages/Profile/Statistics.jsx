@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-  ResponsiveContainer,
-  Tooltip
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { Headphones, Clock, Music, Heart, Moon, Sun } from 'lucide-react';
+import { Headphones, Clock, Music, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const stats = {
   totalSongs: 1234,
@@ -19,114 +16,82 @@ const stats = {
   ]
 };
 
-const cards = [
-  {
-    icon: Music,
-    label: 'Total Songs',
-    value: stats.totalSongs.toLocaleString()
-  },
-  {
-    icon: Clock,
-    label: 'Listening Time',
-    value: `${(stats.totalMinutes / 60).toFixed(1)} hours`
-  },
-  {
-    icon: Heart,
-    label: 'Favorite Genre',
-    value: stats.favoriteGenre
-  },
-  {
-    icon: Headphones,
-    label: 'Top Artists',
-    value: stats.topArtists.length
-  }
-];
-
-const colors = ['#A78BFA', '#60A5FA', '#34D399'];
-
 export default function Statistics() {
-  const [darkMode, setDarkMode] = useState(true);
-
-  const bgColor = darkMode ? 'bg-neutral-950' : 'bg-white';
-  const textColor = darkMode ? 'text-white' : 'text-gray-900';
-  const cardBg = darkMode ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-800';
-  const cardBorder = darkMode ? 'border-white/10' : 'border-gray-300';
-
   return (
-    <div className={`${bgColor} ${textColor} min-h-screen px-6 py-10 transition-colors duration-500`}>
-      <div className="max-w-6xl mx-auto space-y-16">
-        {/* Header + Theme Toggle */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold tracking-tight">Your Monthly Music Summary</h1>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center gap-2 border border-gray-400 px-4 py-2 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition"
-          >
-            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {darkMode ? 'Light Mode' : 'Dark Mode'}
-          </button>
-        </div>
+    <div className="space-y-6 max-w-3xl mx-auto p-4">
+      <h3 className="text-2xl font-bold text-yellow-500 dark:text-yellow-400">Your Statistics</h3>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              className={`${cardBg} border ${cardBorder} backdrop-blur-md p-6 rounded-3xl shadow-lg flex flex-col justify-center items-start h-44 hover:scale-[1.02] transition-transform`}
-            >
-              <div className="bg-white/10 dark:bg-white/10 p-3 rounded-full mb-4">
-                <card.icon className="w-6 h-6 text-purple-400" />
-              </div>
-              <p className="text-sm text-gray-400 dark:text-gray-400">{card.label}</p>
-              <p className="text-xl font-semibold">{card.value}</p>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Total Songs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-center gap-4"
+        >
+          <Music className="w-8 h-8 text-yellow-500 dark:text-yellow-300" />
+          <div>
+            <p className="text-gray-700 dark:text-gray-300">Total Songs Played</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">{stats.totalSongs.toLocaleString()}</p>
+          </div>
+        </motion.div>
 
-        {/* Chart */}
-        <div className={`${cardBg} border ${cardBorder} p-8 rounded-3xl shadow-md`}>
-          <h2 className="text-xl font-semibold mb-6 text-center text-indigo-400">
-            Top Artists This Month
-          </h2>
-          <div className="flex justify-center items-center h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart
-                cx="50%"
-                cy="50%"
-                innerRadius="30%"
-                outerRadius="100%"
-                barSize={15}
-                data={stats.topArtists.map((a, i) => ({
-                  name: a.name,
-                  plays: a.plays,
-                  fill: colors[i % colors.length]
-                }))}
-              >
-                <PolarAngleAxis type="number" domain={[0, 400]} angleAxisId={0} tick={false} />
-                <RadialBar background clockWise dataKey="plays" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: darkMode ? '#1f1f1f' : '#f9f9f9',
-                    border: 'none',
-                    borderRadius: 8,
-                    color: darkMode ? '#fff' : '#000'
-                  }}
-                />
-              </RadialBarChart>
-            </ResponsiveContainer>
+        {/* Total Time */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-center gap-4"
+        >
+          <Clock className="w-8 h-8 text-yellow-500 dark:text-yellow-300" />
+          <div>
+            <p className="text-gray-700 dark:text-gray-300">Total Time Listened</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">
+              {(stats.totalMinutes / 60).toFixed(1)} hrs ({stats.totalMinutes.toLocaleString()} mins)
+            </p>
           </div>
-          <div className="flex justify-center gap-6 mt-6 text-sm text-gray-400">
-            {stats.topArtists.map((artist, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                ></span>
-                {artist.name}
-              </div>
-            ))}
+        </motion.div>
+
+        {/* Genre */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-center gap-4"
+        >
+          <Heart className="w-8 h-8 text-yellow-500 dark:text-yellow-300" />
+          <div>
+            <p className="text-gray-700 dark:text-gray-300">Favourite Genre</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">{stats.favoriteGenre}</p>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Total Artists */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-center gap-4"
+        >
+          <Headphones className="w-8 h-8 text-yellow-500 dark:text-yellow-300" />
+          <div>
+            <p className="text-gray-700 dark:text-gray-300">Unique Artists</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">{stats.topArtists.length}</p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Bar Chart */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <h4 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Top Artists Played</h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={stats.topArtists} layout="vertical">
+            <XAxis type="number" hide />
+            <YAxis dataKey="name" type="category" width={100} tick={{ fill: 'currentColor' }} />
+            <Tooltip contentStyle={{ backgroundColor: '#2d2d2d', borderColor: '#444' }} />
+            <Bar dataKey="plays" fill="#facc15" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

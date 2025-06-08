@@ -231,7 +231,13 @@ export default function Home() {
           onClick={() => setIsPlaying(!isPlaying)}
           className="w-16 h-16 rounded-full bg-white text-black dark:bg-white dark:text-black shadow-xl flex items-center justify-center"
         >
-          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+          {isPlaying ? (
+            <Pause size={32} color="black"
+          fill="black" />
+          ) : (
+            <Play size={32} color="black"
+          fill="black" />
+          )}
         </button>
 
         <button

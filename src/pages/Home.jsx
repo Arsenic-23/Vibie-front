@@ -54,11 +54,11 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen w-full pb-36 px-4 pt-5 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
+      className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
       style={{ overscrollBehavior: 'none', touchAction: 'none' }}
     >
       {/* Top Bar */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <button
           ref={vibersBtnRef}
           className="p-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg"
@@ -125,12 +125,12 @@ export default function Home() {
       )}
 
       {/* Song Art */}
-      <div className="flex flex-col items-center mt-4">
+      <div className="flex flex-col items-center mt-2">
         <div
-          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4"
+          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-3"
           style={{
-            width: 'min(90vw, 360px)',
-            height: 'min(90vw, 360px)',
+            width: 'min(80vw, 320px)',
+            height: 'min(80vw, 320px)',
           }}
         >
           <img
@@ -182,7 +182,7 @@ export default function Home() {
       </div>
 
       {/* Sleek Player Slider */}
-      <div className="w-full px-4 mt-4">
+      <div className="w-full px-4 mt-2">
         <input
           type="range"
           min="0"
@@ -219,7 +219,7 @@ export default function Home() {
       </div>
 
       {/* Player Buttons */}
-      <div className="mt-16 flex items-center justify-center gap-6">
+      <div className="mt-10 flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"

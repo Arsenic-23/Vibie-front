@@ -1,5 +1,5 @@
 import { motion, useCycle } from 'framer-motion';
-const playPath = "M6 4L20 12L6 20V4Z"; // triangle
+const playPath = "M6 4L20 12L6 20V4Z";
 const pausePath = "M6 5H9V19H6z M15 5H18V19H15z"; 
 
 export default function PlayPauseButton({ isPlaying, onClick }) {

@@ -23,22 +23,22 @@ const stats = {
 const cards = [
   {
     icon: Music,
-    label: 'Total Songs',
+    label: 'Songs',
     value: stats.totalSongs.toLocaleString()
   },
   {
     icon: Clock,
-    label: 'Listening Time',
-    value: `${(stats.totalMinutes / 60).toFixed(1)} hrs`
+    label: 'Minutes',
+    value: `${(stats.totalMinutes / 60).toFixed(1)}h`
   },
   {
     icon: Heart,
-    label: 'Favorite Genre',
+    label: 'Genre',
     value: stats.favoriteGenre
   },
   {
     icon: Headphones,
-    label: 'Top Artists',
+    label: 'Artists',
     value: stats.topArtists.length
   }
 ];
@@ -47,57 +47,42 @@ const colors = ['#A78BFA', '#60A5FA', '#34D399'];
 
 export default function Statistics() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 text-white px-6 py-16 font-sans">
-      <div className="max-w-6xl mx-auto space-y-20">
-        {/* Animated Gradient Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-6xl font-black text-center bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-400 bg-clip-text text-transparent tracking-tight"
-        >
-          Your Music Journey
-        </motion.h1>
+    <div className="min-h-screen bg-gradient-to-tr from-black via-gray-900 to-gray-950 text-white px-6 py-16 font-sans">
+      <div className="max-w-5xl mx-auto space-y-16">
+        {/* Clean Title */}
+        <h1 className="text-3xl sm:text-4xl font-semibold text-center text-white/90">
+          Your Monthly Music Snapshot
+        </h1>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {/* Minimal Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
           {cards.map((card, index) => (
-            <motion.div
+            <div
               key={card.label}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              className="rounded-2xl bg-gradient-to-br from-white/5 to-white/10 p-6 shadow-xl hover:shadow-purple-700/20 transition duration-300 transform hover:-translate-y-1"
+              className="rounded-xl bg-white/5 p-4 shadow-md backdrop-blur-sm border border-white/10 flex flex-col items-center gap-2"
             >
-              <div className="flex flex-col items-center gap-4">
-                <div className="bg-white/10 p-3 rounded-full">
-                  <card.icon className="w-7 h-7 text-purple-400" />
-                </div>
-                <p className="text-gray-400 text-sm">{card.label}</p>
-                <p className="text-2xl font-semibold">{card.value}</p>
+              <div className="bg-white/10 p-2 rounded-full">
+                <card.icon className="w-5 h-5 text-purple-400" />
               </div>
-            </motion.div>
+              <p className="text-sm text-gray-400">{card.label}</p>
+              <p className="text-lg font-semibold">{card.value}</p>
+            </div>
           ))}
         </div>
 
-        {/* Circular Chart */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white/5 p-8 rounded-3xl shadow-xl"
-        >
-          <h2 className="text-3xl font-bold mb-10 text-center text-indigo-300">
-            Top Artists This Month
+        {/* Radial Chart for Top Artists */}
+        <div className="bg-white/5 p-6 rounded-3xl shadow-lg border border-white/10">
+          <h2 className="text-xl font-medium mb-6 text-center text-indigo-300">
+            Top Artists
           </h2>
-          <div className="flex justify-center items-center h-[300px]">
+          <div className="flex justify-center items-center h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadialBarChart
                 cx="50%"
                 cy="50%"
                 innerRadius="30%"
                 outerRadius="100%"
-                barSize={20}
+                barSize={15}
                 data={stats.topArtists.map((a, i) => ({
                   name: a.name,
                   plays: a.plays,
@@ -108,16 +93,16 @@ export default function Statistics() {
                 <RadialBar background clockWise dataKey="plays" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#222',
-                    borderRadius: 10,
+                    backgroundColor: '#1f1f1f',
                     border: 'none',
+                    borderRadius: 8,
                     color: '#fff'
                   }}
                 />
               </RadialBarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-6 mt-8 text-sm text-gray-300">
+          <div className="flex justify-center gap-6 mt-6 text-sm text-gray-300">
             {stats.topArtists.map((artist, index) => (
               <div key={index} className="flex items-center gap-2">
                 <span
@@ -128,7 +113,7 @@ export default function Statistics() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

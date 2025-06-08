@@ -1,6 +1,12 @@
 import React from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 import { Headphones, Clock, Music, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -39,77 +45,72 @@ const cards = [
   }
 ];
 
+const colors = ['#A78BFA', '#60A5FA', '#34D399'];
+
 export default function Statistics() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white px-4 py-10 font-sans">
-      <div className="max-w-5xl mx-auto space-y-12">
-        {/* Heading */}
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
+    <div className="min-h-screen bg-gradient-to-tr from-gray-950 via-black to-gray-900 text-white px-6 py-14">
+      <div className="max-w-6xl mx-auto space-y-14">
+        {/* Animated Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl font-bold text-center text-primary"
+          transition={{ duration: 0.7 }}
+          className="text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary"
         >
-          Your Listening Insights
-        </motion.h2>
+          Music Vibes Report
+        </motion.h1>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {/* Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {cards.map((card, index) => (
             <motion.div
               key={card.label}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-3xl p-5 shadow-lg hover:shadow-2xl hover:scale-[1.03] transition-transform duration-300"
             >
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/30 p-2 rounded-full">
-                  <card.icon className="w-5 h-5 text-primary" />
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="bg-primary/30 p-3 rounded-full">
+                  <card.icon className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">{card.label}</p>
-                  <p className="text-lg font-semibold text-white">{card.value}</p>
+                  <p className="text-sm text-gray-400">{card.label}</p>
+                  <p className="text-xl font-bold text-white">{card.value}</p>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Top Artists Chart */}
+        {/* Chart Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/5 backdrop-blur-lg p-6 rounded-2xl shadow-lg"
+          transition={{ delay: 0.5 }}
+          className="bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-lg"
         >
-          <h3 className="text-lg font-semibold mb-4 text-primary">Top Artists</h3>
-          <ResponsiveContainer width="100%" height={280}>
+          <h2 className="text-2xl font-semibold mb-6 text-center text-secondary">Top Artists This Month</h2>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={stats.topArtists} layout="vertical">
               <XAxis type="number" hide />
               <YAxis
                 dataKey="name"
                 type="category"
-                width={100}
-                tick={{ fill: 'white', fontSize: 14 }}
+                width={120}
+                tick={{ fill: 'white', fontSize: 16 }}
               />
               <Tooltip
                 cursor={{ fill: '#ffffff11' }}
-                contentStyle={{
-                  backgroundColor: '#111',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff'
-                }}
+                contentStyle={{ backgroundColor: '#222', borderRadius: 10, border: 'none', color: '#fff' }}
                 labelStyle={{ color: '#fff' }}
-                itemStyle={{ color: '#facc15' }}
               />
-              <Bar
-                dataKey="plays"
-                fill="#facc15"
-                barSize={20}
-                radius={[10, 10, 10, 10]}
-              />
+              <Bar dataKey="plays" radius={[10, 10, 10, 10]}>
+                {stats.topArtists.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </motion.div>

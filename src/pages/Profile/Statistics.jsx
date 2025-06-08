@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   RadialBarChart,
   RadialBar,
@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from 'recharts';
-import { Headphones, Clock, Music, Heart } from 'lucide-react';
+import { Headphones, Clock, Music, Heart, Moon, Sun } from 'lucide-react';
 
 const stats = {
   totalSongs: 1234,
@@ -45,30 +45,46 @@ const cards = [
 const colors = ['#A78BFA', '#60A5FA', '#34D399'];
 
 export default function Statistics() {
-  return (
-    <div className="min-h-screen px-6 py-14 bg-neutral-950 text-white font-sans">
-      <div className="max-w-6xl mx-auto space-y-16">
-        {/* Header */}
-        <h1 className="text-4xl font-bold tracking-tight">Your Monthly Music Summary</h1>
+  const [darkMode, setDarkMode] = useState(true);
 
-        {/* Vertical Capsule Cards */}
+  const bgColor = darkMode ? 'bg-neutral-950' : 'bg-white';
+  const textColor = darkMode ? 'text-white' : 'text-gray-900';
+  const cardBg = darkMode ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-800';
+  const cardBorder = darkMode ? 'border-white/10' : 'border-gray-300';
+
+  return (
+    <div className={`${bgColor} ${textColor} min-h-screen px-6 py-10 transition-colors duration-500`}>
+      <div className="max-w-6xl mx-auto space-y-16">
+        {/* Header + Theme Toggle */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-bold tracking-tight">Your Monthly Music Summary</h1>
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex items-center gap-2 border border-gray-400 px-4 py-2 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition"
+          >
+            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
+        </div>
+
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card, index) => (
             <div
               key={index}
-              className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-lg flex flex-col justify-center items-start h-40 hover:scale-[1.02] transition-transform"
+              className={`${cardBg} border ${cardBorder} backdrop-blur-md p-6 rounded-3xl shadow-lg flex flex-col justify-center items-start h-44 hover:scale-[1.02] transition-transform`}
             >
-              <div className="bg-white/10 p-3 rounded-full mb-4">
+              <div className="bg-white/10 dark:bg-white/10 p-3 rounded-full mb-4">
                 <card.icon className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-sm text-gray-400">{card.label}</p>
+              <p className="text-sm text-gray-400 dark:text-gray-400">{card.label}</p>
               <p className="text-xl font-semibold">{card.value}</p>
             </div>
           ))}
         </div>
 
         {/* Chart */}
-        <div className="bg-white/5 border border-white/10 p-8 rounded-3xl shadow-md">
+        <div className={`${cardBg} border ${cardBorder} p-8 rounded-3xl shadow-md`}>
           <h2 className="text-xl font-semibold mb-6 text-center text-indigo-400">
             Top Artists This Month
           </h2>
@@ -90,16 +106,16 @@ export default function Statistics() {
                 <RadialBar background clockWise dataKey="plays" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1f1f1f',
+                    backgroundColor: darkMode ? '#1f1f1f' : '#f9f9f9',
                     border: 'none',
                     borderRadius: 8,
-                    color: '#fff'
+                    color: darkMode ? '#fff' : '#000'
                   }}
                 />
               </RadialBarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-6 mt-6 text-sm text-gray-300">
+          <div className="flex justify-center gap-6 mt-6 text-sm text-gray-400">
             {stats.topArtists.map((artist, index) => (
               <div key={index} className="flex items-center gap-2">
                 <span

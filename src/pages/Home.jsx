@@ -14,6 +14,8 @@ export default function Home() {
   const [userPhoto, setUserPhoto] = useState(null);
   const [progress, setProgress] = useState(40);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
@@ -21,7 +23,17 @@ export default function Home() {
   useEffect(() => {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (tgUser?.photo_url) setUserPhoto(tgUser.photo_url);
+
+    const storedLiked = localStorage.getItem('liked');
+    const storedDisliked = localStorage.getItem('disliked');
+    if (storedLiked === 'true') setLiked(true);
+    if (storedDisliked === 'true') setDisliked(true);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('liked', liked);
+    localStorage.setItem('disliked', disliked);
+  }, [liked, disliked]);
 
   const fetchLyrics = async () => {
     try {
@@ -115,10 +127,10 @@ export default function Home() {
       {/* Song Art */}
       <div className="flex flex-col items-center mt-4">
         <div
-          className="rounded-2xl overflow-hidden shadow-xl bg-gray-300 dark:bg-gray-800 mb-4"
+          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-4"
           style={{
-            width: 'min(85vw, 360px)',
-            height: 'min(85vw, 360px)',
+            width: 'min(90vw, 360px)',
+            height: 'min(90vw, 360px)',
           }}
         >
           <img
@@ -127,24 +139,50 @@ export default function Home() {
             className="w-full h-full object-cover"
           />
         </div>
-      </div>
 
-      {/* Song Info + Reactions */}
-      <div className="flex flex-col items-start w-full max-w-md mx-auto px-2 mt-2">
-        <h2 className="text-lg font-semibold leading-tight">Song Title</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Artist Name</p>
-        <div className="flex items-center gap-4 mb-4">
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition">
-            <ThumbsUp size={20} />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition">
-            <ThumbsDown size={20} />
-          </button>
+        <div className="w-full flex flex-col items-start px-2 mb-3">
+          <h2 className="text-xl font-bold">Song Title</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
+          <div className="flex items-center gap-4 mt-2">
+            <button
+              onClick={() => {
+                setLiked(!liked);
+                if (disliked) setDisliked(false);
+              }}
+              className={`p-2 rounded-full transition-all duration-200 transform ${
+                liked ? 'bg-blue-100 dark:bg-blue-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+              }`}
+            >
+              <ThumbsUp
+                size={20}
+                className={`transition-colors duration-200 ${
+                  liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
+                }`}
+              />
+            </button>
+
+            <button
+              onClick={() => {
+                setDisliked(!disliked);
+                if (liked) setLiked(false);
+              }}
+              className={`p-2 rounded-full transition-all duration-200 transform ${
+                disliked ? 'bg-red-100 dark:bg-red-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+              }`}
+            >
+              <ThumbsDown
+                size={20}
+                className={`transition-colors duration-200 ${
+                  disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Sleek Player Slider */}
-      <div className="w-full px-4 mt-2 max-w-md mx-auto">
+      <div className="w-full px-4 mt-4">
         <input
           type="range"
           min="0"
@@ -167,6 +205,7 @@ export default function Home() {
             background: ${progressColor};
             border-radius: 50%;
             box-shadow: 0 0 3px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
           }
           input[type="range"]::-webkit-slider-runnable-track {
             height: 4px;
@@ -180,19 +219,19 @@ export default function Home() {
       </div>
 
       {/* Player Buttons */}
-      <div className="mt-10 flex items-center justify-center gap-6">
+      <div className="mt-16 flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
-          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-md"
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
         >
           <Mic2 size={20} />
         </button>
 
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-16 h-16 rounded-full bg-white text-black shadow-lg flex items-center justify-center"
+          className="w-16 h-16 rounded-full bg-white text-black dark:bg-white dark:text-black shadow-xl flex items-center justify-center"
         >
-          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
         </button>
 
         <button
@@ -202,7 +241,7 @@ export default function Home() {
             setShowQueue(true);
             setIsSongQueueOpen(true);
           }}
-          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-md"
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
         >
           <ListMusic size={20} />
         </button>

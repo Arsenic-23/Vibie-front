@@ -5,6 +5,7 @@ import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
+import PlayPauseButton from '../components/PlayPauseButton';
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);
@@ -225,19 +226,7 @@ export default function Home() {
         >
           <Mic2 size={20} />
         </button>
-
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="w-16 h-16 rounded-full bg-white text-black dark:bg-white dark:text-black shadow-xl flex items-center justify-center"
-        >
-          {isPlaying ? (
-            <Pause size={32} color="black"
-          fill="black" />
-          ) : (
-            <Play size={32} color="black"
-          fill="black" />
-          )}
-        </button>
+        <PlayPauseButton isPlaying={isPlaying} onClick={() => setIsPlaying(!isPlaying)} />
 
         <button
           ref={queueBtnRef}

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, Check } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [fillProgress, setFillProgress] = useState(0);
+  const [showCheckmark, setShowCheckmark] = useState(false);
 
-  // Force Telegram Mini App to init
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
     tg?.ready();
@@ -16,13 +17,9 @@ export default function Landing() {
     const tg = window.Telegram?.WebApp;
     tg?.ready();
 
-    // Haptic feedback on tap
     try {
       tg?.HapticFeedback?.impactOccurred('light');
-    } catch (_) {
-      // Optional fallback
-      console.log("Haptics not available");
-    }
+    } catch (_) {}
 
     const user = tg?.initDataUnsafe?.user;
 
@@ -38,17 +35,31 @@ export default function Landing() {
       photo_url: user.photo_url || '',
     };
 
-    localStorage.setItem('authToken', 'mock-token'); // Just a mock token for your frontend
+    localStorage.setItem('authToken', 'mock-token');
     localStorage.setItem('profile', JSON.stringify(userData));
 
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');
 
     setIsLoading(true);
+    setFillProgress(0);
+    setShowCheckmark(false);
 
-    setTimeout(() => {
-      navigate(joinId ? `/home?join=${joinId}` : '/home');
-    }, 800); // Simulate loading (you can adjust or remove delay)
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 2;
+      setFillProgress(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setShowCheckmark(true);
+
+        // Wait briefly to show the checkmark before navigating
+        setTimeout(() => {
+          navigate(joinId ? `/home?join=${joinId}` : '/home');
+        }, 600);
+      }
+    }, 16); // ~60fps
   };
 
   return (
@@ -78,22 +89,35 @@ export default function Landing() {
           Crafted for those who live in rhythm.
         </p>
 
-        <button
-          onClick={handleJoin}
-          disabled={isLoading}
-          className={`
-            ${isLoading ? 'w-14 h-14 px-0 py-0' : 'px-20 py-3'}
-            bg-white text-black font-medium rounded-full text-base md:text-lg shadow-xl
-            transition-all duration-300 ease-in-out flex items-center justify-center
-            disabled:opacity-80 disabled:cursor-not-allowed active:scale-95
-          `}
-        >
-          {isLoading ? (
-            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
-          ) : (
-            'Join the Vibe'
-          )}
-        </button>
+        <div className="relative w-[240px]">
+          <button
+            onClick={handleJoin}
+            disabled={isLoading}
+            className="relative z-10 w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out"
+          >
+            {/* Fill overlay */}
+            <div
+              className="absolute top-0 left-0 h-full bg-purple-500 z-0 transition-all duration-75 ease-linear"
+              style={{ width: `${fillProgress}%` }}
+            />
+
+            {/* Button content container */}
+            <div className="relative z-10 flex items-center justify-center transition-all duration-300 ease-in-out">
+              {/* Show text or checkmark */}
+              {!showCheckmark ? (
+                <span
+                  className={`transition-opacity duration-300 ${
+                    isLoading ? 'opacity-0' : 'opacity-100'
+                  }`}
+                >
+                  Join the Vibe
+                </span>
+              ) : (
+                <Check size={22} className="text-white transition-opacity duration-300 opacity-100" />
+              )}
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );

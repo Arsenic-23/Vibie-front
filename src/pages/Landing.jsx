@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayCircle, Check } from 'lucide-react';
@@ -53,8 +54,6 @@ export default function Landing() {
       if (progress >= 100) {
         clearInterval(interval);
         setShowCheckmark(true);
-
-        // Wait briefly to show the checkmark before navigating
         setTimeout(() => {
           navigate(joinId ? `/home?join=${joinId}` : '/home');
         }, 600);
@@ -72,7 +71,7 @@ export default function Landing() {
 
       {/* App Title */}
       <div className="z-20 pt-14 flex items-center gap-2">
-        <PlayCircle size={22} className="text-purple-500" />
+        <PlayCircle size={22} className="text-purple-400 drop-shadow-lg" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
       </div>
 
@@ -83,7 +82,7 @@ export default function Landing() {
         </h1>
       </div>
 
-      {/* Join Button Area */}
+      {/* Join Button */}
       <div className="z-20 pb-12 flex flex-col items-center gap-4">
         <p className="text-white text-sm md:text-base font-light opacity-90">
           Crafted for those who live in rhythm.
@@ -93,17 +92,20 @@ export default function Landing() {
           <button
             onClick={handleJoin}
             disabled={isLoading}
-            className="relative z-10 w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out"
+            className="relative z-10 w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out active:scale-[0.98]"
           >
-            {/* Fill overlay */}
+            {/* Purple fill overlay */}
             <div
-              className="absolute top-0 left-0 h-full bg-purple-500 z-0 transition-all duration-75 ease-linear"
-              style={{ width: `${fillProgress}%` }}
+              className="absolute top-0 left-0 h-full z-0 rounded-full transition-all duration-75 ease-linear"
+              style={{
+                width: `${fillProgress}%`,
+                background: 'linear-gradient(90deg, #a855f7, #9333ea)',
+                boxShadow: '0 0 12px rgba(168, 85, 247, 0.5)',
+              }}
             />
 
             {/* Button content container */}
             <div className="relative z-10 flex items-center justify-center transition-all duration-300 ease-in-out">
-              {/* Show text or checkmark */}
               {!showCheckmark ? (
                 <span
                   className={`transition-opacity duration-300 ${
@@ -113,7 +115,10 @@ export default function Landing() {
                   Join the Vibe
                 </span>
               ) : (
-                <Check size={22} className="text-white transition-opacity duration-300 opacity-100" />
+                <Check
+                  size={22}
+                  className="text-white transition-all duration-300 transform scale-100"
+                />
               )}
             </div>
           </button>

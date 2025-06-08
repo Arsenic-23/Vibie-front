@@ -5,7 +5,7 @@ import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
-
+import MorphingPlayPause from '../components/MorphingPlayPause';
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
   const [showQueue, setShowQueue] = useState(false);

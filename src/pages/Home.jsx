@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, Pause } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
@@ -115,10 +115,10 @@ export default function Home() {
       {/* Song Art */}
       <div className="flex flex-col items-center mt-4">
         <div
-          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-6"
+          className="rounded-2xl overflow-hidden shadow-xl bg-gray-300 dark:bg-gray-800 mb-4"
           style={{
-            width: 'clamp(250px, 50vw, 500px)',
-            height: 'clamp(250px, 50vw, 500px)',
+            width: 'min(85vw, 360px)',
+            height: 'min(85vw, 360px)',
           }}
         >
           <img
@@ -127,14 +127,24 @@ export default function Home() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="w-full px-2 mb-1 text-center">
-          <h2 className="text-xl font-bold">Song Title</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
+      </div>
+
+      {/* Song Info + Reactions */}
+      <div className="flex flex-col items-start w-full max-w-md mx-auto px-2 mt-2">
+        <h2 className="text-lg font-semibold leading-tight">Song Title</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Artist Name</p>
+        <div className="flex items-center gap-4 mb-4">
+          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition">
+            <ThumbsUp size={20} />
+          </button>
+          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition">
+            <ThumbsDown size={20} />
+          </button>
         </div>
       </div>
 
       {/* Sleek Player Slider */}
-      <div className="w-full px-4 mt-4">
+      <div className="w-full px-4 mt-2 max-w-md mx-auto">
         <input
           type="range"
           min="0"
@@ -157,7 +167,6 @@ export default function Home() {
             background: ${progressColor};
             border-radius: 50%;
             box-shadow: 0 0 3px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
           }
           input[type="range"]::-webkit-slider-runnable-track {
             height: 4px;
@@ -171,19 +180,19 @@ export default function Home() {
       </div>
 
       {/* Player Buttons */}
-      <div className="mt-16 flex items-center justify-center gap-6">
+      <div className="mt-10 flex items-center justify-center gap-6">
         <button
           onClick={fetchLyrics}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
+          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-md"
         >
           <Mic2 size={20} />
         </button>
 
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-20 h-20 rounded-full bg-white dark:bg-black text-black dark:text-white shadow-xl flex items-center justify-center"
+          className="w-16 h-16 rounded-full bg-white text-black shadow-lg flex items-center justify-center"
         >
-          {isPlaying ? <Pause size={36} /> : <Play size={36} />}
+          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
         </button>
 
         <button
@@ -193,7 +202,7 @@ export default function Home() {
             setShowQueue(true);
             setIsSongQueueOpen(true);
           }}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
+          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-md"
         >
           <ListMusic size={20} />
         </button>

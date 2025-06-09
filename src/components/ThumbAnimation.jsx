@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,42 +27,35 @@ export function AnimatedThumb({ children, active }) {
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
-            const rad = (angle * Math.PI) / 180;
-            const distance = 24;
             const isPink = i % 2 !== 0;
-            const finalX = Math.cos(rad) * distance;
-            const finalY = Math.sin(rad) * distance;
-            const lineLength = isPink ? 5 : 8;
+            const color = isPink ? '#ec4899' : '#f43f5e';
+            const lineLength = isPink ? 12 : 18;
 
             return (
               <motion.div
                 key={i}
                 initial={{
-                  x: 0,
-                  y: 0,
-                  width: 2,
-                  height: 2,
+                  scaleY: 0,
                   opacity: 1,
                 }}
                 animate={{
-                  x: finalX,
-                  y: finalY,
-                  width: [2, 2, 2],
-                  height: [2, lineLength, 2],
+                  scaleY: [0, 1, 0.2],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
                   duration: 0.5,
                   ease: 'easeOut',
-                  delay: i * 0.015,
+                  delay: i * 0.01,
                 }}
-                className="absolute rounded-full origin-center"
+                className="absolute w-[2px] rounded-full"
                 style={{
-                  backgroundColor: isPink ? '#ec4899' : '#f43f5e',
+                  height: `${lineLength}px`,
+                  backgroundColor: color,
                   top: '50%',
                   left: '50%',
-                  transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                  transform: `rotate(${angle}deg) translateY(-50%)`,
+                  transformOrigin: 'center bottom',
                 }}
               />
             );

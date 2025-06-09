@@ -22,36 +22,45 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Radial Burst Effect Like Clock Hands */}
+      {/* Radial Burst Animation */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
+            const rad = (angle * Math.PI) / 180;
+            const distance = 24;
+            const x = Math.cos(rad) * distance;
+            const y = Math.sin(rad) * distance;
 
             return (
               <motion.div
                 key={i}
                 initial={{
-                  scaleY: 0.3,
+                  x: 0,
+                  y: 0,
                   scaleX: 1,
+                  scaleY: 0.5,
                   opacity: 1,
                 }}
                 animate={{
-                  scaleY: [0.3, 1, 0.2],
+                  x,
+                  y,
+                  scaleY: [0.5, 1.8, 0.4],
+                  scaleX: [1, 1.2, 1],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
                   duration: 0.5,
                   ease: 'easeOut',
-                  delay: i * 0.01,
+                  delay: i * 0.015,
                 }}
-                className="absolute w-[2px] h-[10px] rounded-full origin-bottom"
+                className="absolute w-[2px] h-[8px] rounded-full origin-center"
                 style={{
                   backgroundColor: i % 2 === 0 ? '#f43f5e' : '#ec4899',
                   top: '50%',
                   left: '50%',
-                  transform: `translate(-50%, -100%) rotate(${angle}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                 }}
               />
             );

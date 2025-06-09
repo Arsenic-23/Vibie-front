@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function AnimatedThumb({ children, active }) {
   const [showBurst, setShowBurst] = useState(false);
-  const containerRef = useRef(null);
-  const numRays = 10;
+  const numRays = 12;
 
   useEffect(() => {
     if (active) {
@@ -22,50 +21,57 @@ export function AnimatedThumb({ children, active }) {
   };
 
   return (
-    <div ref={containerRef} className="relative inline-block w-fit h-fit">
-      {/* Rays shooting from thumb tip */}
+    <div className="relative inline-block w-fit h-fit">
+      {/* Burst Animation with Dot → Line → Dot */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = 28;
+            const distance = 24;
             const x = Math.cos(rad) * distance;
             const y = Math.sin(rad) * distance;
 
             return (
               <motion.div
                 key={i}
-                initial={{ x: 0, y: 0, scaleY: 1, opacity: 1 }}
+                initial={{
+                  x: 0,
+                  y: 0,
+                  scaleY: 0.5,
+                  scaleX: 0.5,
+                  opacity: 1,
+                }}
                 animate={{
                   x,
                   y,
-                  scaleY: 1.8,
-                  opacity: 0,
+                  scaleY: [0.5, 1.4, 0.4],
+                  scaleX: [0.5, 0.7, 0.5],
+                  opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.45,
+                  duration: 0.5,
                   ease: 'easeOut',
-                  delay: i * 0.01,
+                  delay: i * 0.015,
                 }}
-                className="absolute w-[2px] h-[10px] rounded-full"
+                className="absolute w-[3px] h-[3px] rounded-full"
                 style={{
-                  backgroundColor: '#f43f5e',
-                  top: '45%',
+                  backgroundColor: i % 2 === 0 ? '#f43f5e' : '#ec4899',
+                  top: '50%',
                   left: '50%',
-                  transform: 'translate(-50%, -50%) rotate(' + angle + 'deg)',
+                  transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                 }}
               />
             );
           })}
       </AnimatePresence>
 
-      {/* Thumb Icon with scale + stretch */}
+      {/* Thumb Icon Animation (stretch & pop) */}
       <motion.div
         initial={false}
         animate={{
-          scale: active ? [1, 1.1, 1] : 1,
+          scale: active ? [1, 1.15, 1] : 1,
           scaleY: active ? [1, 1.25, 1] : 1,
           y: active ? [-2, -5, 0] : 0,
         }}

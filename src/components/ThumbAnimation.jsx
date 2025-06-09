@@ -3,14 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function AnimatedThumb({ children, active }) {
   const [showBurst, setShowBurst] = useState(false);
-  const numLines = 10;
-
-  const colors = Array.from({ length: numLines }).map((_, i) =>
-    i % 2 === 0 ? '#ef4444' : '#ec4899' // red, pink alternately
-  );
-  const lengths = Array.from({ length: numLines }).map((_, i) =>
-    i % 2 === 0 ? 22 : 14 // red longer, pink shorter
-  );
+  const numLines = 12;
 
   useEffect(() => {
     if (active) {
@@ -29,25 +22,25 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Lines */}
+      {/* Burst Animation */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numLines }).map((_, i) => {
             const angle = (360 / numLines) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = lengths[i];
+            const distance = 20;
 
             return (
-              <motion.span
+              <motion.div
                 key={i}
                 initial={{
-                  scale: 0.4,
+                  scale: 0.6,
                   opacity: 1,
                   x: 0,
                   y: 0,
                 }}
                 animate={{
-                  scale: [0.4, 1.1, 0.4],
+                  scale: [0.6, 1, 0.6],
                   x: Math.cos(rad) * distance,
                   y: Math.sin(rad) * distance,
                   opacity: [1, 1, 0],
@@ -56,11 +49,11 @@ export function AnimatedThumb({ children, active }) {
                 transition={{
                   duration: 0.5,
                   ease: 'easeInOut',
-                  delay: i * 0.015,
+                  delay: i * 0.01,
                 }}
-                className="absolute w-0.5 h-2 rounded-full"
+                className="absolute w-[2px] h-[8px] rounded-full"
                 style={{
-                  backgroundColor: colors[i],
+                  backgroundColor: i % 2 === 0 ? '#ef4444' : '#f43f5e', // red shades
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
@@ -71,13 +64,13 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
-      {/* Icon bounce on tap */}
+      {/* Button Icon with scale */}
       <motion.div
         initial={false}
         animate={{
-          scale: active ? [1, 1.2, 1] : 1,
+          scale: active ? [1, 1.25, 1] : 1,
         }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         {children}
       </motion.div>

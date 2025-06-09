@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,13 +23,15 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Lines Animation */}
+      {/* Burst Animation with Dot → Line → Dot */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = 30;
+            const distance = 24;
+            const x = Math.cos(rad) * distance;
+            const y = Math.sin(rad) * distance;
 
             return (
               <motion.div
@@ -41,9 +44,9 @@ export function AnimatedThumb({ children, active }) {
                   opacity: 1,
                 }}
                 animate={{
-                  x: Math.cos(rad) * distance,
-                  y: Math.sin(rad) * distance,
-                  scaleY: [0.5, 1.6, 0.4],
+                  x,
+                  y,
+                  scaleY: [0.5, 1.4, 0.4],
                   scaleX: [0.5, 0.7, 0.5],
                   opacity: [1, 1, 0],
                 }}
@@ -51,9 +54,9 @@ export function AnimatedThumb({ children, active }) {
                 transition={{
                   duration: 0.5,
                   ease: 'easeOut',
-                  delay: i * 0.01,
+                  delay: i * 0.015,
                 }}
-                className="absolute w-[3px] h-[10px] rounded-full"
+                className="absolute w-[3px] h-[3px] rounded-full"
                 style={{
                   backgroundColor: i % 2 === 0 ? '#f43f5e' : '#ec4899',
                   top: '50%',
@@ -65,35 +68,16 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
-      {/* Glossy Overlay on Thumb */}
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            key="gloss"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 0.4, scale: 1.05 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-10 rounded-full pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle at center, rgba(255,255,255,0.6), transparent)',
-              mixBlendMode: 'soft-light',
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Thumb Icon Animation - Elongate + Twist */}
+      {/* Thumb Icon Animation (stretch & pop) */}
       <motion.div
         initial={false}
         animate={{
           scale: active ? [1, 1.15, 1] : 1,
-          scaleY: active ? [1, 1.35, 1] : 1,
-          rotate: active ? [0, -12, 0] : 0,
-          y: active ? [-2, -6, 0] : 0,
+          scaleY: active ? [1, 1.25, 1] : 1,
+          y: active ? [-2, -5, 0] : 0,
         }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="relative z-20"
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="relative z-10"
       >
         {children}
       </motion.div>

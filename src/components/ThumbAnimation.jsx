@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function AnimatedThumb({ children, active }) {
   const [showBurst, setShowBurst] = useState(false);
-  const numLines = 12;
+  const numLines = 10;
 
   useEffect(() => {
     if (active) {
@@ -22,7 +22,7 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Animation */}
+      {/* Burst Lines */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numLines }).map((_, i) => {
@@ -33,44 +33,40 @@ export function AnimatedThumb({ children, active }) {
             return (
               <motion.div
                 key={i}
-                initial={{
-                  scale: 0.6,
-                  opacity: 1,
-                  x: 0,
-                  y: 0,
-                }}
+                initial={{ scale: 1, opacity: 1, x: 0, y: 0 }}
                 animate={{
-                  scale: [0.6, 1, 0.6],
                   x: Math.cos(rad) * distance,
                   y: Math.sin(rad) * distance,
-                  opacity: [1, 1, 0],
+                  scale: 0.3,
+                  opacity: 0,
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.5,
-                  ease: 'easeInOut',
+                  duration: 0.45,
+                  ease: 'easeOut',
                   delay: i * 0.01,
                 }}
                 className="absolute w-[2px] h-[8px] rounded-full"
                 style={{
-                  backgroundColor: i % 2 === 0 ? '#ef4444' : '#f43f5e', // red shades
+                  backgroundColor: i % 2 === 0 ? '#f43f5e' : '#fb7185',
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  rotate: `${angle}deg`,
                 }}
               />
             );
           })}
       </AnimatePresence>
 
-      {/* Button Icon with scale */}
+      {/* Thumb Icon with scale & upward motion */}
       <motion.div
         initial={false}
         animate={{
-          scale: active ? [1, 1.25, 1] : 1,
+          scale: active ? [1, 1.2, 1] : 1,
+          y: active ? [-2, -4, 0] : 0,
         }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="relative z-10"
       >
         {children}
       </motion.div>

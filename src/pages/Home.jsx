@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, ListMusic, Mic2, Play, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
@@ -6,7 +7,7 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
 import PlayPauseButton from '../components/PlayPauseButton';
-import { AnimatedThumb } from '../components/ThumbAnimation';
+import { AnimatedThumb } from '../components/AnimatedThumb';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
@@ -59,7 +60,6 @@ export default function Home() {
       className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
       style={{ overscrollBehavior: 'none', touchAction: 'none' }}
     >
-      {/* Top Bar */}
       <div className="flex items-center justify-between mb-5">
         <button
           ref={vibersBtnRef}
@@ -99,7 +99,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Popups */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
@@ -126,14 +125,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Song Art */}
       <div className="flex flex-col items-center mt-2">
         <div
           className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-3"
-          style={{
-            width: 'min(80vw, 320px)',
-            height: 'min(80vw, 320px)',
-          }}
+          style={{ width: 'min(80vw, 320px)', height: 'min(80vw, 320px)' }}
         >
           <img
             src="https://placehold.co/thumbnail"
@@ -146,50 +141,33 @@ export default function Home() {
           <h2 className="text-xl font-bold">Song Title</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
           <div className="flex items-center gap-4 mt-2">
-            {/* Like Button */}
             <button
               onClick={() => {
                 setLiked(!liked);
                 if (disliked) setDisliked(false);
               }}
-              className={`p-2 rounded-full transition-all duration-200 transform ${
-                liked ? 'bg-blue-100 dark:bg-blue-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-              }`}
+              className="p-2 rounded-full transition-all duration-200 transform hover:scale-110"
             >
-              <AnimatedThumb active={liked}>
-                <ThumbsUp
-                  size={20}
-                  className={`transition-colors duration-200 ${
-                    liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
-                  }`}
-                />
+              <AnimatedThumb active={liked} color="blue">
+                <ThumbsUp size={20} className={`transition-colors duration-200 ${liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`} />
               </AnimatedThumb>
             </button>
 
-            {/* Dislike Button */}
             <button
               onClick={() => {
                 setDisliked(!disliked);
                 if (liked) setLiked(false);
               }}
-              className={`p-2 rounded-full transition-all duration-200 transform ${
-                disliked ? 'bg-red-100 dark:bg-red-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-              }`}
+              className="p-2 rounded-full transition-all duration-200 transform hover:scale-110"
             >
-              <AnimatedThumb active={disliked}>
-                <ThumbsDown
-                  size={20}
-                  className={`transition-colors duration-200 ${
-                    disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
-                  }`}
-                />
+              <AnimatedThumb active={disliked} color="red">
+                <ThumbsDown size={20} className={`transition-colors duration-200 ${disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`} />
               </AnimatedThumb>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Sleek Player Slider */}
       <div className="w-full px-4 mt-2">
         <input
           type="range"
@@ -204,38 +182,17 @@ export default function Home() {
             borderRadius: '999px',
           }}
         />
-        <style>{`
-          input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            margin-top: -5px;
-            background: ${progressColor};
-            border-radius: 50%;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
-          }
-          input[type="range"]::-webkit-slider-runnable-track {
-            height: 4px;
-            background: transparent;
-          }
-        `}</style>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           <span>{Math.floor((progress / 100) * 3.75)}:{String(Math.floor((progress / 100) * 3.75 * 60 % 60)).padStart(2, '0')}</span>
           <span>3:45</span>
         </div>
       </div>
 
-      {/* Player Buttons */}
       <div className="mt-10 flex items-center justify-center gap-6">
-        <button
-          onClick={fetchLyrics}
-          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
-        >
+        <button onClick={fetchLyrics} className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md">
           <Mic2 size={20} />
         </button>
         <PlayPauseButton isPlaying={isPlaying} onClick={() => setIsPlaying(!isPlaying)} />
-
         <button
           ref={queueBtnRef}
           onClick={() => {

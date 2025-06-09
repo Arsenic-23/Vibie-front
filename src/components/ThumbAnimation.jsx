@@ -3,45 +3,52 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function AnimatedThumb({ children, active }) {
   const [showBurst, setShowBurst] = useState(false);
-  const numLines = 10;
-  const colors = ['#ef4444', '#ec4899']; // red & pink burst colors
+  const numLines = 12;
+  const colors = ['#ef4444', '#ec4899']; // red/pink combo
 
   useEffect(() => {
     if (active) {
+      triggerVibration();
       setShowBurst(true);
-      const timer = setTimeout(() => setShowBurst(false), 500); // hide after animation
+      const timer = setTimeout(() => setShowBurst(false), 500);
       return () => clearTimeout(timer);
     }
   }, [active]);
 
+  const triggerVibration = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate(10); // light tap vibration like iOS
+    }
+  };
+
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Lines */}
+      {/* Radiating Lines */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numLines }).map((_, i) => {
             const angle = (360 / numLines) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = 16;
+            const distance = 18;
 
             return (
               <motion.span
                 key={i}
                 initial={{
-                  scaleY: 0.3,
+                  scale: 0.3,
                   opacity: 1,
                   x: 0,
                   y: 0,
                 }}
                 animate={{
-                  scaleY: [0.3, 1, 0.3],
+                  scale: [0.3, 1, 0.3],
                   x: Math.cos(rad) * distance,
                   y: Math.sin(rad) * distance,
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.45,
+                  duration: 0.5,
                   ease: 'easeInOut',
                   delay: i * 0.01,
                 }}
@@ -58,13 +65,13 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
-      {/* Icon Pop */}
+      {/* Icon bounce on tap */}
       <motion.div
         initial={false}
         animate={{
-          scale: active ? [1, 1.2, 1] : 1,
+          scale: active ? [1, 1.3, 1] : 1,
         }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
       >
         {children}
       </motion.div>

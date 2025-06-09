@@ -22,7 +22,7 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Animation */}
+      {/* Radial Burst Animation */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
@@ -38,15 +38,15 @@ export function AnimatedThumb({ children, active }) {
                 initial={{
                   x: 0,
                   y: 0,
+                  scaleX: 1,
                   scaleY: 0.5,
-                  scaleX: 0.5,
                   opacity: 1,
                 }}
                 animate={{
                   x,
                   y,
-                  scaleY: [0.5, 1.4, 0.4],
-                  scaleX: [0.5, 0.7, 0.5],
+                  scaleY: [0.5, 1.8, 0.4],
+                  scaleX: [1, 1.2, 1],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
@@ -55,7 +55,7 @@ export function AnimatedThumb({ children, active }) {
                   ease: 'easeOut',
                   delay: i * 0.015,
                 }}
-                className="absolute w-[3px] h-[3px] rounded-full"
+                className="absolute w-[2px] h-[8px] rounded-full origin-center"
                 style={{
                   backgroundColor: i % 2 === 0 ? '#f43f5e' : '#ec4899',
                   top: '50%',

@@ -17,7 +17,7 @@ export function AnimatedThumb({ children, active }) {
 
   const triggerVibration = () => {
     if (navigator.vibrate) {
-      navigator.vibrate(10); // light tap vibration like iOS
+      navigator.vibrate(70); // light tap vibration like iOS
     }
   };
 

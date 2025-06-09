@@ -27,33 +27,42 @@ export function AnimatedThumb({ children, active }) {
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
+            const rad = (angle * Math.PI) / 180;
+            const distance = 24;
             const isPink = i % 2 !== 0;
-            const color = isPink ? '#ec4899' : '#f43f5e';
-            const lineLength = isPink ? 12 : 18;
+            const finalX = Math.cos(rad) * distance;
+            const finalY = Math.sin(rad) * distance;
+            const lineLength = isPink ? 5 : 8;
 
             return (
               <motion.div
                 key={i}
                 initial={{
-                  scaleY: 0,
+                  x: 0,
+                  y: 0,
+                  width: 2,
+                  height: 2,
                   opacity: 1,
                 }}
                 animate={{
-                  scaleY: [0, 1, 0.4],
+                  x: finalX,
+                  y: finalY,
+                  width: [2, 2, 2],
+                  height: [2, lineLength, 2],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
                   duration: 0.5,
                   ease: 'easeOut',
-                  delay: i * 0.01,
+                  delay: i * 0.015,
                 }}
-                className="absolute left-1/2 top-1/2 w-[2px] rounded-full"
+                className="absolute rounded-full origin-center"
                 style={{
-                  height: `${lineLength}px`,
-                  backgroundColor: color,
-                  transform: `rotate(${angle}deg) translateY(-50%)`,
-                  transformOrigin: 'center center',
+                  backgroundColor: isPink ? '#ec4899' : '#f43f5e',
+                  top: '50%',
+                  left: '50%',
+                  transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                 }}
               />
             );

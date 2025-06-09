@@ -146,46 +146,46 @@ export default function Home() {
           <h2 className="text-xl font-bold">Song Title</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
           <div className="flex items-center gap-4 mt-2">
-            {/* Like Button */}
-            <button
-              onClick={() => {
-                setLiked(!liked);
-                if (disliked) setDisliked(false);
-              }}
-              className={`p-2 rounded-full transition-all duration-200 transform ${
-                liked ? 'bg-blue-100 dark:bg-blue-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-              }`}
-            >
-              <AnimatedThumb active={liked}>
-                <ThumbsUp
-                  size={20}
-                  className={`transition-colors duration-200 ${
-                    liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
-                  }`}
-                />
-              </AnimatedThumb>
-            </button>
+  {/* Like Button */}
+  <button
+    onClick={() => {
+      setLiked(!liked);
+      if (disliked) setDisliked(false);
+    }}
+    className={`p-2 rounded-full transition-all duration-200 transform ${
+      liked ? 'scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+    }`}
+  >
+    <AnimatedThumb active={liked}>
+      <ThumbsUp
+        size={20}
+        className={`transition-colors duration-200 ${
+          liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
+        }`}
+      />
+    </AnimatedThumb>
+  </button>
 
-            {/* Dislike Button */}
-            <button
-              onClick={() => {
-                setDisliked(!disliked);
-                if (liked) setLiked(false);
-              }}
-              className={`p-2 rounded-full transition-all duration-200 transform ${
-                disliked ? 'bg-red-100 dark:bg-red-900 scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-              }`}
-            >
-              <AnimatedThumb active={disliked}>
-                <ThumbsDown
-                  size={20}
-                  className={`transition-colors duration-200 ${
-                    disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
-                  }`}
-                />
-              </AnimatedThumb>
-            </button>
-          </div>
+  {/* Dislike Button */}
+  <button
+    onClick={() => {
+      setDisliked(!disliked);
+      if (liked) setLiked(false);
+    }}
+    className={`p-2 rounded-full transition-all duration-200 transform ${
+      disliked ? 'scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+    }`}
+  >
+    <AnimatedThumb active={disliked}>
+      <ThumbsDown
+        size={20}
+        className={`transition-colors duration-200 ${
+          disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
+        }`}
+      />
+    </AnimatedThumb>
+  </button>
+</div>
         </div>
       </div>
 

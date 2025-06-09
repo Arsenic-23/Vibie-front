@@ -1,36 +1,34 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function AnimatedThumb({ children, active, color = 'red' }) {
-  const numBursts = 10;
-  const burstColor = color === 'blue' ? '#3B82F6' : '#EF4444'; // Use Tailwind red/blue color
-
-  const bursts = Array.from({ length: numBursts });
+export function AnimatedThumb({ children, active }) {
+  const numLines = 12;
+  const colors = ['#ef4444', '#ec4899']; // Red and Pink shades
+  const lines = Array.from({ length: numLines });
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Dots (circular, popping outwards) */}
       <AnimatePresence>
         {active &&
-          bursts.map((_, i) => {
-            const angle = (360 / numBursts) * i;
+          lines.map((_, i) => {
+            const angle = (360 / numLines) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = 16; // px distance from center
+            const distance = 24;
 
             return (
               <motion.span
                 key={i}
                 initial={{
+                  scaleY: 0,
                   opacity: 1,
-                  scale: 0,
                   x: 0,
                   y: 0,
                 }}
                 animate={{
-                  scale: [0, 1.2, 0.8, 0],
+                  scaleY: [0, 1.5, 0],
                   x: Math.cos(rad) * distance,
                   y: Math.sin(rad) * distance,
-                  opacity: [1, 1, 0.8, 0],
+                  opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
@@ -38,9 +36,10 @@ export function AnimatedThumb({ children, active, color = 'red' }) {
                   ease: 'easeOut',
                   delay: 0.01 * i,
                 }}
-                className="absolute w-1.5 h-1.5 rounded-full"
+                className="absolute w-0.5 h-3 origin-center rounded-full"
                 style={{
-                  backgroundColor: burstColor,
+                  rotate: `${angle}deg`,
+                  backgroundColor: colors[i % colors.length],
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
@@ -50,7 +49,7 @@ export function AnimatedThumb({ children, active, color = 'red' }) {
           })}
       </AnimatePresence>
 
-      {/* Like icon with pop effect */}
+      {/* Icon Pop */}
       <motion.div
         initial={false}
         animate={{

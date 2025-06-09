@@ -39,7 +39,7 @@ export function AnimatedThumb({ children, active }) {
                   opacity: 1,
                 }}
                 animate={{
-                  scaleY: [0, 1, 0.2],
+                  scaleY: [0, 1, 0.4],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
@@ -48,14 +48,12 @@ export function AnimatedThumb({ children, active }) {
                   ease: 'easeOut',
                   delay: i * 0.01,
                 }}
-                className="absolute w-[2px] rounded-full"
+                className="absolute left-1/2 top-1/2 w-[2px] rounded-full"
                 style={{
                   height: `${lineLength}px`,
                   backgroundColor: color,
-                  top: '50%',
-                  left: '50%',
                   transform: `rotate(${angle}deg) translateY(-50%)`,
-                  transformOrigin: 'center bottom',
+                  transformOrigin: 'center center',
                 }}
               />
             );

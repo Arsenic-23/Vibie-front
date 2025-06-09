@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,7 +22,7 @@ export function AnimatedThumb({ children, active }) {
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Animation with Dot → Line → Dot */}
+      {/* Burst Animation */}
       <AnimatePresence>
         {showBurst &&
           Array.from({ length: numRays }).map((_, i) => {
@@ -68,15 +67,16 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
-      {/* Thumb Icon Animation (stretch & pop) */}
+      {/* Thumb Icon Animation */}
       <motion.div
         initial={false}
         animate={{
           scale: active ? [1, 1.15, 1] : 1,
-          scaleY: active ? [1, 1.25, 1] : 1,
+          scaleY: active ? [1, 1.35, 1] : 1,
+          rotate: active ? [0, -15, 15, 0] : 0,
           y: active ? [-2, -5, 0] : 0,
         }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className="relative z-10"
       >
         {children}

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,8 +30,10 @@ export function AnimatedThumb({ children, active }) {
             const angle = (360 / numRays) * i;
             const rad = (angle * Math.PI) / 180;
             const distance = 24;
-            const x = Math.cos(rad) * distance;
-            const y = Math.sin(rad) * distance;
+            const isPink = i % 2 !== 0;
+            const finalX = Math.cos(rad) * distance;
+            const finalY = Math.sin(rad) * distance;
+            const lineLength = isPink ? 5 : 8;
 
             return (
               <motion.div
@@ -38,15 +41,15 @@ export function AnimatedThumb({ children, active }) {
                 initial={{
                   x: 0,
                   y: 0,
-                  scaleX: 1,
-                  scaleY: 0.5,
+                  width: 2,
+                  height: 2,
                   opacity: 1,
                 }}
                 animate={{
-                  x,
-                  y,
-                  scaleY: [0.5, 1.8, 0.4],
-                  scaleX: [1, 1.2, 1],
+                  x: finalX,
+                  y: finalY,
+                  width: [2, 2, 2],
+                  height: [2, lineLength, 2],
                   opacity: [1, 1, 0],
                 }}
                 exit={{ opacity: 0 }}
@@ -55,9 +58,9 @@ export function AnimatedThumb({ children, active }) {
                   ease: 'easeOut',
                   delay: i * 0.015,
                 }}
-                className="absolute w-[2px] h-[8px] rounded-full origin-center"
+                className="absolute rounded-full origin-center"
                 style={{
-                  backgroundColor: i % 2 === 0 ? '#f43f5e' : '#ec4899',
+                  backgroundColor: isPink ? '#ec4899' : '#f43f5e',
                   top: '50%',
                   left: '50%',
                   transform: `translate(-50%, -50%) rotate(${angle}deg)`,

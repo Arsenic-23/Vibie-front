@@ -6,7 +6,7 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
 import PlayPauseButton from '../components/PlayPauseButton';
-import { AnimatedThumb } from '../components/ThumbAnimation'; // ✅ Added import
+import { AnimatedThumb } from '../components/ThumbAnimation';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
@@ -57,8 +57,14 @@ export default function Home() {
   return (
     <div
       className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
-      style={{ overscrollBehavior: 'none', touchAction: 'none' }}
+      style={{
+        overscrollBehavior: 'none',
+        touchAction: 'none',
+        WebkitTapHighlightColor: 'transparent',
+      }}
     >
+      <style>{`* { -webkit-tap-highlight-color: transparent; }`}</style>
+
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-5">
         <button
@@ -146,50 +152,48 @@ export default function Home() {
           <h2 className="text-xl font-bold">Song Title</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
           <div className="flex items-center gap-4 mt-2">
-  {/* Like Button */}
-  <button
-    onClick={() => {
-      setLiked(!liked);
-      if (disliked) setDisliked(false);
-    }}
-    className={`p-2 rounded-full transition-all duration-200 transform ${
-      liked ? 'scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-    }`}
-  >
-    <AnimatedThumb active={liked}>
-      <ThumbsUp
-        size={20}
-        className={`transition-colors duration-200 ${
-          liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
-        }`}
-      />
-    </AnimatedThumb>
-  </button>
+            {/* Like Button */}
+            <button
+              onClick={() => {
+                setLiked(!liked);
+                if (disliked) setDisliked(false);
+              }}
+              className={`p-2 rounded-full transition-all duration-200 transform focus:outline-none focus:ring-0`}
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
+            >
+              <AnimatedThumb active={liked}>
+                <ThumbsUp
+                  size={20}
+                  className={`transition-colors duration-200 ${
+                    liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
+                  }`}
+                />
+              </AnimatedThumb>
+            </button>
 
-  {/* Dislike Button */}
-  <button
-    onClick={() => {
-      setDisliked(!disliked);
-      if (liked) setLiked(false);
-    }}
-    className={`p-2 rounded-full transition-all duration-200 transform ${
-      disliked ? 'scale-110' : 'hover:bg-gray-200 dark:hover:bg-gray-800'
-    }`}
-  >
-    <AnimatedThumb active={disliked}>
-      <ThumbsDown
-        size={20}
-        className={`transition-colors duration-200 ${
-          disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
-        }`}
-      />
-    </AnimatedThumb>
-  </button>
-</div>
+            {/* Dislike Button */}
+            <button
+              onClick={() => {
+                setDisliked(!disliked);
+                if (liked) setLiked(false);
+              }}
+              className={`p-2 rounded-full transition-all duration-200 transform focus:outline-none focus:ring-0`}
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
+            >
+              <AnimatedThumb active={disliked}>
+                <ThumbsDown
+                  size={20}
+                  className={`transition-colors duration-200 ${
+                    disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'
+                  }`}
+                />
+              </AnimatedThumb>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Sleek Player Slider */}
+      {/* Slider */}
       <div className="w-full px-4 mt-2">
         <input
           type="range"
@@ -235,7 +239,6 @@ export default function Home() {
           <Mic2 size={20} />
         </button>
         <PlayPauseButton isPlaying={isPlaying} onClick={() => setIsPlaying(!isPlaying)} />
-
         <button
           ref={queueBtnRef}
           onClick={() => {

@@ -6,69 +6,7 @@ import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
 import PlayPauseButton from '../components/PlayPauseButton';
-import { motion, AnimatePresence } from 'framer-motion';
-
-function AnimatedThumb({ children, active }) {
-  const [showBurst, setShowBurst] = useState(false);
-  const numLines = 12;
-  const colors = ['#ef4444', '#ec4899'];
-
-  useEffect(() => {
-    if (active) {
-      setShowBurst(true);
-      const timeout = setTimeout(() => setShowBurst(false), 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [active]);
-
-  return (
-    <div className="relative flex items-center justify-center">
-      <AnimatePresence>
-        {showBurst &&
-          [...Array(numLines)].map((_, i) => {
-            const angle = (360 / numLines) * i;
-            return (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1.2 }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  position: 'absolute',
-                  width: '4px',
-                  height: '14px',
-                  background: colors[i % colors.length],
-                  borderRadius: '4px',
-                  transform: `rotate(${angle}deg) translate(20px)`,
-                  transformOrigin: 'center',
-                }}
-              />
-            );
-          })}
-      </AnimatePresence>
-
-      <motion.div
-        animate={{
-          scale: active ? 1.2 : 1,
-          rotate: active ? 5 : 0,
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-        className={`rounded-full p-2 ${
-          active
-            ? 'bg-[radial-gradient(circle_at_center,_#ffffffaa_30%,_transparent_70%)]'
-            : ''
-        }`}
-        style={{
-          WebkitTapHighlightColor: 'transparent',
-          touchAction: 'manipulation',
-        }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
+import { AnimatedThumb } from '../components/ThumbAnimation';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
@@ -117,7 +55,14 @@ export default function Home() {
   const popupVisible = showQueue || showVibers;
 
   return (
-    <div className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300">
+    <div
+      className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
+      style={{
+        overscrollBehavior: 'none',
+        touchAction: 'none',
+        WebkitTapHighlightColor: 'transparent',
+      }}
+    >
       <style>{`* { -webkit-tap-highlight-color: transparent; }`}</style>
 
       {/* Top Bar */}
@@ -163,27 +108,37 @@ export default function Home() {
       {/* Popups */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowVibers(false);
-            setIsVibersPopupOpen(false);
-          }} />
-          <VibersPopup onClose={() => {
-            setShowVibers(false);
-            setIsVibersPopupOpen(false);
-          }} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowVibers(false);
+              setIsVibersPopupOpen(false);
+            }}
+          />
+          <VibersPopup
+            onClose={() => {
+              setShowVibers(false);
+              setIsVibersPopupOpen(false);
+            }}
+          />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowQueue(false);
-            setIsSongQueueOpen(false);
-          }} />
-          <SongQueue onClose={() => {
-            setShowQueue(false);
-            setIsSongQueueOpen(false);
-          }} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowQueue(false);
+              setIsSongQueueOpen(false);
+            }}
+          />
+          <SongQueue
+            onClose={() => {
+              setShowQueue(false);
+              setIsSongQueueOpen(false);
+            }}
+          />
         </div>
       )}
 
@@ -213,14 +168,18 @@ export default function Home() {
                 setLiked(!liked);
                 if (disliked) setDisliked(false);
               }}
-              className="p-0 border-none outline-none bg-transparent"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              className="p-2 rounded-full transition-all duration-200 transform outline-none ring-0"
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                outline: 'none',
+                touchAction: 'manipulation',
+              }}
             >
               <AnimatedThumb active={liked}>
                 <ThumbsUp
                   size={20}
                   className={`transition-colors duration-200 ${
-                    liked ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                    liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
                   }`}
                 />
               </AnimatedThumb>
@@ -232,14 +191,20 @@ export default function Home() {
                 setDisliked(!disliked);
                 if (liked) setLiked(false);
               }}
-              className="p-0 border-none outline-none bg-transparent"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              className="p-2 rounded-full transition-all duration-200 transform outline-none ring-0"
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                outline: 'none',
+                touchAction: 'manipulation',
+              }}
             >
               <AnimatedThumb active={disliked}>
                 <ThumbsDown
                   size={20}
                   className={`transition-colors duration-200 ${
-                    disliked ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                    disliked
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-600 dark:text-gray-300'
                   }`}
                 />
               </AnimatedThumb>
@@ -280,7 +245,10 @@ export default function Home() {
           }
         `}</style>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
-          <span>{Math.floor((progress / 100) * 3.75)}:{String(Math.floor((progress / 100) * 3.75 * 60 % 60)).padStart(2, '0')}</span>
+          <span>
+            {Math.floor((progress / 100) * 3.75)}:
+            {String(Math.floor(((progress / 100) * 3.75 * 60) % 60)).padStart(2, '0')}
+          </span>
           <span>3:45</span>
         </div>
       </div>

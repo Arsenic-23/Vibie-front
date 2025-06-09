@@ -28,7 +28,7 @@ export function AnimatedThumb({ children, active }) {
           Array.from({ length: numRays }).map((_, i) => {
             const angle = (360 / numRays) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = 30; // slightly longer
+            const distance = 30;
 
             return (
               <motion.div
@@ -65,17 +65,35 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
+      {/* Glossy Overlay on Thumb */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            key="gloss"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 0.4, scale: 1.05 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 z-10 rounded-full pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(255,255,255,0.6), transparent)',
+              mixBlendMode: 'soft-light',
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Thumb Icon Animation - Elongate + Twist */}
       <motion.div
         initial={false}
         animate={{
           scale: active ? [1, 1.15, 1] : 1,
-          scaleY: active ? [1, 1.3, 1] : 1,
-          rotate: active ? [0, -10, 0] : 0,
-          y: active ? [-2, -5, 0] : 0,
+          scaleY: active ? [1, 1.35, 1] : 1,
+          rotate: active ? [0, -12, 0] : 0,
+          y: active ? [-2, -6, 0] : 0,
         }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="relative z-10"
+        className="relative z-20"
       >
         {children}
       </motion.div>

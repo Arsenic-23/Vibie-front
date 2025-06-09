@@ -1,66 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function AnimatedThumb({ children, active }) {
-  const [showBurst, setShowBurst] = useState(false);
+export function AnimatedThumb({ children, trigger }) {
+  const [burst, setBurst] = useState(false);
   const numLines = 10;
 
-  const colors = Array.from({ length: numLines }).map((_, i) =>
-    i % 2 === 0 ? '#ef4444' : '#ec4899' // red, pink alternately
-  );
-  const lengths = Array.from({ length: numLines }).map((_, i) =>
-    i % 2 === 0 ? 22 : 14 // red longer, pink shorter
-  );
-
   useEffect(() => {
-    if (active) {
+    if (trigger) {
       triggerVibration();
-      setShowBurst(true);
-      const timer = setTimeout(() => setShowBurst(false), 500);
+      setBurst(true);
+      const timer = setTimeout(() => setBurst(false), 400);
       return () => clearTimeout(timer);
     }
-  }, [active]);
+  }, [trigger]);
 
   const triggerVibration = () => {
-    if (navigator.vibrate) {
-      navigator.vibrate(60);
-    }
+    if (navigator.vibrate) navigator.vibrate(60);
   };
+
+  const colors = ['#ef4444', '#ec4899']; // red, pink alternating
 
   return (
     <div className="relative inline-block w-fit h-fit">
-      {/* Burst Lines */}
+      {/* Burst lines */}
       <AnimatePresence>
-        {showBurst &&
+        {burst &&
           Array.from({ length: numLines }).map((_, i) => {
             const angle = (360 / numLines) * i;
             const rad = (angle * Math.PI) / 180;
-            const distance = lengths[i];
+            const distance = i % 2 === 0 ? 22 : 16; // red longer, pink shorter
 
             return (
               <motion.span
                 key={i}
                 initial={{
-                  scale: 0.4,
-                  opacity: 1,
+                  scale: 0,
                   x: 0,
                   y: 0,
+                  opacity: 1,
                 }}
                 animate={{
-                  scale: [0.4, 1.1, 0.4],
+                  scale: 1,
                   x: Math.cos(rad) * distance,
                   y: Math.sin(rad) * distance,
-                  opacity: [1, 1, 0],
+                  opacity: 0,
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.5,
-                  ease: 'easeInOut',
-                  delay: i * 0.015,
+                  duration: 0.4,
+                  ease: 'easeOut',
+                  delay: i * 0.01,
                 }}
                 className="absolute w-0.5 h-2 rounded-full"
                 style={{
-                  backgroundColor: colors[i],
+                  backgroundColor: colors[i % 2],
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
@@ -71,11 +64,11 @@ export function AnimatedThumb({ children, active }) {
           })}
       </AnimatePresence>
 
-      {/* Icon bounce on tap */}
+      {/* Icon bounce */}
       <motion.div
         initial={false}
         animate={{
-          scale: active ? [1, 1.2, 1] : 1,
+          scale: trigger ? [1, 1.3, 1] : 1,
         }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
       >

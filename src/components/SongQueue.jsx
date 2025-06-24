@@ -1,39 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 
 export default function SongQueue({ onClose }) {
-  const [queue, setQueue] = useState([
-    {
-      id: '1',
-      title: 'Next Vibe',
-      artist: 'DJ Sonic',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Vibe',
-    },
-    {
-      id: '2',
-      title: 'Rhythm Flow',
-      artist: 'Beatline',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Flow',
-    },
-    {
-      id: '3',
-      title: 'Echo Beats',
-      artist: 'Synthex',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Echo',
-    },
-    {
-      id: '4',
-      title: 'Midnight Pulse',
-      artist: 'NeonWaves',
-      thumbnail: 'https://via.placeholder.com/100x100.png?text=Pulse',
-    },
-  ]);
-
+  const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const wsRef = useRef(null);
 
-  const handleRemove = (id) => {
-    setQueue((prev) => prev.filter((s) => s.id !== id));
+  useEffect(() => {
+    const stream_id = localStorage.getItem('stream_id');
+    const user_id = localStorage.getItem('user_id');
+
+    if (!stream_id || !user_id) return;
+
+    const ws = new WebSocket(`wss://your-backend-url/ws/stream/${stream_id}?user_id=${user_id}`);
+    wsRef.current = ws;
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'sync' && Array.isArray(data.queue)) {
+        setQueue(data.queue);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error("❌ WebSocket error:", err);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  const handleRemove = async (songId) => {
+    const stream_id = localStorage.getItem('stream_id');
+
+    try {
+      await fetch(`https://your-backend-url/queue/${stream_id}/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ song_id: songId }),
+      });
+    } catch (err) {
+      console.error("❌ Failed to remove song from queue:", err);
+    }
   };
 
   return (
@@ -61,14 +71,18 @@ export default function SongQueue({ onClose }) {
 
         <ul className="space-y-3">
           <AnimatePresence>
-            {queue.map((song, index) => (
-              <SwipeableSongItem
-                key={song.id}
-                song={song}
-                isCurrent={index === currentIndex}
-                onRemove={() => handleRemove(song.id)}
-              />
-            ))}
+            {queue.length === 0 ? (
+              <li className="text-gray-400 text-sm">No songs in queue</li>
+            ) : (
+              queue.map((song, index) => (
+                <SwipeableSongItem
+                  key={song.song_id}
+                  song={song}
+                  isCurrent={index === currentIndex}
+                  onRemove={() => handleRemove(song.song_id)}
+                />
+              ))
+            )}
           </AnimatePresence>
         </ul>
       </motion.div>
@@ -89,14 +103,12 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="relative overflow-hidden rounded-xl"
     >
-      {/* Persistent red background with trash icon */}
       <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0">
         <motion.div style={{ scale }}>
           <Trash2 className="text-white w-4 h-4" />
         </motion.div>
       </div>
 
-      {/* Foreground swipable card */}
       <motion.div
         drag="x"
         style={{ x }}

@@ -13,7 +13,7 @@ export default function Landing() {
     tg?.ready();
   }, []);
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     const tg = window.Telegram?.WebApp;
     tg?.ready();
 
@@ -28,36 +28,52 @@ export default function Landing() {
       return;
     }
 
-    const userData = {
-      telegram_id: user.id,
-      first_name: user.first_name,
-      username: user.username,
-      photo_url: user.photo_url || '',
-    };
-
-    localStorage.setItem('authToken', 'mock-token');
-    localStorage.setItem('profile', JSON.stringify(userData));
-
     const queryParams = new URLSearchParams(window.location.search);
     const joinId = queryParams.get('join');
+    const stream_id = joinId || user.id.toString();
 
-    setIsLoading(true);
-    setFillProgress(0);
-    setShowCheckmark(false);
+    const userData = {
+      telegram_id: user.id,
+      name: user.first_name,
+      username: user.username,
+      profile_pic: user.photo_url || '',
+      stream_id: stream_id,
+    };
 
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 2;
-      setFillProgress(progress);
+    try {
+      setIsLoading(true);
+      setFillProgress(0);
+      setShowCheckmark(false);
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        setShowCheckmark(true);
-        setTimeout(() => {
-          navigate(joinId ? `/home?join=${joinId}` : '/home');
-        }, 600);
-      }
-    }, 16); // ~60fps
+      const res = await fetch(`https://your-backend-url/users/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await res.json();
+
+      localStorage.setItem('stream_id', data.stream_id);
+      localStorage.setItem('user_id', user.id.toString());
+      localStorage.setItem('profile', JSON.stringify(userData));
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 2;
+        setFillProgress(progress);
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setShowCheckmark(true);
+          setTimeout(() => {
+            navigate('/home');
+          }, 600);
+        }
+      }, 16);
+    } catch (err) {
+      alert("Failed to join stream. Try again.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,35 +81,26 @@ export default function Landing() {
       className="relative w-full h-screen overflow-hidden flex flex-col justify-between items-center bg-cover bg-center"
       style={{ backgroundImage: 'url(/images/bg.jpg)' }}
     >
-      {/* Overlay */}
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40 z-0" />
-
-      {/* App Title */}
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-purple-400 drop-shadow-lg" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
       </div>
-
-      {/* Tagline */}
       <div className="z-10 flex flex-col items-center">
         <h1 className="text-white text-3xl md:text-4xl font-semibold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
           Over 100 million songs<br />and counting
         </h1>
       </div>
-
-      {/* Join Button */}
       <div className="z-20 pb-12 flex flex-col items-center gap-4">
         <p className="text-white text-sm md:text-base font-light opacity-90">
           Crafted for those who live in rhythm.
         </p>
-
         <div className="relative w-[240px]">
           <button
             onClick={handleJoin}
             disabled={isLoading}
             className="relative w-full py-3 rounded-full bg-white text-black font-semibold text-base md:text-lg overflow-hidden transition-all duration-300 ease-in-out active:scale-[0.98]"
           >
-            {/* Smooth fill animation */}
             <div
               className="absolute top-0 left-0 h-full rounded-full z-0"
               style={{
@@ -103,8 +110,6 @@ export default function Landing() {
                 boxShadow: '0 0 12px rgba(168, 85, 247, 0.5)',
               }}
             />
-
-            {/* Content overlay */}
             <div className="relative z-10 flex items-center justify-center transition-opacity duration-300">
               {!showCheckmark ? (
                 <span className={`transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}>

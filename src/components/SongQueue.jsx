@@ -13,7 +13,7 @@ export default function SongQueue({ onClose }) {
 
     if (!stream_id || !user_id) return;
 
-    const ws = new WebSocket(`wss://your-backend-url/ws/stream/${stream_id}?user_id=${user_id}`);
+    const ws = new WebSocket(`wss://https://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`);
     wsRef.current = ws;
 
     ws.onmessage = (event) => {

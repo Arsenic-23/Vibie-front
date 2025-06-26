@@ -13,22 +13,21 @@ import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 import MainLayout from './layouts/MainLayout';
 
-import { WebSocketProvider } from './context/WebSocketContext'; // ✅ import it
+import { WebSocketProvider } from './context/WebSocketContext';
 
 function App() {
   const location = useLocation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
     const profile = localStorage.getItem('profile');
-    if (token && profile) {
+    if (profile) {
       setUser(JSON.parse(profile));
     }
   }, []);
 
   return (
-    <WebSocketProvider> {/* ✅ wrap the entire app */}
+    <WebSocketProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
         {!user ? (

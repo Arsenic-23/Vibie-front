@@ -1,3 +1,5 @@
+// File: app/src/pages/Landing.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlayCircle, Check } from 'lucide-react';
@@ -56,6 +58,9 @@ export default function Landing() {
       localStorage.setItem('stream_id', data.stream_id);
       localStorage.setItem('user_id', user.id.toString());
       localStorage.setItem('profile', JSON.stringify(userData));
+
+      // Optional: set auth token if needed by App.jsx
+      // localStorage.setItem('authToken', 'ok');
 
       let progress = 0;
       const interval = setInterval(() => {

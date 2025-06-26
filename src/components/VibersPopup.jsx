@@ -1,10 +1,10 @@
 // File: components/VibersPopup.jsx ✅
 
 import React from 'react';
-import { useWebSocket } from '../context/WebSocketContext'; // 👈 context we built earlier
+import { useWebSocket } from '../context/WebSocketContext'; 
 
 export default function VibersPopup({ onClose }) {
-  const { vibers } = useWebSocket(); // 👈 Get real-time vibers from context
+  const { vibers } = useWebSocket();
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2">

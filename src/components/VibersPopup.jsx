@@ -1,33 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+// File: components/VibersPopup.jsx ✅
+
+import React from 'react';
+import { useWebSocket } from '../context/WebSocketContext'; // 👈 context we built earlier
 
 export default function VibersPopup({ onClose }) {
-  const [vibers, setVibers] = useState([]);
-  const wsRef = useRef(null);
-
-  useEffect(() => {
-    const stream_id = localStorage.getItem("stream_id");
-    const user_id = localStorage.getItem("user_id");
-
-    if (!stream_id || !user_id) return;
-
-    const ws = new WebSocket(`wss://https://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "sync" && data.vibers) {
-        setVibers(data.vibers);
-      }
-    };
-
-    ws.onerror = () => {
-      console.error("❌ WebSocket error");
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
+  const { vibers } = useWebSocket(); // 👈 Get real-time vibers from context
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2">

@@ -13,6 +13,8 @@ import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 import MainLayout from './layouts/MainLayout';
 
+import { WebSocketProvider } from './context/WebSocketContext'; // ✅ import it
+
 function App() {
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -26,23 +28,25 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      {!user ? (
-        <Route path="*" element={<Navigate to="/" replace />} />
-      ) : (
-        <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home user={user} />} />
-          <Route path="/search" element={<Search user={user} />} />
-          <Route path="/explore" element={<Explore user={user} />} />
-          <Route path="/profile" element={<Profile user={user} />} />
-          <Route path="/profile/history" element={<History />} />
-          <Route path="/profile/favourites" element={<Favourites />} />
-          <Route path="/profile/statistics" element={<Statistics />} />
-          <Route path="/profile/settings" element={<Settings />} />
-        </Route>
-      )}
-    </Routes>
+    <WebSocketProvider> {/* ✅ wrap the entire app */}
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        {!user ? (
+          <Route path="*" element={<Navigate to="/" replace />} />
+        ) : (
+          <Route element={<MainLayout />}>
+            <Route path="/home" element={<Home user={user} />} />
+            <Route path="/search" element={<Search user={user} />} />
+            <Route path="/explore" element={<Explore user={user} />} />
+            <Route path="/profile" element={<Profile user={user} />} />
+            <Route path="/profile/history" element={<History />} />
+            <Route path="/profile/favourites" element={<Favourites />} />
+            <Route path="/profile/statistics" element={<Statistics />} />
+            <Route path="/profile/settings" element={<Settings />} />
+          </Route>
+        )}
+      </Routes>
+    </WebSocketProvider>
   );
 }
 

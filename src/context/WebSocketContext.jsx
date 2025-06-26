@@ -16,7 +16,7 @@ export function WebSocketProvider({ children }) {
   useEffect(() => {
     if (!stream_id || !user?.telegram_id) return;
 
-    const wsUrl = `wss://backendvibie.onrender.com/ws/${stream_id}`;
+    const wsUrl = `wss://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user.telegram_id}`;
     const socket = new WebSocket(wsUrl);
     socketRef.current = socket;
 
@@ -32,10 +32,9 @@ export function WebSocketProvider({ children }) {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'vibers_update') {
+      if (data.type === 'sync') {
         setVibers(data.vibers || []);
-      } else if (data.type === 'now_playing') {
-        setNowPlaying(data.song || null);
+        setNowPlaying(data.now_playing || null);
       }
     };
 
@@ -44,7 +43,9 @@ export function WebSocketProvider({ children }) {
     };
 
     return () => {
-      socket.send(JSON.stringify({ type: 'leave', user_id: user.telegram_id }));
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'leave', user_id: user.telegram_id }));
+      }
       socket.close();
     };
   }, [stream_id, user]);

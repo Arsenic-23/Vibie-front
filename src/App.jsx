@@ -1,5 +1,3 @@
-// File: app/src/App.jsx
-
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';
@@ -20,6 +18,17 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    tg?.ready?.();
+
+    // ✅ Extract stream_id from Telegram start_param
+    const startParam = tg?.initDataUnsafe?.start_param;
+    if (startParam) {
+      console.log("✅ Telegram deep link stream_id:", startParam);
+      localStorage.setItem('stream_id', startParam);
+    }
+
+    // ✅ Load user if exists
     const profile = localStorage.getItem('profile');
     if (profile) {
       setUser(JSON.parse(profile));

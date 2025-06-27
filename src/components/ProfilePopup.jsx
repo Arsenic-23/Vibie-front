@@ -1,4 +1,3 @@
-// src/components/ProfilePopup.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
 import toast from 'react-hot-toast';
@@ -7,11 +6,14 @@ export default function ProfilePopup({ onClose }) {
   const [activeTab, setActiveTab] = useState('theme');
   const popupRef = useRef(null);
 
-  const streamLink = 'https://t.me/vibie_bot/Vibiebot';
+  // 🔗 Extract streamId from current URL path
+  const streamId = window.location.pathname.split('/').pop();
+  const streamLink = `https://t.me/vibie_bot?startapp=${streamId}`; // dynamic bot link
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(streamLink);
+      toast.success('Link copied to clipboard!');
     } catch (err) {
       toast.error('Failed to copy the link.');
     }
@@ -20,7 +22,7 @@ export default function ProfilePopup({ onClose }) {
   const openTelegramShare = () => {
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(
       streamLink
-    )}&text=${encodeURIComponent('Join my stream on Vibie!')}`;
+    )}&text=${encodeURIComponent('Join my stream on Vibie! 🎶')}`;
     window.open(telegramUrl, '_blank');
   };
 
@@ -36,7 +38,6 @@ export default function ProfilePopup({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4 bg-transparent">
-      {/* Popup */}
       <div
         ref={popupRef}
         className="w-72 bg-white/90 dark:bg-[#111111] backdrop-blur-lg p-5 rounded-2xl shadow-2xl space-y-5 border border-gray-200 dark:border-gray-800 animate-popBounce z-50"
@@ -93,7 +94,7 @@ export default function ProfilePopup({ onClose }) {
         )}
       </div>
 
-      {/* Animations & Styles */}
+      {/* Styles */}
       <style jsx>{`
         @keyframes gradientMove {
           0% {

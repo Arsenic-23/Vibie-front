@@ -12,27 +12,12 @@ export const useWebSocket = () => useContext(WebSocketContext);
 export function WebSocketProvider({ children }) {
   const [vibers, setVibers] = useState([]);
   const [nowPlaying, setNowPlaying] = useState(null);
-  const [streamId, setStreamId] = useState(null);
-  const [user, setUser] = useState(null);
   const socketRef = useRef(null);
 
-  // 🔄 Periodically sync stream_id and user from localStorage
   useEffect(() => {
-    const syncInterval = setInterval(() => {
-      const storedStreamId = localStorage.getItem('stream_id');
-      const storedProfile = JSON.parse(localStorage.getItem('profile') || '{}');
+    const streamId = localStorage.getItem('stream_id');
+    const user = JSON.parse(localStorage.getItem('profile') || '{}');
 
-      if (storedStreamId && storedProfile?.telegram_id) {
-        setStreamId(storedStreamId);
-        setUser(storedProfile);
-      }
-    }, 300); // every 300ms
-
-    return () => clearInterval(syncInterval);
-  }, []);
-
-  // 🧠 Connect WebSocket when streamId & user are ready
-  useEffect(() => {
     if (!streamId || !user?.telegram_id) return;
 
     const wsUrl = `wss://backendvibie.onrender.com/ws/stream/${streamId}?user_id=${user.telegram_id}`;
@@ -41,6 +26,7 @@ export function WebSocketProvider({ children }) {
 
     socket.onopen = () => {
       console.log('[🔌 WebSocket] Connected');
+
       socket.send(
         JSON.stringify({
           type: 'join',
@@ -54,6 +40,7 @@ export function WebSocketProvider({ children }) {
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'sync') {
+        console.log('[🎵 Sync]', data);
         setVibers(data.vibers || []);
         setNowPlaying(data.now_playing || null);
       }
@@ -65,13 +52,11 @@ export function WebSocketProvider({ children }) {
 
     return () => {
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({ type: 'leave', user_id: user.telegram_id })
-        );
+        socket.send(JSON.stringify({ type: 'leave', user_id: user.telegram_id }));
       }
       socket.close();
     };
-  }, [streamId, user]);
+  }, []); // <- Only run once on initial mount
 
   return (
     <WebSocketContext.Provider value={{ vibers, nowPlaying }}>

@@ -10,7 +10,6 @@ import Favourites from './pages/Profile/Favourites';
 import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 import MainLayout from './layouts/MainLayout';
-
 import { WebSocketProvider } from './context/WebSocketContext';
 
 function App() {
@@ -21,14 +20,12 @@ function App() {
     const tg = window.Telegram?.WebApp;
     tg?.ready?.();
 
-    // ✅ Extract stream_id from Telegram start_param
     const startParam = tg?.initDataUnsafe?.start_param;
     if (startParam) {
-      console.log("✅ Telegram deep link stream_id:", startParam);
+      console.log('✅ Deep link stream_id:', startParam);
       localStorage.setItem('stream_id', startParam);
     }
 
-    // ✅ Load user if exists
     const profile = localStorage.getItem('profile');
     if (profile) {
       setUser(JSON.parse(profile));

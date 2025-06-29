@@ -9,35 +9,32 @@ export default function Landing() {
   const [showCheckmark, setShowCheckmark] = useState(false);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
+    window.Telegram?.WebApp?.ready?.();
   }, []);
 
   const handleJoin = async () => {
     const tg = window.Telegram?.WebApp;
-    tg?.ready();
+    tg?.ready?.();
 
     try {
       tg?.HapticFeedback?.impactOccurred('light');
     } catch (_) {}
 
     const user = tg?.initDataUnsafe?.user;
-
     if (!user) {
-      alert("Please open this from inside Telegram.");
+      alert('Please open this inside Telegram.');
       return;
     }
 
-    // ✅ Prefer stream_id from start_param
-    const streamIdFromTelegram = tg?.initDataUnsafe?.start_param;
-    const stream_id = streamIdFromTelegram || user.id.toString();
+    const startParam = tg?.initDataUnsafe?.start_param;
+    const stream_id = startParam || user.id.toString();
 
     const userData = {
       telegram_id: user.id,
       name: user.first_name,
       username: user.username,
       profile_pic: user.photo_url || '',
-      stream_id: stream_id,
+      stream_id,
     };
 
     try {
@@ -45,7 +42,7 @@ export default function Landing() {
       setFillProgress(0);
       setShowCheckmark(false);
 
-      const res = await fetch(`https://backendvibie.onrender.com/users/join`, {
+      const res = await fetch('https://backendvibie.onrender.com/users/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -54,24 +51,21 @@ export default function Landing() {
       const data = await res.json();
 
       localStorage.setItem('stream_id', data.stream_id);
-      localStorage.setItem('user_id', user.id.toString());
       localStorage.setItem('profile', JSON.stringify(userData));
+      localStorage.setItem('user_id', user.id.toString());
 
       let progress = 0;
       const interval = setInterval(() => {
         progress += 2;
         setFillProgress(progress);
-
         if (progress >= 100) {
           clearInterval(interval);
           setShowCheckmark(true);
-          setTimeout(() => {
-            navigate('/home');
-          }, 600);
+          setTimeout(() => navigate('/home'), 600);
         }
       }, 16);
     } catch (err) {
-      alert("Failed to join stream. Try again.");
+      alert('Failed to join stream. Try again.');
       setIsLoading(false);
     }
   };
@@ -81,7 +75,7 @@ export default function Landing() {
       className="relative w-full h-screen overflow-hidden flex flex-col justify-between items-center bg-cover bg-center"
       style={{ backgroundImage: 'url(/images/bg.jpg)' }}
     >
-      <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40 z-0" />
+      <div className="absolute inset-0 bg-black bg-opacity-40 z-0" />
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-purple-400 drop-shadow-lg" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>

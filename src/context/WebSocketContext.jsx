@@ -17,7 +17,6 @@ export function WebSocketProvider({ children }) {
   useEffect(() => {
     const streamId = localStorage.getItem('stream_id');
     const user = JSON.parse(localStorage.getItem('profile') || '{}');
-
     if (!streamId || !user?.telegram_id) return;
 
     const wsUrl = `wss://backendvibie.onrender.com/ws/stream/${streamId}?user_id=${user.telegram_id}`;
@@ -26,7 +25,6 @@ export function WebSocketProvider({ children }) {
 
     socket.onopen = () => {
       console.log('[🔌 WebSocket] Connected');
-
       socket.send(
         JSON.stringify({
           type: 'join',
@@ -40,7 +38,6 @@ export function WebSocketProvider({ children }) {
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'sync') {
-        console.log('[🎵 Sync]', data);
         setVibers(data.vibers || []);
         setNowPlaying(data.now_playing || null);
       }
@@ -56,7 +53,7 @@ export function WebSocketProvider({ children }) {
       }
       socket.close();
     };
-  }, []); // <- Only run once on initial mount
+  }, []); // only on mount
 
   return (
     <WebSocketContext.Provider value={{ vibers, nowPlaying }}>

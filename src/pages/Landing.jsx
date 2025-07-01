@@ -27,7 +27,7 @@ export default function Landing() {
     }
 
     const startParam = tg?.initDataUnsafe?.start_param;
-    const stream_id = startParam || user.id.toString();
+    const stream_id = localStorage.getItem('stream_id') || startParam || user.id.toString();
 
     const userData = {
       telegram_id: user.id,

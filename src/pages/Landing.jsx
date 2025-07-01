@@ -21,14 +21,14 @@ export default function Landing() {
     } catch (_) {}
 
     const user = tg?.initDataUnsafe?.user;
+    const startParam = tg?.initDataUnsafe?.start_param;
+
     if (!user) {
       alert('Please open this inside Telegram.');
       return;
     }
 
-    const startParam = tg?.initDataUnsafe?.start_param;
-    const stream_id = localStorage.getItem('stream_id') || startParam || user.id.toString();
-
+    const stream_id = startParam || user.id.toString(); // Always prioritize deep link
     const userData = {
       telegram_id: user.id,
       name: user.first_name,
@@ -50,7 +50,8 @@ export default function Landing() {
 
       const data = await res.json();
 
-      localStorage.setItem('stream_id', data.stream_id);
+      // Save final values
+      localStorage.setItem('stream_id', data.stream_id); // Keep stream_id as provided by server
       localStorage.setItem('profile', JSON.stringify(userData));
       localStorage.setItem('user_id', user.id.toString());
 

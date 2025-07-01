@@ -15,31 +15,39 @@ export function WebSocketProvider({ children }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem('profile') || '{}');
     const streamId = localStorage.getItem('stream_id');
-    const user = JSON.parse(localStorage.getItem('profile') || '{}');
-    if (!streamId || !user?.telegram_id) return;
 
-    const wsUrl = `wss://backendvibie.onrender.com/ws/stream/${streamId}?user_id=${user.telegram_id}`;
+    if (!streamId || !profile?.telegram_id) {
+      console.warn('Missing stream_id or profile for WebSocket connection');
+      return;
+    }
+
+    const wsUrl = `wss://backendvibie.onrender.com/ws/stream/${streamId}?user_id=${profile.telegram_id}`;
     const socket = new WebSocket(wsUrl);
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log('[🔌 WebSocket] Connected');
+      console.log('[🔌 WebSocket] Connected to stream:', streamId);
       socket.send(
         JSON.stringify({
           type: 'join',
-          user_id: user.telegram_id,
-          name: user.name,
-          profile_pic: user.profile_pic || '',
+          user_id: profile.telegram_id,
+          name: profile.name,
+          profile_pic: profile.profile_pic || '',
         })
       );
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'sync') {
-        setVibers(data.vibers || []);
-        setNowPlaying(data.now_playing || null);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'sync') {
+          setVibers(data.vibers || []);
+          setNowPlaying(data.now_playing || null);
+        }
+      } catch (err) {
+        console.error('WebSocket message parsing error:', err);
       }
     };
 
@@ -49,11 +57,11 @@ export function WebSocketProvider({ children }) {
 
     return () => {
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: 'leave', user_id: user.telegram_id }));
+        socket.send(JSON.stringify({ type: 'leave', user_id: profile.telegram_id }));
       }
       socket.close();
     };
-  }, []); // only on mount
+  }, []);
 
   return (
     <WebSocketContext.Provider value={{ vibers, nowPlaying }}>

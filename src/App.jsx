@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, createContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';

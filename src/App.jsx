@@ -24,9 +24,19 @@ function App() {
     tg?.ready?.();
 
     const startParam = tg?.initDataUnsafe?.start_param;
+
+    // 🔁 Save the deep link ID if it's provided
     if (startParam) {
-      console.log('✅ Deep link stream_id:', startParam);
+      console.log('✅ Deep link stream_id detected:', startParam);
+      localStorage.setItem('deep_link_stream_id', startParam);
       setStreamId(startParam);
+    } else {
+      // 👇 Fallback: retrieve from storage if available
+      const cachedStreamId = localStorage.getItem('deep_link_stream_id');
+      if (cachedStreamId) {
+        console.log('📦 Loaded cached stream_id:', cachedStreamId);
+        setStreamId(cachedStreamId);
+      }
     }
 
     const profile = localStorage.getItem('profile');

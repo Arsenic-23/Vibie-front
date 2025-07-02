@@ -15,7 +15,6 @@ import { WebSocketProvider } from './context/WebSocketContext';
 export const StreamContext = createContext(null);
 
 function App() {
-  const location = useLocation();
   const [user, setUser] = useState(null);
   const [streamId, setStreamId] = useState(null);
 
@@ -23,26 +22,19 @@ function App() {
     const tg = window.Telegram?.WebApp;
     tg?.ready?.();
 
+    // Get deep link stream id from Telegram only once on app mount
     const startParam = tg?.initDataUnsafe?.start_param;
-
-    // 🔁 Save the deep link ID if it's provided
     if (startParam) {
-      console.log('✅ Deep link stream_id detected:', startParam);
-      localStorage.setItem('deep_link_stream_id', startParam);
+      console.log('🎯 Deep link param:', startParam);
       setStreamId(startParam);
+      localStorage.setItem('deep_link_stream_id', startParam); // Save for fallback
     } else {
-      // 👇 Fallback: retrieve from storage if available
-      const cachedStreamId = localStorage.getItem('deep_link_stream_id');
-      if (cachedStreamId) {
-        console.log('📦 Loaded cached stream_id:', cachedStreamId);
-        setStreamId(cachedStreamId);
-      }
+      const fallback = localStorage.getItem('deep_link_stream_id');
+      if (fallback) setStreamId(fallback);
     }
 
     const profile = localStorage.getItem('profile');
-    if (profile) {
-      setUser(JSON.parse(profile));
-    }
+    if (profile) setUser(JSON.parse(profile));
   }, []);
 
   return (

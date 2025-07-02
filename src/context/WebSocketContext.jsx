@@ -16,10 +16,14 @@ export function WebSocketProvider({ children }) {
 
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem('profile') || '{}');
-    const streamId = localStorage.getItem('stream_id');
+
+    // ✅ Always use deep link stream ID, saved from Landing
+    const streamId =
+      localStorage.getItem('deep_link_stream_id') ||
+      localStorage.getItem('stream_id');
 
     if (!streamId || !profile?.telegram_id) {
-      console.warn('Missing stream_id or profile for WebSocket connection');
+      console.warn('❌ Missing stream_id or profile for WebSocket connection');
       return;
     }
 
@@ -57,7 +61,9 @@ export function WebSocketProvider({ children }) {
 
     return () => {
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: 'leave', user_id: profile.telegram_id }));
+        socket.send(
+          JSON.stringify({ type: 'leave', user_id: profile.telegram_id })
+        );
       }
       socket.close();
     };

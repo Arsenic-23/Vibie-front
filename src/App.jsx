@@ -22,19 +22,16 @@ function App() {
     const tg = window.Telegram?.WebApp;
     tg?.ready?.();
 
-    // Get deep link stream id from Telegram only once on app mount
-    const startParam = tg?.initDataUnsafe?.start_param;
-    if (startParam) {
-      console.log('🎯 Deep link param:', startParam);
-      setStreamId(startParam);
-      localStorage.setItem('deep_link_stream_id', startParam); // Save for fallback
-    } else {
-      const fallback = localStorage.getItem('deep_link_stream_id');
-      if (fallback) setStreamId(fallback);
+    // ✅ Get final saved stream_id set from Landing
+    const storedStreamId = localStorage.getItem('stream_id');
+    if (storedStreamId) {
+      setStreamId(storedStreamId);
     }
 
     const profile = localStorage.getItem('profile');
-    if (profile) setUser(JSON.parse(profile));
+    if (profile) {
+      setUser(JSON.parse(profile));
+    }
   }, []);
 
   return (

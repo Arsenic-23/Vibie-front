@@ -28,8 +28,11 @@ export default function Landing() {
       return;
     }
 
-    // Always prioritize deep link if available
-    const stream_id = startParam || user.id.toString();
+    // ✅ Proper stream_id extraction
+    const stream_id = startParam?.trim() || localStorage.getItem('deep_link_stream_id') || user.id.toString();
+    localStorage.setItem('deep_link_stream_id', stream_id);
+
+    console.log('🎯 Final stream_id used:', stream_id);
 
     const userData = {
       telegram_id: user.id,
@@ -52,13 +55,10 @@ export default function Landing() {
 
       const data = await res.json();
 
-      // ✅ Save all required values
-      localStorage.setItem('stream_id', data.stream_id); // from backend
-      localStorage.setItem('deep_link_stream_id', stream_id); // from Telegram link
+      localStorage.setItem('stream_id', data.stream_id);
       localStorage.setItem('profile', JSON.stringify(userData));
       localStorage.setItem('user_id', user.id.toString());
 
-      // Progress animation
       let progress = 0;
       const interval = setInterval(() => {
         progress += 2;

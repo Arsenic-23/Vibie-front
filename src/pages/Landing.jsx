@@ -21,18 +21,20 @@ export default function Landing() {
     } catch (_) {}
 
     const user = tg?.initDataUnsafe?.user;
-    const startParam = tg?.initDataUnsafe?.start_param;
+    const startParam = tg?.initDataUnsafe?.start_param?.trim();
 
     if (!user) {
       alert('Please open this inside Telegram.');
       return;
     }
 
-    // ✅ Proper stream_id extraction
-    const stream_id = startParam?.trim() || localStorage.getItem('deep_link_stream_id') || user.id.toString();
-    localStorage.setItem('deep_link_stream_id', stream_id);
+    // ✅ Final stream_id logic (deep link > local > fallback to user.id)
+    const stream_id =
+      startParam ||
+      localStorage.getItem('deep_link_stream_id') ||
+      user.id.toString();
 
-    console.log('🎯 Final stream_id used:', stream_id);
+    localStorage.setItem('deep_link_stream_id', stream_id);
 
     const userData = {
       telegram_id: user.id,
@@ -55,6 +57,7 @@ export default function Landing() {
 
       const data = await res.json();
 
+      // ✅ Save final values
       localStorage.setItem('stream_id', data.stream_id);
       localStorage.setItem('profile', JSON.stringify(userData));
       localStorage.setItem('user_id', user.id.toString());

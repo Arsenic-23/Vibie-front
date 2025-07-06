@@ -38,7 +38,7 @@ export default function Search() {
       setLoading(true);
       try {
         const res = await axios.get('https://backendvibie.onrender.com/search/', {
-          params: { query, page },
+          params: { q: query, page }, // ✅ Fixed param: "query" → "q"
         });
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
@@ -170,12 +170,6 @@ export default function Search() {
     console.log('Playing:', song.title);
   };
 
-  const formatDuration = (duration) => {
-    const minutes = Math.floor(duration / 60);
-    const seconds = duration % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
@@ -255,10 +249,10 @@ export default function Search() {
                   </div>
                   <div className="mt-2 space-y-0.5 text-sm">
                     <h2 className="font-semibold truncate">{song.title}</h2>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.artist}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p> {/* ✅ Changed from artist to channel */}
                     {song.duration && (
                       <p className="text-[10px] text-gray-500 dark:text-gray-500">
-                        {formatDuration(song.duration)}
+                        {song.duration}
                       </p>
                     )}
                   </div>
@@ -291,11 +285,11 @@ export default function Search() {
             </motion.div>
         )}
       </AnimatePresence>
-      {/* Footer */}
+
       <div className="mt-12 -mb-0.5 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-  <PlayCircle size={18} className="text-purple-500" />
-  <span className="font-semibold">Vibie</span>
-</div>
+        <PlayCircle size={18} className="text-purple-500" />
+        <span className="font-semibold">Vibie</span>
+      </div>
     </div>
   );
 }

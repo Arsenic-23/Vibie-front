@@ -37,7 +37,7 @@ export default function Search() {
       if (!query) return;
       setLoading(true);
       try {
-        const res = await axios.get('https://vibie-backend.onrender.com/api/search/search/', {
+        const res = await axios.get('https://backendvibie.onrender.com/search/', {
           params: { query, page },
         });
         const newResults = res.data.results || [];

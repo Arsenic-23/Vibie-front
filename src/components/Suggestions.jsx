@@ -10,7 +10,8 @@ export default function Suggestions({ query, onSelect }) {
 
     const fetchSuggestions = debounce(async () => {
       try {
-        const res = await axios.get('https://backendvibie.onrender.com/suggest', {
+        const res = await axios.get('
+https://backendvibie.onrender.com/suggest/', {
           params: { q: query },
         });
         setSuggestions(res.data.results || []);

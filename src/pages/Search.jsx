@@ -3,11 +3,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SearchIcon, Play, Mic, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import debounce from 'lodash.debounce';
 
 export default function Search() {
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
@@ -32,13 +34,36 @@ export default function Search() {
     [loading, hasMore]
   );
 
+  // 🔄 Debounced suggestions fetcher
+  const fetchSuggestions = useCallback(
+    debounce(async (term) => {
+      try {
+        const res = await axios.get('https://backendvibie.onrender.com/search/', {
+          params: { q: term },
+        });
+        setSuggestions(res.data.results.slice(0, 5)); // Top 5 only
+      } catch {
+        setSuggestions([]);
+      }
+    }, 400),
+    []
+  );
+
+  useEffect(() => {
+    if (input.trim() && !searchSubmitted && !isListening) {
+      fetchSuggestions(input.trim());
+    } else {
+      setSuggestions([]);
+    }
+  }, [input]);
+
   useEffect(() => {
     const fetchResults = async () => {
       if (!query) return;
       setLoading(true);
       try {
         const res = await axios.get('https://backendvibie.onrender.com/search/', {
-          params: { q: query, page }, // ✅ Fixed param: "query" → "q"
+          params: { q: query, page },
         });
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
@@ -131,11 +156,13 @@ export default function Search() {
     };
   }, [showWave]);
 
-  const handleSearch = () => {
-    if (input.trim()) {
-      setQuery(input.trim());
+  const handleSearch = (manualQuery = null) => {
+    const finalQuery = manualQuery || input.trim();
+    if (finalQuery) {
+      setQuery(finalQuery);
       setSearchSubmitted(true);
       setResults([]);
+      setSuggestions([]);
       setPage(1);
       setHasMore(true);
       setShowWave(false);
@@ -160,6 +187,7 @@ export default function Search() {
     setInput('');
     setSearchSubmitted(false);
     setResults([]);
+    setSuggestions([]);
     setPage(1);
     setQuery('');
     setShowWave(true);
@@ -180,7 +208,10 @@ export default function Search() {
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
-              if (!e.target.value) setSearchSubmitted(false);
+              if (!e.target.value) {
+                setSearchSubmitted(false);
+                setSuggestions([]);
+              }
             }}
             onKeyDown={handleKeyDown}
             placeholder="Find your vibe..."
@@ -203,8 +234,24 @@ export default function Search() {
               <Mic size={18} />
             </motion.button>
           </div>
+
+          {/* 🔍 Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="absolute w-full top-full mt-2 z-10 bg-white dark:bg-neutral-900 shadow-xl rounded-xl overflow-hidden text-sm">
+              {suggestions.map((s, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSearch(s.title)}
+                  className="w-full text-left px-4 py-2 hover:bg-purple-100 dark:hover:bg-neutral-800"
+                >
+                  {s.title}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* Discover Section */}
         <AnimatePresence>
           {!searchSubmitted && (
             <motion.div
@@ -249,11 +296,9 @@ export default function Search() {
                   </div>
                   <div className="mt-2 space-y-0.5 text-sm">
                     <h2 className="font-semibold truncate">{song.title}</h2>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p> {/* ✅ Changed from artist to channel */}
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
                     {song.duration && (
-                      <p className="text-[10px] text-gray-500 dark:text-gray-500">
-                        {song.duration}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-500">{song.duration}</p>
                     )}
                   </div>
                 </div>
@@ -271,6 +316,7 @@ export default function Search() {
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
 
+      {/* SiriWave */}
       <AnimatePresence>
         {showWave && (
           <motion.div
@@ -280,12 +326,13 @@ export default function Search() {
             exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
             transition={{ duration: 0.5 }}
             className="fixed bottom-14 left-0 w-full flex justify-center z-50"
-         >
+          >
             <div className="siri-voice-visualizer w-[250px] h-[60px]" />
-            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Footer */}
       <div className="mt-12 -mb-0.5 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
         <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>

@@ -8,20 +8,21 @@ export default function SongQueue({ onClose }) {
   const [queue, setQueue] = useState([]);
   const wsRef = useRef(null);
 
-  // ✅ Use backend URL from .env
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+  // ✅ Backend URL from .env
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+  // 🔄 Keep queue in sync with AudioProvider
   useEffect(() => {
     setQueue(audioQueue || []);
   }, [audioQueue]);
 
+  // 🔌 Setup WebSocket connection for live queue updates
   useEffect(() => {
     const stream_id = localStorage.getItem('stream_id');
     const user_id = localStorage.getItem('user_id');
     if (!stream_id || !user_id || !backendUrl) return;
 
-    // ✅ Build dynamic WebSocket URL from backend base
-    const wsBase = backendUrl.replace(/^http/, 'ws'); // Converts http(s) to ws(s)
+    const wsBase = backendUrl.replace(/^http/, 'ws');
     const wsUrl = `${wsBase}/ws/stream/${stream_id}?user_id=${user_id}`;
 
     const ws = new WebSocket(wsUrl);
@@ -30,7 +31,6 @@ export default function SongQueue({ onClose }) {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-
         if (data.type === 'sync' && Array.isArray(data.queue)) {
           if (data.queue.length > 0) {
             setQueue((prev) => {
@@ -51,6 +51,46 @@ export default function SongQueue({ onClose }) {
 
     return () => ws.close();
   }, [backendUrl]);
+
+  // 🚀 Automatically POST newly added songs to backend
+  useEffect(() => {
+    const stream_id = localStorage.getItem('stream_id');
+    if (!stream_id || !backendUrl) return;
+
+    const unsyncedSongs = queue.filter((song) => !song.synced);
+
+    unsyncedSongs.forEach(async (song) => {
+      const payload = {
+        stream_id,
+        song_id: song.song_id,
+        title: song.title,
+        artist: song.artist,
+        duration: song.duration || 0,
+        thumbnail_url: song.thumbnail_url || song.thumbnail || '',
+        audio_url: song.audio_url || '',
+      };
+
+      try {
+        const res = await fetch(`${backendUrl}/queue/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        console.log('✅ Synced song to backend:', song.title);
+
+        // Mark song as synced to prevent re-posting
+        setQueue((prev) =>
+          prev.map((s) =>
+            s.song_id === song.song_id ? { ...s, synced: true } : s
+          )
+        );
+      } catch (err) {
+        console.error('❌ Failed to sync song to backend:', err);
+      }
+    });
+  }, [queue, backendUrl]);
 
   const handleRemove = (songId) => {
     removeFromQueue(songId);
@@ -104,6 +144,7 @@ export default function SongQueue({ onClose }) {
   );
 }
 
+// 🎧 Swipe-to-remove component
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
   const scale = useTransform(x, [-60, 0], [1.1, 1]);
@@ -145,7 +186,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         } rounded-xl`}
       >
         <img
-          src={song.thumbnail || '/placeholder.jpg'}
+          src={song.thumbnail_url || song.thumbnail || '/placeholder.jpg'}
           alt={song.title}
           className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
         />

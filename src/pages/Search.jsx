@@ -41,7 +41,7 @@ export default function Search() {
       setLoading(true);
       try {
         const res = await axios.get(
-          'https://document-perception-shaved-genesis.trycloudflare.com/search/',
+          'https://please-busy-jane-garbage.trycloudflare.com/search/',
           { params: { q: query, page } }
         );
         const newResults = res.data.results || [];
@@ -159,7 +159,7 @@ export default function Search() {
   const handlePlaySong = async (song) => {
     try {
       const audioRes = await fetch(
-        `https://document-perception-shaved-genesis.trycloudflare.com/audio/audio/fetch?video_id=${song.id}`
+        `https://please-busy-jane-garbage.trycloudflare.com/audio/audio/fetch?video_id=${song.id}`
       );
       const audioData = await audioRes.json();
       const songObj = {

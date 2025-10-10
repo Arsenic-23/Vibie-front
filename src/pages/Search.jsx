@@ -45,8 +45,18 @@ export default function Search() {
           { params: { q: query, page } }
         );
         const newResults = res.data.results || [];
-        setResults((prev) => [...prev, ...newResults]);
-        setHasMore(newResults.length === 15);
+        // normalize results (ensure fields exist)
+        const normalized = newResults.map((r) => ({
+          id: r.id ?? r.video_id ?? r.videoId,
+          title: r.title ?? r.name ?? 'Unknown title',
+          channel: r.channel ?? r.artist ?? '',
+          thumbnail: r.thumbnail ?? r.thumb ?? '/placeholder.jpg',
+          duration: r.duration,
+          // keep original payload as `raw` if needed
+          raw: r,
+        }));
+        setResults((prev) => (page === 1 ? normalized : [...prev, ...normalized]));
+        setHasMore(normalized.length === 15 || normalized.length > 0);
       } catch (err) {
         console.error(err);
         setHasMore(false);
@@ -159,17 +169,34 @@ export default function Search() {
   const handlePlaySong = async (song) => {
     try {
       const audioRes = await fetch(
-        `https://please-busy-jane-garbage.trycloudflare.com/audio/audio/fetch?video_id=${song.id}`
+        `https://please-busy-jane-garbage.trycloudflare.com/audio/audio/fetch?video_id=${encodeURIComponent(
+          song.id
+        )}`
       );
+      if (!audioRes.ok) throw new Error('Audio fetch failed');
       const audioData = await audioRes.json();
+
+      if (!audioData?.url) {
+        console.error('No audio URL returned for', song);
+        return;
+      }
+
       const songObj = {
-        ...song,
-        audioUrl: audioData.url,
+        song_id: song.id,
+        id: song.id,
+        title: song.title,
+        artist: song.channel || song.artist || '',
         thumbnail: song.thumbnail || '/placeholder.jpg',
+        url: audioData.url, // IMPORTANT: provider expects `url`
+        duration: song.duration,
+        raw: song.raw ?? song,
       };
 
-      if (!currentSong) playSong(songObj);
-      else addToQueue(songObj);
+      if (!currentSong) {
+        playSong(songObj);
+      } else {
+        addToQueue(songObj);
+      }
     } catch (err) {
       console.error('Failed to fetch audio URL:', err);
     }

@@ -9,7 +9,7 @@ export default function SongQueue({ onClose }) {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    setQueue(audioQueue);
+    setQueue(audioQueue || []);
   }, [audioQueue]);
 
   useEffect(() => {
@@ -18,15 +18,24 @@ export default function SongQueue({ onClose }) {
     if (!stream_id || !user_id) return;
 
     const ws = new WebSocket(
-      `wss://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`
+      `wss://please-busy-jane-garbage.trycloudflare.com/ws/stream/${stream_id}?user_id=${user_id}`
     );
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+
         if (data.type === 'sync' && Array.isArray(data.queue)) {
-          setQueue(data.queue);
+          if (data.queue.length > 0) {
+            setQueue((prev) => {
+              // Prevent redundant overwrites if queue is already same
+              const changed =
+                JSON.stringify(prev.map((s) => s.song_id)) !==
+                JSON.stringify(data.queue.map((s) => s.song_id));
+              return changed ? data.queue : prev;
+            });
+          }
         }
       } catch (err) {
         console.error('❌ Failed to parse WebSocket message:', err);
@@ -34,10 +43,11 @@ export default function SongQueue({ onClose }) {
     };
 
     ws.onerror = (err) => console.error('❌ WebSocket error:', err);
+    ws.onclose = () => console.log('🔌 WebSocket closed');
+
     return () => ws.close();
   }, []);
 
-  // ✅ Remove only the specific song (not all)
   const handleRemove = (songId) => {
     removeFromQueue(songId);
     setQueue((prev) => prev.filter((s) => s.song_id !== songId));

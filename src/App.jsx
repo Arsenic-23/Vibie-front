@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -11,6 +11,7 @@ import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 import MainLayout from './layouts/MainLayout';
 import { WebSocketProvider } from './context/WebSocketContext';
+import { AudioProvider } from './context/AudioProvider';
 
 export const StreamContext = createContext(null);
 
@@ -21,40 +22,39 @@ function App() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
     tg?.ready?.();
-
-    // ✅ Get final saved stream_id set from Landing
+    
     const storedStreamId = localStorage.getItem('stream_id');
-    if (storedStreamId) {
-      setStreamId(storedStreamId);
-    }
+    if (storedStreamId) setStreamId(storedStreamId);
 
+    
     const profile = localStorage.getItem('profile');
-    if (profile) {
-      setUser(JSON.parse(profile));
-    }
+    if (profile) setUser(JSON.parse(profile));
   }, []);
 
   return (
     <StreamContext.Provider value={streamId}>
-      <WebSocketProvider streamId={streamId}>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          {!user ? (
-            <Route path="*" element={<Navigate to="/" replace />} />
-          ) : (
-            <Route element={<MainLayout />}>
-              <Route path="/home" element={<Home user={user} />} />
-              <Route path="/search" element={<Search user={user} />} />
-              <Route path="/explore" element={<Explore user={user} />} />
-              <Route path="/profile" element={<Profile user={user} />} />
-              <Route path="/profile/history" element={<History />} />
-              <Route path="/profile/favourites" element={<Favourites />} />
-              <Route path="/profile/statistics" element={<Statistics />} />
-              <Route path="/profile/settings" element={<Settings />} />
-            </Route>
-          )}
-        </Routes>
-      </WebSocketProvider>
+      {/* 🟢 Global AudioProvider wraps entire app to manage playback, queue, etc. */}
+      <AudioProvider>
+        <WebSocketProvider streamId={streamId}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            {!user ? (
+              <Route path="*" element={<Navigate to="/" replace />} />
+            ) : (
+              <Route element={<MainLayout />}>
+                <Route path="/home" element={<Home user={user} />} />
+                <Route path="/search" element={<Search user={user} />} />
+                <Route path="/explore" element={<Explore user={user} />} />
+                <Route path="/profile" element={<Profile user={user} />} />
+                <Route path="/profile/history" element={<History />} />
+                <Route path="/profile/favourites" element={<Favourites />} />
+                <Route path="/profile/statistics" element={<Statistics />} />
+                <Route path="/profile/settings" element={<Settings />} />
+              </Route>
+            )}
+          </Routes>
+        </WebSocketProvider>
+      </AudioProvider>
     </StreamContext.Provider>
   );
 }

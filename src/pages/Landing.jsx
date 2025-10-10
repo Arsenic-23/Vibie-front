@@ -48,7 +48,7 @@ export default function Landing() {
       setFillProgress(0);
       setShowCheckmark(false);
 
-      const res = await fetch('https://document-perception-shaved-genesis.trycloudflare.com/users/join', {
+      const res = await fetch('https://please-busy-jane-garbage.trycloudflare.com/users/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),

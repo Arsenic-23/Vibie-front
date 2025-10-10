@@ -21,7 +21,8 @@ export default function Search() {
   const observer = useRef();
   const siriWaveRef = useRef(null);
 
-  // Infinite scroll
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -34,40 +35,37 @@ export default function Search() {
     [loading, hasMore]
   );
 
-  // Fetch search results
   useEffect(() => {
     if (!query) return;
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(
-          'https://please-busy-jane-garbage.trycloudflare.com/search/',
-          { params: { q: query, page } }
-        );
+        const res = await axios.get(`${backendUrl}/search/`, {
+          params: { q: query, page },
+        });
         const newResults = res.data.results || [];
-        // normalize results (ensure fields exist)
+
         const normalized = newResults.map((r) => ({
           id: r.id ?? r.video_id ?? r.videoId,
           title: r.title ?? r.name ?? 'Unknown title',
           channel: r.channel ?? r.artist ?? '',
           thumbnail: r.thumbnail ?? r.thumb ?? '/placeholder.jpg',
           duration: r.duration,
-          // keep original payload as `raw` if needed
           raw: r,
         }));
+
         setResults((prev) => (page === 1 ? normalized : [...prev, ...normalized]));
         setHasMore(normalized.length === 15 || normalized.length > 0);
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching search results:', err);
         setHasMore(false);
       } finally {
         setLoading(false);
       }
     };
     fetchResults();
-  }, [query, page]);
+  }, [query, page, backendUrl]);
 
-  // Voice recognition
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -107,7 +105,6 @@ export default function Search() {
     recognitionRef.current = recognition;
   }, []);
 
-  // SiriWave visualizer
   useEffect(() => {
     if (!showWave) return;
     const tryInit = () => {
@@ -165,13 +162,10 @@ export default function Search() {
     }
   };
 
-  // Play or queue song
   const handlePlaySong = async (song) => {
     try {
       const audioRes = await fetch(
-        `https://please-busy-jane-garbage.trycloudflare.com/audio/audio/fetch?video_id=${encodeURIComponent(
-          song.id
-        )}`
+        `${backendUrl}/audio/audio/fetch?video_id=${encodeURIComponent(song.id)}`
       );
       if (!audioRes.ok) throw new Error('Audio fetch failed');
       const audioData = await audioRes.json();
@@ -187,16 +181,13 @@ export default function Search() {
         title: song.title,
         artist: song.channel || song.artist || '',
         thumbnail: song.thumbnail || '/placeholder.jpg',
-        url: audioData.url, // IMPORTANT: provider expects `url`
+        url: audioData.url,
         duration: song.duration,
         raw: song.raw ?? song,
       };
 
-      if (!currentSong) {
-        playSong(songObj);
-      } else {
-        addToQueue(songObj);
-      }
+      if (!currentSong) playSong(songObj);
+      else addToQueue(songObj);
     } catch (err) {
       console.error('Failed to fetch audio URL:', err);
     }
@@ -220,12 +211,17 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+          <SearchIcon
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
+            size={18}
+          />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}
               className={`relative p-2 rounded-full ${
-                isListening ? 'bg-purple-600 text-white shadow-lg animate-pulse' : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
+                isListening
+                  ? 'bg-purple-600 text-white shadow-lg animate-pulse'
+                  : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
               }`}
               whileTap={{ scale: 0.9 }}
             >
@@ -261,9 +257,17 @@ export default function Search() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-80" />
                   </div>
                   <div className="p-3 text-sm">
-                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
-                    {song.duration && <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>}
+                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">
+                      {song.title}
+                    </h2>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      {song.channel}
+                    </p>
+                    {song.duration && (
+                      <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
+                        {song.duration}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               );

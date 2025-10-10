@@ -37,7 +37,7 @@ export default function Search() {
       if (!query) return;
       setLoading(true);
       try {
-        const res = await axios.get('https://backendvibie.onrender.com/search/', {
+        const res = await axios.get('https://attract-behavior-lang-korean.trycloudflare.com/search/', {
           params: { q: query, page },
         });
         const newResults = res.data.results || [];

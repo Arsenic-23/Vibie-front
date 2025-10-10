@@ -8,6 +8,9 @@ export default function SongQueue({ onClose }) {
   const [queue, setQueue] = useState([]);
   const wsRef = useRef(null);
 
+  // ✅ Use backend URL from .env
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+
   useEffect(() => {
     setQueue(audioQueue || []);
   }, [audioQueue]);
@@ -15,11 +18,13 @@ export default function SongQueue({ onClose }) {
   useEffect(() => {
     const stream_id = localStorage.getItem('stream_id');
     const user_id = localStorage.getItem('user_id');
-    if (!stream_id || !user_id) return;
+    if (!stream_id || !user_id || !backendUrl) return;
 
-    const ws = new WebSocket(
-      `wss://please-busy-jane-garbage.trycloudflare.com/ws/stream/${stream_id}?user_id=${user_id}`
-    );
+    // ✅ Build dynamic WebSocket URL from backend base
+    const wsBase = backendUrl.replace(/^http/, 'ws'); // Converts http(s) to ws(s)
+    const wsUrl = `${wsBase}/ws/stream/${stream_id}?user_id=${user_id}`;
+
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
@@ -29,7 +34,6 @@ export default function SongQueue({ onClose }) {
         if (data.type === 'sync' && Array.isArray(data.queue)) {
           if (data.queue.length > 0) {
             setQueue((prev) => {
-              // Prevent redundant overwrites if queue is already same
               const changed =
                 JSON.stringify(prev.map((s) => s.song_id)) !==
                 JSON.stringify(data.queue.map((s) => s.song_id));
@@ -46,7 +50,7 @@ export default function SongQueue({ onClose }) {
     ws.onclose = () => console.log('🔌 WebSocket closed');
 
     return () => ws.close();
-  }, []);
+  }, [backendUrl]);
 
   const handleRemove = (songId) => {
     removeFromQueue(songId);
@@ -114,7 +118,6 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="relative overflow-hidden rounded-xl"
     >
-      {/* Background delete zone */}
       <motion.div
         className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0"
         style={{ opacity }}
@@ -124,7 +127,6 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         </motion.div>
       </motion.div>
 
-      {/* Swipeable content */}
       <motion.div
         drag="x"
         style={{ x }}

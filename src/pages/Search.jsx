@@ -23,18 +23,25 @@ export default function Search() {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
 
+  // --- Infinite scroll observer (fixed smooth loading) ---
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
       if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) setPage((prev) => prev + 1);
-      });
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            setPage((prev) => prev + 1);
+          }
+        },
+        { threshold: 0.3 }
+      );
       if (node) observer.current.observe(node);
     },
     [loading, hasMore]
   );
 
+  // --- Fetch results ---
   useEffect(() => {
     if (!query) return;
     const fetchResults = async () => {
@@ -55,7 +62,7 @@ export default function Search() {
         }));
 
         setResults((prev) => (page === 1 ? normalized : [...prev, ...normalized]));
-        setHasMore(normalized.length === 15 || normalized.length > 0);
+        setHasMore(normalized.length > 0);
       } catch (err) {
         console.error('Error fetching search results:', err);
         setHasMore(false);
@@ -66,6 +73,7 @@ export default function Search() {
     fetchResults();
   }, [query, page, backendUrl]);
 
+  // --- Voice recognition setup ---
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -78,12 +86,7 @@ export default function Search() {
       setIsListening(true);
       setShowWave(true);
     };
-    recognition.onerror = () => {
-      setIsListening(false);
-      setShowWave(false);
-      siriWaveRef.current?.stop();
-    };
-    recognition.onend = () => {
+    recognition.onerror = recognition.onend = () => {
       setIsListening(false);
       setShowWave(false);
       siriWaveRef.current?.stop();
@@ -105,6 +108,7 @@ export default function Search() {
     recognitionRef.current = recognition;
   }, []);
 
+  // --- SiriWave visualizer setup ---
   useEffect(() => {
     if (!showWave) return;
     const tryInit = () => {
@@ -128,6 +132,7 @@ export default function Search() {
     };
   }, [showWave]);
 
+  // --- Search handlers ---
   const handleSubmitSearch = (searchValue) => {
     setQuery(searchValue);
     setSearchSubmitted(true);
@@ -162,6 +167,7 @@ export default function Search() {
     }
   };
 
+  // --- Play button logic ---
   const handlePlaySong = async (song) => {
     try {
       const audioRes = await fetch(
@@ -242,32 +248,38 @@ export default function Search() {
                 <motion.div
                   ref={isLast ? lastSongElementRef : null}
                   key={song.id}
-                  whileHover={{ scale: 1.04 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                  className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer"
-                  onClick={() => handlePlaySong(song)}
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ type: 'spring', stiffness: 250, damping: 20 }}
+                  className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                 >
-                  <div className="relative w-full h-36 rounded-xl overflow-hidden">
+                  <div className="relative w-full h-36 overflow-hidden">
                     <img
                       src={song.thumbnail || '/placeholder.jpg'}
                       alt={song.title}
                       className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => (e.target.src = '/placeholder.jpg')}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
                   </div>
+
                   <div className="p-3 text-sm">
-                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">
-                      {song.title}
-                    </h2>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                      {song.channel}
-                    </p>
+                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
                     {song.duration && (
-                      <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
-                        {song.duration}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>
                     )}
+                  </div>
+
+                  {/* Glossy Play Button */}
+                  <div className="absolute bottom-3 right-3">
+                    <motion.button
+                      onClick={() => handlePlaySong(song)}
+                      className="p-2 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 text-white shadow-lg backdrop-blur-lg transition-all duration-300 hover:scale-110 active:scale-95 border border-white/20"
+                      whileHover={{ rotate: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <PlayCircle size={22} className="drop-shadow-md" />
+                    </motion.button>
                   </div>
                 </motion.div>
               );

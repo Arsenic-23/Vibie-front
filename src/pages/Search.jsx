@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchIcon, Mic, PlayCircle } from 'lucide-react';
+import { SearchIcon, Mic } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Suggestions from '../components/Suggestions';
-import { useAudio } from '../context/AudioProvider';
 
 export default function Search() {
-  const { playSong, addToQueue, currentSong } = useAudio();
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -23,7 +21,7 @@ export default function Search() {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
 
-  // --- Infinite scroll observer (fixed smooth loading) ---
+  // Infinite scroll observer (smooth & glitch-free)
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -41,7 +39,7 @@ export default function Search() {
     [loading, hasMore]
   );
 
-  // --- Fetch results ---
+  // Fetch search results
   useEffect(() => {
     if (!query) return;
     const fetchResults = async () => {
@@ -58,7 +56,6 @@ export default function Search() {
           channel: r.channel ?? r.artist ?? '',
           thumbnail: r.thumbnail ?? r.thumb ?? '/placeholder.jpg',
           duration: r.duration,
-          raw: r,
         }));
 
         setResults((prev) => (page === 1 ? normalized : [...prev, ...normalized]));
@@ -73,7 +70,7 @@ export default function Search() {
     fetchResults();
   }, [query, page, backendUrl]);
 
-  // --- Voice recognition setup ---
+  // Voice recognition setup
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -108,7 +105,7 @@ export default function Search() {
     recognitionRef.current = recognition;
   }, []);
 
-  // --- SiriWave visualizer setup ---
+  // SiriWave animation
   useEffect(() => {
     if (!showWave) return;
     const tryInit = () => {
@@ -132,7 +129,7 @@ export default function Search() {
     };
   }, [showWave]);
 
-  // --- Search handlers ---
+  // Search submit handlers
   const handleSubmitSearch = (searchValue) => {
     setQuery(searchValue);
     setSearchSubmitted(true);
@@ -164,38 +161,6 @@ export default function Search() {
       setQuery('');
       setShowWave(true);
       recognitionRef.current.start();
-    }
-  };
-
-  // --- Play button logic ---
-  const handlePlaySong = async (song) => {
-    try {
-      const audioRes = await fetch(
-        `${backendUrl}/audio/audio/fetch?video_id=${encodeURIComponent(song.id)}`
-      );
-      if (!audioRes.ok) throw new Error('Audio fetch failed');
-      const audioData = await audioRes.json();
-
-      if (!audioData?.url) {
-        console.error('No audio URL returned for', song);
-        return;
-      }
-
-      const songObj = {
-        song_id: song.id,
-        id: song.id,
-        title: song.title,
-        artist: song.channel || song.artist || '',
-        thumbnail: song.thumbnail || '/placeholder.jpg',
-        url: audioData.url,
-        duration: song.duration,
-        raw: song.raw ?? song,
-      };
-
-      if (!currentSong) playSong(songObj);
-      else addToQueue(songObj);
-    } catch (err) {
-      console.error('Failed to fetch audio URL:', err);
     }
   };
 
@@ -261,25 +226,12 @@ export default function Search() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
                   </div>
-
                   <div className="p-3 text-sm">
                     <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
                     <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
                     {song.duration && (
                       <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>
                     )}
-                  </div>
-
-                  {/* Glossy Play Button */}
-                  <div className="absolute bottom-3 right-3">
-                    <motion.button
-                      onClick={() => handlePlaySong(song)}
-                      className="p-2 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 text-white shadow-lg backdrop-blur-lg transition-all duration-300 hover:scale-110 active:scale-95 border border-white/20"
-                      whileHover={{ rotate: 5 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <PlayCircle size={22} className="drop-shadow-md" />
-                    </motion.button>
                   </div>
                 </motion.div>
               );
@@ -313,7 +265,6 @@ export default function Search() {
       </AnimatePresence>
 
       <div className="mt-12 -mb-0.5 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <PlayCircle size={18} className="text-purple-500" />
         <span className="font-semibold">Vibie</span>
       </div>
     </div>

@@ -3,8 +3,10 @@ import { SearchIcon, Mic, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Suggestions from '../components/Suggestions';
+import { useAudio } from '../context/AudioProvider';
 
 export default function Search() {
+  const { playSong, addToQueue, currentSong } = useAudio();
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -14,37 +16,39 @@ export default function Search() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showWave, setShowWave] = useState(false);
+
   const recognitionRef = useRef(null);
   const observer = useRef();
   const siriWaveRef = useRef(null);
 
+  // Infinite scroll observer
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prevPage) => prevPage + 1);
-        }
+        if (entries[0].isIntersecting && hasMore) setPage((prev) => prev + 1);
       });
       if (node) observer.current.observe(node);
     },
     [loading, hasMore]
   );
 
+  // Fetch results
   useEffect(() => {
     const fetchResults = async () => {
       if (!query) return;
       setLoading(true);
       try {
-        const res = await axios.get('https://document-perception-shaved-genesis.trycloudflare.com/search/', {
-          params: { q: query, page },
-        });
+        const res = await axios.get(
+          'https://document-perception-shaved-genesis.trycloudflare.com/search/',
+          { params: { q: query, page } }
+        );
         const newResults = res.data.results || [];
         setResults((prev) => [...prev, ...newResults]);
         setHasMore(newResults.length === 15);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         setHasMore(false);
       } finally {
         setLoading(false);
@@ -53,52 +57,48 @@ export default function Search() {
     fetchResults();
   }, [query, page]);
 
+  // Voice recognition
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-IN';
-      recognition.interimResults = true;
-      recognition.continuous = false;
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
 
-      recognition.onstart = () => {
-        setIsListening(true);
-        setShowWave(true);
-      };
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
 
-      recognition.onerror = () => {
-        setIsListening(false);
-        setShowWave(false);
-        siriWaveRef.current?.stop();
-      };
+    recognition.onstart = () => {
+      setIsListening(true);
+      setShowWave(true);
+    };
+    recognition.onerror = () => {
+      setIsListening(false);
+      setShowWave(false);
+      siriWaveRef.current?.stop();
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      setShowWave(false);
+      siriWaveRef.current?.stop();
+    };
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += transcript;
+        else setInput(transcript);
+      }
+      if (finalTranscript) {
+        const trimmed = finalTranscript.trim();
+        setInput(trimmed);
+        handleSubmitSearch(trimmed);
+      }
+    };
 
-      recognition.onend = () => {
-        setIsListening(false);
-        setShowWave(false);
-        siriWaveRef.current?.stop();
-      };
-
-      recognition.onresult = (event) => {
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            setInput(transcript);
-          }
-        }
-        if (finalTranscript) {
-          const trimmed = finalTranscript.trim();
-          setInput(trimmed);
-          handleSubmitSearch(trimmed);
-        }
-      };
-
-      recognitionRef.current = recognition;
-    }
+    recognitionRef.current = recognition;
   }, []);
 
+  // SiriWave visualizer
   useEffect(() => {
     if (!showWave) return;
 
@@ -114,19 +114,17 @@ export default function Search() {
           style: 'ios',
           autostart: true,
         });
-      } else {
-        requestAnimationFrame(tryInit);
-      }
+      } else requestAnimationFrame(tryInit);
     };
 
     tryInit();
-
     return () => {
       siriWaveRef.current?.stop();
       siriWaveRef.current = null;
     };
   }, [showWave]);
 
+  // Submit search
   const handleSubmitSearch = (searchValue) => {
     setQuery(searchValue);
     setSearchSubmitted(true);
@@ -141,33 +139,48 @@ export default function Search() {
     if (input.trim()) handleSubmitSearch(input.trim());
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSearch();
-  };
+  const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
 
   const handleMicClick = () => {
     if (!recognitionRef.current) {
       alert('Voice recognition not supported in this browser');
       return;
     }
-    if (isListening) {
-      recognitionRef.current.stop();
-      return;
+    if (isListening) recognitionRef.current.stop();
+    else {
+      if (navigator.vibrate) navigator.vibrate(80);
+      setInput('');
+      setSearchSubmitted(false);
+      setResults([]);
+      setPage(1);
+      setQuery('');
+      setShowWave(true);
+      recognitionRef.current.start();
     }
-    if (navigator.vibrate) navigator.vibrate(80);
-    setInput('');
-    setSearchSubmitted(false);
-    setResults([]);
-    setPage(1);
-    setQuery('');
-    setShowWave(true);
-    recognitionRef.current.start();
+  };
+
+  // Play song or add to queue
+  const handlePlaySong = async (song) => {
+    try {
+      const audioRes = await fetch(
+        `https://document-perception-shaved-genesis.trycloudflare.com/audio/audio/fetch?video_id=${song.video_id}`
+      );
+      const audioData = await audioRes.json();
+      const songObj = { ...song, audioUrl: audioData.url, thumbnail: song.thumbnail || '/placeholder.jpg' };
+
+      if (!currentSong) playSong(songObj);
+      else addToQueue(songObj);
+    } catch (err) {
+      console.error('Failed to fetch audio URL:', err);
+    }
   };
 
   return (
-    <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
+    <div className="min-h-screen px-4 pt-6 pb-28 bg-white dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
         <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Search Vibes</h1>
+
+        {/* Search bar */}
         <div className="relative max-w-xl mx-auto">
           <input
             type="text"
@@ -180,17 +193,12 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            size={18}
-          />
+          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}
               className={`relative p-2 rounded-full ${
-                isListening
-                  ? 'bg-purple-600 text-white shadow-lg animate-pulse'
-                  : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
+                isListening ? 'bg-purple-600 text-white shadow-lg animate-pulse' : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
               }`}
               whileTap={{ scale: 0.9 }}
             >
@@ -199,29 +207,10 @@ export default function Search() {
           </div>
         </div>
 
-        {/* 🔍 Suggestion dropdown */}
-        {input.trim() && !searchSubmitted && (
-          <Suggestions query={input} onSelect={handleSubmitSearch} />
-        )}
+        {/* Suggestions */}
+        {input.trim() && !searchSubmitted && <Suggestions query={input} onSelect={handleSubmitSearch} />}
 
-        <AnimatePresence>
-          {!searchSubmitted && (
-            <motion.div
-              key="discover-box"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-              className="mt-10 mx-auto max-w-3xl px-6 py-10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl bg-gradient-to-br from-white/20 to-purple-100/10 dark:from-neutral-800/30 dark:to-purple-900/10 transition-all duration-700 relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-violet-600" />
-              <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100">
-                <span className="text-purple-500 font-medium">Discover</span> your favorite tracks, artists, and vibes
-              </h2>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+        {/* Results grid */}
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
             {results.map((song, i) => {
@@ -232,7 +221,8 @@ export default function Search() {
                   key={i}
                   whileHover={{ scale: 1.04 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                  className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
+                  className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer"
+                  onClick={() => handlePlaySong(song)}
                 >
                   <div className="relative w-full h-36 rounded-xl overflow-hidden">
                     <img
@@ -246,9 +236,7 @@ export default function Search() {
                   <div className="p-3 text-sm">
                     <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
                     <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
-                    {song.duration && (
-                      <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>
-                    )}
+                    {song.duration && <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>}
                   </div>
                 </motion.div>
               );
@@ -265,6 +253,7 @@ export default function Search() {
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
       </div>
 
+      {/* SiriWave visualizer */}
       <AnimatePresence>
         {showWave && (
           <motion.div

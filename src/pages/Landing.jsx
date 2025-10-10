@@ -27,8 +27,7 @@ export default function Landing() {
       alert('Please open this inside Telegram.');
       return;
     }
-
-    // ✅ Final stream_id logic (deep link > local > fallback to user.id)
+    
     const stream_id =
       startParam ||
       localStorage.getItem('deep_link_stream_id') ||
@@ -49,7 +48,7 @@ export default function Landing() {
       setFillProgress(0);
       setShowCheckmark(false);
 
-      const res = await fetch('https://attract-behavior-lang-korean.trycloudflare.com/users/join', {
+      const res = await fetch('https://eval-focal-hints-care.trycloudflare.com/users/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),

@@ -49,7 +49,7 @@ export default function Landing() {
       setFillProgress(0);
       setShowCheckmark(false);
 
-      const res = await fetch('https://backendvibie.onrender.com/users/join', {
+      const res = await fetch('https://attract-behavior-lang-korean.trycloudflare.com/users/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),

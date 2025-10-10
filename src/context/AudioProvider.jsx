@@ -5,51 +5,112 @@ const AudioContext = createContext(null);
 export const AudioProvider = ({ children }) => {
   const audioRef = useRef(new Audio());
   const [queue, setQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Play a song immediately
-  const playSong = (song) => {
-    const index = queue.findIndex((s) => s.song_id === song.song_id);
-    if (index === -1) {
-      // Add to queue if not present
-      setQueue((prev) => [...prev, song]);
-      setCurrentIndex(queue.length);
-    } else {
-      setCurrentIndex(index);
-    }
-    setCurrentSong(song);
-    audioRef.current.src = song.url;
-    audioRef.current.play();
-    setIsPlaying(true);
-  };
+  useEffect(() => {
+    const audio = audioRef.current;
+    const song = queue[currentIndex] ?? null;
 
-  // Play next song automatically
+    if (song) {
+      setCurrentSong(song);
+      if (audio.src !== song.url) {
+        audio.src = song.url;
+      }
+      if (isPlaying) {
+        audio.play().catch((e) => {
+          console.warn('Playback failed:', e);
+          setIsPlaying(false);
+        });
+      }
+    } else {
+      audio.pause();
+      setCurrentSong(null);
+      setIsPlaying(false);
+    }
+  }, [currentIndex, queue]);
+
   useEffect(() => {
     const audio = audioRef.current;
     const handleEnded = () => {
-      if (currentIndex + 1 < queue.length) {
-        setCurrentIndex(currentIndex + 1);
-        const nextSong = queue[currentIndex + 1];
-        setCurrentSong(nextSong);
-        audio.src = nextSong.url;
-        audio.play();
-      } else {
+      setCurrentIndex((prev) => {
+        if (prev + 1 < queue.length) {
+          return prev + 1;
+        }
         setIsPlaying(false);
-      }
+        return prev;
+      });
     };
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [currentIndex, queue]);
+  }, [queue.length]);
+
+  const playSong = (song) => {
+    if (!song || !song.url) {
+      console.warn('playSong called with invalid song:', song);
+      return;
+    }
+
+    setQueue((prev) => {
+      const idx = prev.findIndex((s) => s.song_id === song.song_id);
+      if (idx !== -1) {
+        setTimeout(() => setCurrentIndex(idx), 0);
+        return prev;
+      }
+      const next = [...prev, song];
+      setTimeout(() => setCurrentIndex(next.length - 1), 0);
+      return next;
+    });
+
+    setIsPlaying(true);
+  };
+
+  const addToQueue = (song) => {
+    if (!song) return;
+    setQueue((prev) => {
+      if (prev.some((s) => s.song_id === song.song_id)) return prev;
+      return [...prev, song];
+    });
+  };
+
+  const removeFromQueue = (songId) => {
+    setQueue((prev) => {
+      const idx = prev.findIndex((s) => s.song_id === songId);
+      if (idx === -1) return prev;
+
+      const newQueue = prev.filter((s) => s.song_id !== songId);
+
+      setCurrentIndex((cur) => {
+        if (idx < cur) {
+          return Math.max(0, cur - 1);
+        } else if (idx === cur) {
+          if (idx < newQueue.length) {
+            return idx;
+          } else if (newQueue.length > 0) {
+            return newQueue.length - 1;
+          } else {
+            return -1;
+          }
+        }
+        return cur;
+      });
+
+      return newQueue;
+    });
+  };
 
   const pause = () => {
-    audioRef.current.pause();
+    const audio = audioRef.current;
+    audio.pause();
     setIsPlaying(false);
   };
 
   const resume = () => {
-    audioRef.current.play();
+    const audio = audioRef.current;
+    audio.play().catch((e) => {
+      console.warn('Playback resume failed:', e);
+    });
     setIsPlaying(true);
   };
 
@@ -57,24 +118,20 @@ export const AudioProvider = ({ children }) => {
     isPlaying ? pause() : resume();
   };
 
-  const addToQueue = (song) => {
-    setQueue((prev) => [...prev, song]);
+  const next = () => {
+    setCurrentIndex((prev) => {
+      if (prev + 1 < queue.length) {
+        return prev + 1;
+      }
+      return prev;
+    });
   };
 
-  const removeFromQueue = (songId) => {
-    setQueue((prev) => prev.filter((s) => s.song_id !== songId));
-    if (currentSong?.song_id === songId) {
-      // Play next song if current is removed
-      const nextIndex = queue.findIndex((s) => s.song_id === songId) + 1;
-      if (nextIndex < queue.length) {
-        const nextSong = queue[nextIndex];
-        playSong(nextSong);
-      } else {
-        audioRef.current.pause();
-        setCurrentSong(null);
-        setIsPlaying(false);
-      }
-    }
+  const prev = () => {
+    setCurrentIndex((prev) => {
+      if (prev - 1 >= 0) return prev - 1;
+      return prev;
+    });
   };
 
   return (
@@ -92,6 +149,9 @@ export const AudioProvider = ({ children }) => {
         addToQueue,
         removeFromQueue,
         setQueue,
+        next,
+        prev,
+        setCurrentIndex,
       }}
     >
       {children}
@@ -99,7 +159,6 @@ export const AudioProvider = ({ children }) => {
   );
 };
 
-// ✅ Hook to use audio context
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) throw new Error('useAudio must be used within an AudioProvider');

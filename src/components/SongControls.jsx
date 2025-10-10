@@ -1,42 +1,30 @@
-import React, { useState } from 'react';
-import { Heart, PauseCircle, PlayCircle, SkipForward } from 'lucide-react';
+import React from 'react';
+import { SkipBack, SkipForward } from 'lucide-react';
+import PlayPauseButton from './PlayPauseButton';
+import { useAudio } from '../context/AudioProvider';
 
 export default function SongControls() {
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [liked, setLiked] = useState(false);
-  const [pop, setPop] = useState(false);
-
-  const handleLike = () => {
-    setLiked(!liked);
-    setPop(true);
-    if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
-
-    setTimeout(() => setPop(false), 300);
-  };
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    if (navigator.vibrate) navigator.vibrate(20);
-  };
+  const { isPlaying, togglePlayPause, playNext, playPrevious } = useAudio();
 
   return (
-    <div className="flex justify-center items-center space-x-8 mt-4">
-      {/* Like Button with Pop Animation */}
+    <div className="flex items-center justify-center gap-6 mt-6">
+      {/* Previous Song */}
       <button
-        onClick={handleLike}
-        className={`transition-all duration-300 ${liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-300'} ${pop ? 'animate-pop' : ''}`}
+        onClick={playPrevious}
+        className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
       >
-        <Heart fill={liked ? 'currentColor' : 'none'} size={28} />
+        <SkipBack size={24} />
       </button>
 
-      {/* Play/Pause Button */}
-      <button onClick={handlePlayPause} className="text-black dark:text-white">
-        {isPlaying ? <PauseCircle size={48} /> : <PlayCircle size={48} />}
-      </button>
+      {/* Play/Pause */}
+      <PlayPauseButton isPlaying={isPlaying} onClick={togglePlayPause} />
 
-      {/* Forward Button */}
-      <button className="text-gray-500 dark:text-gray-300">
-        <SkipForward size={28} />
+      {/* Next Song */}
+      <button
+        onClick={playNext}
+        className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
+      >
+        <SkipForward size={24} />
       </button>
     </div>
   );

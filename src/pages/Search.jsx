@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchIcon, Play, Mic, PlayCircle } from 'lucide-react';
+import { SearchIcon, Mic, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Suggestions from '../components/Suggestions';
@@ -164,10 +164,6 @@ export default function Search() {
     recognitionRef.current.start();
   };
 
-  const handlePlay = (song) => {
-    console.log('Playing:', song.title);
-  };
-
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white text-black dark:bg-neutral-950 dark:text-white transition-all flex flex-col justify-between">
       <div>
@@ -231,35 +227,30 @@ export default function Search() {
             {results.map((song, i) => {
               const isLast = results.length === i + 1;
               return (
-                <div
+                <motion.div
                   ref={isLast ? lastSongElementRef : null}
                   key={i}
-                  className="group relative rounded-xl bg-gray-100 dark:bg-neutral-900 p-3 shadow hover:shadow-xl transition-all duration-300"
+                  whileHover={{ scale: 1.04 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                  className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                 >
-                  <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-36 rounded-xl overflow-hidden">
                     <img
                       src={song.thumbnail || '/placeholder.jpg'}
                       alt={song.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => (e.target.src = '/placeholder.jpg')}
                     />
-                    <button
-                      onClick={() => handlePlay(song)}
-                      className="absolute bottom-2 right-2 p-2 rounded-full bg-purple-600 hover:scale-105 transition-transform"
-                    >
-                      <Play size={18} className="text-white" />
-                    </button>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-80" />
                   </div>
-                  <div className="mt-2 space-y-0.5 text-sm">
-                    <h2 className="font-semibold truncate">{song.title}</h2>
+                  <div className="p-3 text-sm">
+                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
                     <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
                     {song.duration && (
-                      <p className="text-[10px] text-gray-500 dark:text-gray-500">
-                        {song.duration}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

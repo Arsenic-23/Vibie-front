@@ -21,7 +21,7 @@ export default function Search() {
   const observer = useRef();
   const siriWaveRef = useRef(null);
 
-  // Infinite scroll observer
+  // Infinite scroll
   const lastSongElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -34,10 +34,10 @@ export default function Search() {
     [loading, hasMore]
   );
 
-  // Fetch results
+  // Fetch search results
   useEffect(() => {
+    if (!query) return;
     const fetchResults = async () => {
-      if (!query) return;
       setLoading(true);
       try {
         const res = await axios.get(
@@ -60,7 +60,6 @@ export default function Search() {
   // Voice recognition
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
-
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
@@ -101,7 +100,6 @@ export default function Search() {
   // SiriWave visualizer
   useEffect(() => {
     if (!showWave) return;
-
     const tryInit = () => {
       const container = document.querySelector('.siri-voice-visualizer');
       if (window.SiriWave && container && !siriWaveRef.current) {
@@ -116,7 +114,6 @@ export default function Search() {
         });
       } else requestAnimationFrame(tryInit);
     };
-
     tryInit();
     return () => {
       siriWaveRef.current?.stop();
@@ -124,7 +121,6 @@ export default function Search() {
     };
   }, [showWave]);
 
-  // Submit search
   const handleSubmitSearch = (searchValue) => {
     setQuery(searchValue);
     setSearchSubmitted(true);
@@ -159,14 +155,18 @@ export default function Search() {
     }
   };
 
-  // Play song or add to queue
+  // Play or queue song
   const handlePlaySong = async (song) => {
     try {
       const audioRes = await fetch(
-        `https://document-perception-shaved-genesis.trycloudflare.com/audio/audio/fetch?video_id=${song.video_id}`
+        `https://document-perception-shaved-genesis.trycloudflare.com/audio/audio/fetch?video_id=${song.id}`
       );
       const audioData = await audioRes.json();
-      const songObj = { ...song, audioUrl: audioData.url, thumbnail: song.thumbnail || '/placeholder.jpg' };
+      const songObj = {
+        ...song,
+        audioUrl: audioData.url,
+        thumbnail: song.thumbnail || '/placeholder.jpg',
+      };
 
       if (!currentSong) playSong(songObj);
       else addToQueue(songObj);
@@ -218,7 +218,7 @@ export default function Search() {
               return (
                 <motion.div
                   ref={isLast ? lastSongElementRef : null}
-                  key={i}
+                  key={song.id}
                   whileHover={{ scale: 1.04 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer"

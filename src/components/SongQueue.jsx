@@ -1,49 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
+import { useAudio } from '../context/AudioProvider';
 
 export default function SongQueue({ onClose }) {
+  const { queue: audioQueue, currentSong, removeFromQueue } = useAudio();
   const [queue, setQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const wsRef = useRef(null);
 
+  // Sync local queue state with audio provider queue
+  useEffect(() => {
+    setQueue(audioQueue);
+  }, [audioQueue]);
+
+  // Optional: WebSocket sync for multi-user streams
   useEffect(() => {
     const stream_id = localStorage.getItem('stream_id');
     const user_id = localStorage.getItem('user_id');
-
     if (!stream_id || !user_id) return;
 
-    const ws = new WebSocket(`wss://https://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`);
+    const ws = new WebSocket(`wss://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`);
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'sync' && Array.isArray(data.queue)) {
-        setQueue(data.queue);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'sync' && Array.isArray(data.queue)) {
+          setQueue(data.queue);
+        }
+      } catch (err) {
+        console.error('❌ Failed to parse WebSocket message:', err);
       }
     };
 
-    ws.onerror = (err) => {
-      console.error("❌ WebSocket error:", err);
-    };
-
-    return () => {
-      ws.close();
-    };
+    ws.onerror = (err) => console.error('❌ WebSocket error:', err);
+    return () => ws.close();
   }, []);
 
-  const handleRemove = async (songId) => {
-    const stream_id = localStorage.getItem('stream_id');
-
-    try {
-      await fetch(`https://your-backend-url/queue/${stream_id}/remove`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ song_id: songId }),
-      });
-    } catch (err) {
-      console.error("❌ Failed to remove song from queue:", err);
-    }
+  const handleRemove = (songId) => {
+    removeFromQueue(songId);
   };
 
   return (
@@ -78,7 +73,7 @@ export default function SongQueue({ onClose }) {
                 <SwipeableSongItem
                   key={song.song_id}
                   song={song}
-                  isCurrent={index === currentIndex}
+                  isCurrent={currentSong?.song_id === song.song_id}
                   onRemove={() => handleRemove(song.song_id)}
                 />
               ))
@@ -90,9 +85,10 @@ export default function SongQueue({ onClose }) {
   );
 }
 
+// Individual swipeable song item
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const scale = useTransform(x, [-40, 0], [1.1, 0]);
+  const scale = useTransform(x, [-40, 0], [1.1, 1]);
 
   return (
     <motion.li
@@ -127,7 +123,7 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
         } rounded-xl`}
       >
         <img
-          src={song.thumbnail}
+          src={song.thumbnail || '/placeholder.jpg'}
           alt={song.title}
           className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
         />

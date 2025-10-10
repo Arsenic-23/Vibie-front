@@ -8,6 +8,8 @@ export default function Landing() {
   const [fillProgress, setFillProgress] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+
   useEffect(() => {
     window.Telegram?.WebApp?.ready?.();
   }, []);
@@ -27,7 +29,7 @@ export default function Landing() {
       alert('Please open this inside Telegram.');
       return;
     }
-    
+
     const stream_id =
       startParam ||
       localStorage.getItem('deep_link_stream_id') ||
@@ -48,7 +50,7 @@ export default function Landing() {
       setFillProgress(0);
       setShowCheckmark(false);
 
-      const res = await fetch('https://please-busy-jane-garbage.trycloudflare.com/users/join', {
+      const res = await fetch(`${backendUrl}/users/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -56,7 +58,6 @@ export default function Landing() {
 
       const data = await res.json();
 
-      // ✅ Save final values
       localStorage.setItem('stream_id', data.stream_id);
       localStorage.setItem('profile', JSON.stringify(userData));
       localStorage.setItem('user_id', user.id.toString());
@@ -72,6 +73,7 @@ export default function Landing() {
         }
       }, 16);
     } catch (err) {
+      console.error(err);
       alert('Failed to join stream. Try again.');
       setIsLoading(false);
     }
@@ -85,7 +87,9 @@ export default function Landing() {
       <div className="absolute inset-0 bg-black bg-opacity-40 z-0" />
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-purple-400 drop-shadow-lg" />
-        <span className="text-white text-base font-bold tracking-wide drop-shadow-md">Vibie</span>
+        <span className="text-white text-base font-bold tracking-wide drop-shadow-md">
+          Vibie
+        </span>
       </div>
       <div className="z-10 flex flex-col items-center">
         <h1 className="text-white text-3xl md:text-4xl font-semibold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
@@ -113,11 +117,16 @@ export default function Landing() {
             />
             <div className="relative z-10 flex items-center justify-center transition-opacity duration-300">
               {!showCheckmark ? (
-                <span className={`transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+                <span
+                  className={`transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                >
                   Join the Vibe
                 </span>
               ) : (
-                <Check size={22} className="text-white transition-transform duration-300 scale-100" />
+                <Check
+                  size={22}
+                  className="text-white transition-transform duration-300 scale-100"
+                />
               )}
             </div>
           </button>

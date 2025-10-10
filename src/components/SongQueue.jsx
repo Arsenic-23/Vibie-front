@@ -8,18 +8,18 @@ export default function SongQueue({ onClose }) {
   const [queue, setQueue] = useState([]);
   const wsRef = useRef(null);
 
-  // Sync local queue state with audio provider queue
   useEffect(() => {
     setQueue(audioQueue);
   }, [audioQueue]);
 
-  // Optional: WebSocket sync for multi-user streams
   useEffect(() => {
     const stream_id = localStorage.getItem('stream_id');
     const user_id = localStorage.getItem('user_id');
     if (!stream_id || !user_id) return;
 
-    const ws = new WebSocket(`wss://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`);
+    const ws = new WebSocket(
+      `wss://backendvibie.onrender.com/ws/stream/${stream_id}?user_id=${user_id}`
+    );
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
@@ -37,13 +37,18 @@ export default function SongQueue({ onClose }) {
     return () => ws.close();
   }, []);
 
+  // ✅ Remove only the specific song (not all)
   const handleRemove = (songId) => {
     removeFromQueue(songId);
+    setQueue((prev) => prev.filter((s) => s.song_id !== songId));
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-md"
+        onClick={onClose}
+      />
 
       <motion.div
         className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-3xl md:rounded-3xl p-6 shadow-2xl z-60 overflow-y-auto"
@@ -69,7 +74,7 @@ export default function SongQueue({ onClose }) {
             {queue.length === 0 ? (
               <li className="text-gray-400 text-sm">No songs in queue</li>
             ) : (
-              queue.map((song, index) => (
+              queue.map((song) => (
                 <SwipeableSongItem
                   key={song.song_id}
                   song={song}
@@ -85,10 +90,10 @@ export default function SongQueue({ onClose }) {
   );
 }
 
-// Individual swipeable song item
 function SwipeableSongItem({ song, isCurrent, onRemove }) {
   const x = useMotionValue(0);
-  const scale = useTransform(x, [-40, 0], [1.1, 1]);
+  const scale = useTransform(x, [-60, 0], [1.1, 1]);
+  const opacity = useTransform(x, [-60, 0], [1, 0]);
 
   return (
     <motion.li
@@ -99,19 +104,24 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="relative overflow-hidden rounded-xl"
     >
-      <div className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0">
+      {/* Background delete zone */}
+      <motion.div
+        className="absolute inset-0 bg-red-600 flex items-center justify-end pr-5 z-0"
+        style={{ opacity }}
+      >
         <motion.div style={{ scale }}>
           <Trash2 className="text-white w-4 h-4" />
         </motion.div>
-      </div>
+      </motion.div>
 
+      {/* Swipeable content */}
       <motion.div
         drag="x"
         style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.5}
         onDragEnd={(e, info) => {
-          if (info.offset.x < -60) {
+          if (info.offset.x < -80) {
             navigator.vibrate?.(70);
             onRemove();
           }
@@ -127,10 +137,15 @@ function SwipeableSongItem({ song, isCurrent, onRemove }) {
           alt={song.title}
           className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
         />
-        <div className="flex-1">
+
+        <div className="flex-1 min-w-0">
           <p className="font-medium text-sm truncate">{song.title}</p>
-          <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{song.artist}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">Swipe left to remove</p>
+          <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
+            {song.artist}
+          </p>
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            Swipe left to remove
+          </p>
         </div>
       </motion.div>
     </motion.li>

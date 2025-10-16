@@ -13,6 +13,8 @@ import MainLayout from './layouts/MainLayout';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { AudioProvider } from './context/AudioProvider';
 
+import { StreamChoice } from './pages/stream'; 
+
 export const StreamContext = createContext(null);
 
 function App() {
@@ -22,22 +24,26 @@ function App() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
     tg?.ready?.();
-    
+
     const storedStreamId = localStorage.getItem('stream_id');
     if (storedStreamId) setStreamId(storedStreamId);
 
-    
     const profile = localStorage.getItem('profile');
     if (profile) setUser(JSON.parse(profile));
   }, []);
 
   return (
     <StreamContext.Provider value={streamId}>
-      {/* 🟢 Global AudioProvider wraps entire app to manage playback, queue, etc. */}
       <AudioProvider>
         <WebSocketProvider streamId={streamId}>
           <Routes>
+            {/* Landing Page */}
             <Route path="/" element={<Landing />} />
+
+            {/* */}
+            <Route path="/stream" element={<StreamChoice />} />
+
+            {/* (only if user exists) */}
             {!user ? (
               <Route path="*" element={<Navigate to="/" replace />} />
             ) : (

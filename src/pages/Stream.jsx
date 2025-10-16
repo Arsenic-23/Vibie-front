@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from "framer-motion";
 import { Plus, Users, Radio, Lock, Zap, ArrowRight, Hash } from 'lucide-react';
 import { useState } from 'react';
 

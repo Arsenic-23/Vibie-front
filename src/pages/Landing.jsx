@@ -69,7 +69,7 @@ export default function Landing() {
         if (progress >= 100) {
           clearInterval(interval);
           setShowCheckmark(true);
-          setTimeout(() => navigate('/home'), 600);
+          setTimeout(() => navigate('/stream'), 600);
         }
       }, 16);
     } catch (err) {

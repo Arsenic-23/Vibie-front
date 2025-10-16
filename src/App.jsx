@@ -13,7 +13,7 @@ import MainLayout from './layouts/MainLayout';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { AudioProvider } from './context/AudioProvider';
 
-import { StreamChoice } from './pages/stream'; 
+import { StreamChoice } from './pages/Stream'; // adjust path if needed
 
 export const StreamContext = createContext(null);
 
@@ -37,13 +37,13 @@ function App() {
       <AudioProvider>
         <WebSocketProvider streamId={streamId}>
           <Routes>
-            {/* Landing Page */}
+            {/* 🟣 Landing Page */}
             <Route path="/" element={<Landing />} />
 
-            {/* */}
+            {/* 🟢 Stream Page (accessible directly or via CTA) */}
             <Route path="/stream" element={<StreamChoice />} />
 
-            {/* (only if user exists) */}
+            {/* 🔒 Protected Routes (only if user exists) */}
             {!user ? (
               <Route path="*" element={<Navigate to="/" replace />} />
             ) : (

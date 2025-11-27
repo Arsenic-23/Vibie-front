@@ -1,5 +1,6 @@
 import React, { useEffect, useState, createContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -9,11 +10,12 @@ import History from './pages/Profile/History';
 import Favourites from './pages/Profile/Favourites';
 import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
+
 import MainLayout from './layouts/MainLayout';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { AudioProvider } from './context/AudioProvider';
 
-import { StreamChoice } from './pages/Stream'; // adjust path if needed
+import { StreamChoice } from './pages/Stream';
 
 export const StreamContext = createContext(null);
 
@@ -22,9 +24,6 @@ function App() {
   const [streamId, setStreamId] = useState(null);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready?.();
-
     const storedStreamId = localStorage.getItem('stream_id');
     if (storedStreamId) setStreamId(storedStreamId);
 
@@ -37,13 +36,10 @@ function App() {
       <AudioProvider>
         <WebSocketProvider streamId={streamId}>
           <Routes>
-            {/* 🟣 Landing Page */}
             <Route path="/" element={<Landing />} />
 
-            {/* 🟢 Stream Page (accessible directly or via CTA) */}
             <Route path="/stream" element={<StreamChoice />} />
 
-            {/* 🔒 Protected Routes (only if user exists) */}
             {!user ? (
               <Route path="*" element={<Navigate to="/" replace />} />
             ) : (

@@ -1,12 +1,10 @@
-// ===== Landing.jsx (Updated Fully Working Firebase Google Auth) =====
-
 import React from 'react';
 import { PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
-export default function Landing()() {
+export default function Landing() {
   const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
@@ -53,24 +51,7 @@ export default function Landing()() {
       {/* Google Login Button */}
       <div className="z-20 pb-16 flex flex-col items-center gap-4">
         <button
-          onClick={async () => {
-            try {
-              const result = await signInWithPopup(auth, googleProvider);
-              const user = result.user;
-
-              const profile = {
-                name: user.displayName,
-                email: user.email,
-                avatar: user.photoURL,
-                uid: user.uid,
-              };
-
-              localStorage.setItem("profile", JSON.stringify(profile));
-              navigate("/stream");
-            } catch (error) {
-              console.error("Google auth failed", error);
-            }
-          }}
+          onClick={handleGoogleLogin}
           className="flex items-center justify-center gap-3 bg-white text-[#5F6368] w-[250px] py-3 rounded-full font-medium text-base shadow-xl active:scale-[0.97] transition-all"
         >
           <img

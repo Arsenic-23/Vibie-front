@@ -12,10 +12,13 @@ import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 
 import MainLayout from './layouts/MainLayout';
+
 import { WebSocketProvider } from './context/WebSocketContext';
 import { AudioProvider } from './context/AudioProvider';
+import { ChatProvider } from './context/ChatContext';
 
 import { StreamChoice } from './pages/Stream';
+import StreamRoom from './pages/Stream/StreamRoom';
 
 export const StreamContext = createContext(null);
 
@@ -34,27 +37,40 @@ function App() {
   return (
     <StreamContext.Provider value={streamId}>
       <AudioProvider>
+
+        {/* WebSocket bound to stream */}
         <WebSocketProvider streamId={streamId}>
-          <Routes>
-            <Route path="/" element={<Landing />} />
 
-            <Route path="/stream" element={<StreamChoice />} />
+          {/* Chat bound to stream + user */}
+          <ChatProvider streamId={streamId} user={user}>
 
-            {!user ? (
-              <Route path="*" element={<Navigate to="/" replace />} />
-            ) : (
-              <Route element={<MainLayout />}>
-                <Route path="/home" element={<Home user={user} />} />
-                <Route path="/search" element={<Search user={user} />} />
-                <Route path="/explore" element={<Explore user={user} />} />
-                <Route path="/profile" element={<Profile user={user} />} />
-                <Route path="/profile/history" element={<History />} />
-                <Route path="/profile/favourites" element={<Favourites />} />
-                <Route path="/profile/statistics" element={<Statistics />} />
-                <Route path="/profile/settings" element={<Settings />} />
-              </Route>
-            )}
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+
+              {/* Stream selection page */}
+              <Route path="/stream" element={<StreamChoice />} />
+
+              {/* Stream main room with chat + queue + player */}
+              <Route path="/stream/room" element={<StreamRoom streamId={streamId} user={user} />} />
+
+              {!user ? (
+                <Route path="*" element={<Navigate to="/" replace />} />
+              ) : (
+                <Route element={<MainLayout />}>
+                  <Route path="/home" element={<Home user={user} />} />
+                  <Route path="/search" element={<Search user={user} />} />
+                  <Route path="/explore" element={<Explore user={user} />} />
+                  <Route path="/profile" element={<Profile user={user} />} />
+                  <Route path="/profile/history" element={<History />} />
+                  <Route path="/profile/favourites" element={<Favourites />} />
+                  <Route path="/profile/statistics" element={<Statistics />} />
+                  <Route path="/profile/settings" element={<Settings />} />
+                </Route>
+              )}
+            </Routes>
+
+          </ChatProvider>
+
         </WebSocketProvider>
       </AudioProvider>
     </StreamContext.Provider>

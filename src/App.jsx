@@ -32,22 +32,25 @@ function App() {
   const [streamId, setStreamId] = useState(null);
 
   useEffect(() => {
-    // Restore stream ID
-    const storedStreamId = localStorage.getItem("stream_id");
-    if (storedStreamId) setStreamId(storedStreamId);
+    // Restore previous stream ID
+    const savedStream = localStorage.getItem("stream_id");
+    if (savedStream) setStreamId(savedStream);
 
-    // Restore user profile
-    const profile = localStorage.getItem("profile");
-    if (profile) setUser(JSON.parse(profile));
+    // Restore saved user
+    const savedProfile = localStorage.getItem("profile");
+    if (savedProfile) setUser(JSON.parse(savedProfile));
 
-    // Handle Google OAuth callback
-    const urlParams = new URLSearchParams(window.location.search);
-    const googleData = urlParams.get("user");
-    if (googleData) {
-      const parsed = JSON.parse(decodeURIComponent(googleData));
+    // Handle Google OAuth callback (if needed)
+    const params = new URLSearchParams(window.location.search);
+    const googleUserData = params.get("user");
+
+    if (googleUserData) {
+      const parsed = JSON.parse(decodeURIComponent(googleUserData));
+
       localStorage.setItem("profile", JSON.stringify(parsed));
       setUser(parsed);
 
+      // Clean URL
       window.history.replaceState({}, document.title, "/stream");
     }
   }, []);
@@ -58,15 +61,24 @@ function App() {
         <WebSocketProvider streamId={streamId}>
           <ChatProvider streamId={streamId} user={user}>
             <Routes>
+              {/* Landing page */}
               <Route path="/" element={<Landing />} />
 
-              {/* Stream Pages */}
+              {/* Stream selection + room */}
               <Route path="/stream" element={<StreamChoice />} />
+
               <Route
                 path="/stream/room"
-                element={<StreamRoom streamId={streamId} user={user} />}
+                element={
+                  user ? (
+                    <StreamRoom streamId={streamId} user={user} />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
               />
 
+              {/* Protected pages */}
               {!user ? (
                 <Route path="*" element={<Navigate to="/" replace />} />
               ) : (

@@ -22,7 +22,7 @@
     "@headlessui/react": "^1.7.17",
     "lodash.debounce": "^4.0.8",
     "recharts": "^2.7.2",
-    "firebase": "^11.0.0"
+    "firebase": "^11.0.0",
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",

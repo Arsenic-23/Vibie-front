@@ -1,6 +1,6 @@
-import React from 'react';
-import { PlayCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { PlayCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
@@ -29,11 +29,10 @@ export default function Landing() {
   return (
     <div
       className="relative w-full h-screen overflow-hidden flex flex-col justify-between items-center bg-cover bg-center"
-      style={{ backgroundImage: 'url(/images/bg.jpg)' }}
+      style={{ backgroundImage: "url(/images/bg.jpg)" }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-40 z-0" />
 
-      {/* Logo */}
       <div className="z-20 pt-14 flex items-center gap-2">
         <PlayCircle size={22} className="text-purple-400 drop-shadow-lg" />
         <span className="text-white text-base font-bold tracking-wide drop-shadow-md">
@@ -41,14 +40,14 @@ export default function Landing() {
         </span>
       </div>
 
-      {/* Heading */}
       <div className="z-10 flex flex-col items-center">
         <h1 className="text-white text-3xl md:text-4xl font-semibold mb-4 text-center px-6 tracking-tight leading-snug drop-shadow-xl">
-          Over 100 million songs<br />and counting
+          Over 100 million songs
+          <br />
+          and counting
         </h1>
       </div>
 
-      {/* Google Login Button */}
       <div className="z-20 pb-16 flex flex-col items-center gap-4">
         <button
           onClick={handleGoogleLogin}

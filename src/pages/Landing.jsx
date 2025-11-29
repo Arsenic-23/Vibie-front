@@ -64,7 +64,7 @@ export default function Landing() {
           "
         >
           <img
-            src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'
+            src='https://www.svgrepo.com/show/380993/google-logo-search-new.svg'
             alt="google"
             className="w-6 h-6 bg-white rounded-full p-1 shadow-sm"
           />

@@ -1,33 +1,60 @@
-// src/pages/Stream.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Radio, Lock, Zap, ArrowRight } from "lucide-react";
+import { Plus, Users, Radio, Lock, Zap, ArrowRight } from "lucide-react";
 import { getFirebaseToken } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 
-// Resolve API base URL safely and strip spaces
-const API =
-  (import.meta.env.VITE_API_URL ||
-    import.meta.env.VITE_BACKEND_URL ||
-    "").trim() || "http://localhost:8000";
+const API = import.meta.env.VITE_BACKEND_URL;
 
-console.log("🔥 USING API BASE:", JSON.stringify(API));
+/* -------------------------------------------------------------
+   Reusable UI Components
+------------------------------------------------------------- */
+function Button({ children, onClick, disabled, className = "", style = {} }) {
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`flex items-center justify-center gap-2 font-medium transition-all ${className}`}
+      style={{
+        padding: "0.75rem 1.5rem",
+        borderRadius: "0.75rem",
+        cursor: disabled ? "not-allowed" : "pointer",
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
+function Input({ className = "", style = {}, ...props }) {
+  return (
+    <input
+      {...props}
+      className={`w-full px-4 py-3 bg-transparent text-sm outline-none ${className}`}
+      style={{ borderRadius: "0.5rem", color: "white", ...style }}
+    />
+  );
+}
+
+/* -------------------------------------------------------------
+   MAIN STREAM PAGE COMPONENT
+------------------------------------------------------------- */
 export default function StreamChoice() {
   const [streamCode, setStreamCode] = useState("");
+  const [focusedInput, setFocusedInput] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   /* -------------------------------------------------------------
-      CREATE STREAM
+     CREATE STREAM (POST /stream/create)
   ------------------------------------------------------------- */
   const handleCreateStream = async () => {
     try {
       setLoading(true);
 
       const token = await getFirebaseToken();
-      console.log("📛 Firebase token present:", !!token);
 
       const res = await fetch(`${API}/stream/create`, {
         method: "POST",
@@ -41,40 +68,29 @@ export default function StreamChoice() {
         }),
       });
 
-      console.log("CREATE status:", res.status);
-      const data = await res.json().catch(() => ({}));
-      console.log("CREATE response body:", data);
-
-      if (!res.ok) {
-        throw new Error(data.detail || "Failed to create stream");
-      }
-
-      if (!data.stream_id) {
-        throw new Error("Backend did not return stream_id");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to create stream.");
 
       localStorage.setItem("stream_id", data.stream_id);
+
       navigate("/stream/room");
-    } catch (err) {
-      console.error("Create Stream Error:", err);
-      alert(err.message);
+    } catch (e) {
+      console.error(e);
+      alert(e.message);
     } finally {
       setLoading(false);
     }
   };
 
   /* -------------------------------------------------------------
-      JOIN STREAM
+     JOIN STREAM (POST /stream/join)
   ------------------------------------------------------------- */
   const handleJoinStream = async () => {
     try {
-      const trimmed = streamCode.trim();
-      if (!trimmed) return;
-
+      if (!streamCode.trim()) return;
       setLoading(true);
 
       const token = await getFirebaseToken();
-      console.log("📛 Firebase token present:", !!token);
 
       const res = await fetch(`${API}/stream/join`, {
         method: "POST",
@@ -83,76 +99,78 @@ export default function StreamChoice() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          stream_id: trimmed,
+          stream_id: streamCode.trim(),
         }),
       });
 
-      console.log("JOIN status:", res.status);
-      const data = await res.json().catch(() => ({}));
-      console.log("JOIN response body:", data);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to join stream.");
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Failed to join stream");
-      }
+      localStorage.setItem("stream_id", streamCode.trim());
 
-      localStorage.setItem("stream_id", trimmed);
       navigate("/stream/room");
-    } catch (err) {
-      console.error("Join Stream Error:", err);
-      alert(err.message);
+    } catch (e) {
+      console.error(e);
+      alert(e.message);
     } finally {
       setLoading(false);
     }
   };
 
+  /* -------------------------------------------------------------
+     UI
+  ------------------------------------------------------------- */
   return (
     <div className="relative size-full overflow-hidden bg-black">
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-black to-zinc-900" />
 
+      {/* Content */}
       <div className="relative flex flex-col items-center justify-center min-h-full px-6 py-16">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-20 text-center"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-20 text-center">
           <p className="text-xs tracking-[0.2em] uppercase text-zinc-600 mb-8">
             Welcome to Vibie
           </p>
 
-          <h1 className="mb-7 text-white text-5xl font-bold">
-            Choose Your Session
-          </h1>
-          <p className="text-zinc-500">
-            Create a session or join one instantly
-          </p>
+          <h1 className="mb-7 text-white text-5xl font-bold">Choose Your Session</h1>
+
+          <p className="text-zinc-500">Create a new stream or join an existing one</p>
         </motion.div>
 
+        {/* Cards */}
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
           <CreateStreamCard onClick={handleCreateStream} disabled={loading} />
+
           <JoinStreamCard
             streamCode={streamCode}
             setStreamCode={setStreamCode}
+            focusedInput={focusedInput}
+            setFocusedInput={setFocusedInput}
             onJoin={handleJoinStream}
             disabled={loading}
           />
         </div>
 
+        {/* Features */}
         <div className="flex gap-4 mt-10 text-zinc-600">
           <FeaturePill icon={<Radio size={16} />} text="Real-time Sync" />
-          <FeaturePill icon={<Lock size={16} />} text="Private or Public" />
-          <FeaturePill icon={<Zap size={16} />} text="Instant Joining" />
+          <FeaturePill icon={<Lock size={16} />} text="Private Sessions" />
+          <FeaturePill icon={<Zap size={16} />} text="Instant Reactions" />
         </div>
       </div>
     </div>
   );
 }
 
+/* -------------------------------------------------------------
+   CARDS
+------------------------------------------------------------- */
 function CreateStreamCard({ onClick, disabled }) {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
       <div
-        onClick={!disabled ? onClick : undefined}
         className="rounded-[2rem] p-10 bg-white/5 border border-white/10 cursor-pointer"
+        onClick={!disabled ? onClick : undefined}
       >
         <div className="flex flex-col gap-6">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
@@ -160,43 +178,55 @@ function CreateStreamCard({ onClick, disabled }) {
           </div>
 
           <h2 className="text-white text-xl">Create Stream</h2>
-          <p className="text-zinc-500">Start a fresh music session.</p>
+          <p className="text-zinc-500">Start a new music session with full control.</p>
         </div>
       </div>
     </motion.div>
   );
 }
 
-function JoinStreamCard({ streamCode, setStreamCode, onJoin, disabled }) {
+function JoinStreamCard({
+  streamCode,
+  setStreamCode,
+  focusedInput,
+  setFocusedInput,
+  onJoin,
+  disabled,
+}) {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
       <div className="rounded-[2rem] p-10 bg-white/5 border border-white/10">
         <h2 className="text-white text-xl mb-3">Join Stream</h2>
 
-        <input
+        <Input
           type="text"
           placeholder="Enter stream code"
           value={streamCode}
           onChange={(e) => setStreamCode(e.target.value.toUpperCase())}
+          onFocus={() => setFocusedInput(true)}
+          onBlur={() => setFocusedInput(false)}
           onKeyDown={(e) => e.key === "Enter" && streamCode.trim() && onJoin()}
-          className="w-full h-14 px-4 bg-white/10 border border-white/20 rounded-xl outline-none text-white"
+          className="h-14 bg-white/10 border border-white/20"
         />
 
-        <button
+        <Button
           onClick={onJoin}
           disabled={!streamCode.trim() || disabled}
-          className="w-full h-14 mt-5 text-white bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl"
+          className="w-full h-14 mt-5 text-white bg-gradient-to-br from-blue-500 to-cyan-500"
         >
-          Join Session <ArrowRight className="inline ml-2 w-4 h-4" />
-        </button>
+          Join Session <ArrowRight className="w-4 h-4" />
+        </Button>
       </div>
     </motion.div>
   );
 }
 
+/* -------------------------------------------------------------
+   UI Helpers
+------------------------------------------------------------- */
 function FeaturePill({ icon, text }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/5 border border-white/10">
       <div>{icon}</div>
       <span className="text-sm">{text}</span>
     </div>

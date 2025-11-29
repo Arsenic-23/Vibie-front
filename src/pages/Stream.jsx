@@ -1,19 +1,23 @@
+// src/pages/Stream.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Radio, Lock, Zap, ArrowRight } from "lucide-react";
 import { getFirebaseToken } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 
-// Guaranteed API value
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Resolve API base URL safely and strip spaces
+const API =
+  (import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    "").trim() || "http://localhost:8000";
+
+console.log("🔥 USING API BASE:", JSON.stringify(API));
 
 export default function StreamChoice() {
   const [streamCode, setStreamCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  console.log("🔥 USING API:", API);
 
   /* -------------------------------------------------------------
       CREATE STREAM
@@ -23,6 +27,7 @@ export default function StreamChoice() {
       setLoading(true);
 
       const token = await getFirebaseToken();
+      console.log("📛 Firebase token present:", !!token);
 
       const res = await fetch(`${API}/stream/create`, {
         method: "POST",
@@ -36,13 +41,19 @@ export default function StreamChoice() {
         }),
       });
 
-      const data = await res.json();
-      console.log("CREATE RESPONSE:", data);
+      console.log("CREATE status:", res.status);
+      const data = await res.json().catch(() => ({}));
+      console.log("CREATE response body:", data);
 
-      if (!res.ok) throw new Error(data.detail || "Failed to create stream");
+      if (!res.ok) {
+        throw new Error(data.detail || "Failed to create stream");
+      }
+
+      if (!data.stream_id) {
+        throw new Error("Backend did not return stream_id");
+      }
 
       localStorage.setItem("stream_id", data.stream_id);
-
       navigate("/stream/room");
     } catch (err) {
       console.error("Create Stream Error:", err);
@@ -57,11 +68,13 @@ export default function StreamChoice() {
   ------------------------------------------------------------- */
   const handleJoinStream = async () => {
     try {
-      if (!streamCode.trim()) return;
+      const trimmed = streamCode.trim();
+      if (!trimmed) return;
 
       setLoading(true);
 
       const token = await getFirebaseToken();
+      console.log("📛 Firebase token present:", !!token);
 
       const res = await fetch(`${API}/stream/join`, {
         method: "POST",
@@ -70,17 +83,19 @@ export default function StreamChoice() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          stream_id: streamCode.trim(),
+          stream_id: trimmed,
         }),
       });
 
-      const data = await res.json();
-      console.log("JOIN RESPONSE:", data);
+      console.log("JOIN status:", res.status);
+      const data = await res.json().catch(() => ({}));
+      console.log("JOIN response body:", data);
 
-      if (!res.ok) throw new Error(data.detail || "Failed to join stream");
+      if (!res.ok) {
+        throw new Error(data.detail || "Failed to join stream");
+      }
 
-      localStorage.setItem("stream_id", streamCode.trim());
-
+      localStorage.setItem("stream_id", trimmed);
       navigate("/stream/room");
     } catch (err) {
       console.error("Join Stream Error:", err);
@@ -95,14 +110,21 @@ export default function StreamChoice() {
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-black to-zinc-900" />
 
       <div className="relative flex flex-col items-center justify-center min-h-full px-6 py-16">
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-20 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-20 text-center"
+        >
           <p className="text-xs tracking-[0.2em] uppercase text-zinc-600 mb-8">
             Welcome to Vibie
           </p>
 
-          <h1 className="mb-7 text-white text-5xl font-bold">Choose Your Session</h1>
-          <p className="text-zinc-500">Create a session or join one instantly</p>
+          <h1 className="mb-7 text-white text-5xl font-bold">
+            Choose Your Session
+          </h1>
+          <p className="text-zinc-500">
+            Create a session or join one instantly
+          </p>
         </motion.div>
 
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
@@ -120,7 +142,6 @@ export default function StreamChoice() {
           <FeaturePill icon={<Lock size={16} />} text="Private or Public" />
           <FeaturePill icon={<Zap size={16} />} text="Instant Joining" />
         </div>
-
       </div>
     </div>
   );
@@ -150,7 +171,6 @@ function JoinStreamCard({ streamCode, setStreamCode, onJoin, disabled }) {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
       <div className="rounded-[2rem] p-10 bg-white/5 border border-white/10">
-
         <h2 className="text-white text-xl mb-3">Join Stream</h2>
 
         <input
@@ -169,7 +189,6 @@ function JoinStreamCard({ streamCode, setStreamCode, onJoin, disabled }) {
         >
           Join Session <ArrowRight className="inline ml-2 w-4 h-4" />
         </button>
-
       </div>
     </motion.div>
   );

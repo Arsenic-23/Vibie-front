@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Users, Radio, Lock, Zap, ArrowRight } from "lucide-react";
+import { Plus, Radio, Lock, Zap, ArrowRight } from "lucide-react";
 import { getFirebaseToken } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 
-// ALWAYS USE THIS KEY
-const API = import.meta.env.VITE_API_URL;
+// Guaranteed API value
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function StreamChoice() {
   const [streamCode, setStreamCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  console.log("🔥 USING API:", API);
 
   /* -------------------------------------------------------------
       CREATE STREAM
@@ -35,14 +37,15 @@ export default function StreamChoice() {
       });
 
       const data = await res.json();
+      console.log("CREATE RESPONSE:", data);
+
       if (!res.ok) throw new Error(data.detail || "Failed to create stream");
 
-      // Store stream ID
       localStorage.setItem("stream_id", data.stream_id);
 
       navigate("/stream/room");
     } catch (err) {
-      console.error(err);
+      console.error("Create Stream Error:", err);
       alert(err.message);
     } finally {
       setLoading(false);
@@ -57,6 +60,7 @@ export default function StreamChoice() {
       if (!streamCode.trim()) return;
 
       setLoading(true);
+
       const token = await getFirebaseToken();
 
       const res = await fetch(`${API}/stream/join`, {
@@ -71,25 +75,23 @@ export default function StreamChoice() {
       });
 
       const data = await res.json();
+      console.log("JOIN RESPONSE:", data);
+
       if (!res.ok) throw new Error(data.detail || "Failed to join stream");
 
       localStorage.setItem("stream_id", streamCode.trim());
 
       navigate("/stream/room");
     } catch (err) {
-      console.error(err);
+      console.error("Join Stream Error:", err);
       alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------------------------------------
-      UI
-  ------------------------------------------------------------- */
   return (
     <div className="relative size-full overflow-hidden bg-black">
-
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-black to-zinc-900" />
 
       <div className="relative flex flex-col items-center justify-center min-h-full px-6 py-16">
@@ -100,7 +102,7 @@ export default function StreamChoice() {
           </p>
 
           <h1 className="mb-7 text-white text-5xl font-bold">Choose Your Session</h1>
-          <p className="text-zinc-500">Create a new stream or join an existing session</p>
+          <p className="text-zinc-500">Create a session or join one instantly</p>
         </motion.div>
 
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
@@ -115,8 +117,8 @@ export default function StreamChoice() {
 
         <div className="flex gap-4 mt-10 text-zinc-600">
           <FeaturePill icon={<Radio size={16} />} text="Real-time Sync" />
-          <FeaturePill icon={<Lock size={16} />} text="Private Sessions" />
-          <FeaturePill icon={<Zap size={16} />} text="Instant Reactions" />
+          <FeaturePill icon={<Lock size={16} />} text="Private or Public" />
+          <FeaturePill icon={<Zap size={16} />} text="Instant Joining" />
         </div>
 
       </div>
@@ -124,9 +126,6 @@ export default function StreamChoice() {
   );
 }
 
-/* -------------------------------------------------------------
-   COMPONENTS
-------------------------------------------------------------- */
 function CreateStreamCard({ onClick, disabled }) {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
@@ -140,7 +139,7 @@ function CreateStreamCard({ onClick, disabled }) {
           </div>
 
           <h2 className="text-white text-xl">Create Stream</h2>
-          <p className="text-zinc-500">Start a fresh music session with friends</p>
+          <p className="text-zinc-500">Start a fresh music session.</p>
         </div>
       </div>
     </motion.div>

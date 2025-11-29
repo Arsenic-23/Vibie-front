@@ -9,7 +9,6 @@ export async function loginWithGoogle() {
   const result = await signInWithPopup(auth, provider);
   const user = result.user;
 
-  // Store user in Firestore
   const ref = doc(db, "users", user.uid);
   const existing = await getDoc(ref);
 
@@ -23,7 +22,6 @@ export async function loginWithGoogle() {
     });
   }
 
-  // Store in localStorage for your app layout
   const profile = {
     uid: user.uid,
     name: user.displayName,

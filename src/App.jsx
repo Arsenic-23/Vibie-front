@@ -1,6 +1,7 @@
 import React, { useEffect, useState, createContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
+// Pages
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -11,18 +12,23 @@ import Favourites from './pages/Profile/Favourites';
 import Statistics from './pages/Profile/Statistics';
 import Settings from './pages/Profile/Settings';
 
+// Layout
 import MainLayout from './layouts/MainLayout';
 
+// Stream Pages
+import StreamChoice from './pages/Stream';                
+import StreamRoom from './pages/Stream/StreamRoom';
+
+// Providers
 import { WebSocketProvider } from './context/WebSocketContext';
 import { AudioProvider } from './context/AudioProvider';
 import { ChatProvider } from './context/ChatContext';
 
-import { StreamChoice } from './pages/Stream';
-import StreamRoom from './pages/Stream/StreamRoom';
-
+// Firebase
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
+// Context
 export const StreamContext = createContext(null);
 
 function App() {
@@ -30,6 +36,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [streamId, setStreamId] = useState(null);
 
+  // Listen to Firebase auth state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -52,12 +59,13 @@ function App() {
     return () => unsub();
   }, []);
 
+  // Restore stream ID from localStorage
   useEffect(() => {
     const storedStreamId = localStorage.getItem("stream_id");
     if (storedStreamId) setStreamId(storedStreamId);
   }, []);
 
-  // Loading Screen (prevents flicker)
+  // Loading overlay (prevents UI flicker)
   if (authLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-black">
@@ -74,9 +82,15 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/stream" element={<StreamChoice />} />
-              <Route path="/stream/room" element={<StreamRoom streamId={streamId} user={user} />} />
 
+              {/* Stream Screens */}
+              <Route path="/stream" element={<StreamChoice />} />
+              <Route
+                path="/stream/room"
+                element={<StreamRoom streamId={streamId} user={user} />}
+              />
+
+              {/* Protected Routes */}
               {!user ? (
                 <Route path="*" element={<Navigate to="/" replace />} />
               ) : (

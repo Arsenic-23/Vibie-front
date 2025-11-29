@@ -49,17 +49,28 @@ export default function Landing() {
       </div>
 
       <div className="z-20 pb-16 flex flex-col items-center gap-4">
+
+        {/* Google Gradient Button */}
         <button
           onClick={handleGoogleLogin}
-          className="flex items-center justify-center gap-3 bg-white text-[#5F6368] w-[250px] py-3 rounded-full font-medium text-base shadow-xl active:scale-[0.97] transition-all"
+          className="
+            relative flex items-center justify-center gap-3 
+            w-[260px] py-3 rounded-full font-semibold text-white text-base
+            bg-gradient-to-r from-[#4285F4] via-[#34A853] via-[#FBBC05] to-[#EA4335]
+            bg-[length:300%_300%] animate-gradientFlow
+            shadow-xl hover:shadow-2xl 
+            hover:scale-[1.03] active:scale-[0.98]
+            transition-all duration-300
+          "
         >
           <img
-            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+            src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'
             alt="google"
-            className="w-6 h-6"
+            className="w-6 h-6 bg-white rounded-full p-1 shadow-sm"
           />
           Sign in with Google
         </button>
+
       </div>
     </div>
   );

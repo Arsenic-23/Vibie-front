@@ -1,23 +1,24 @@
-
+// Profile.jsx
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { History, BarChart2, Heart, Settings, PlayCircle } from 'lucide-react';
+import axios from 'axios';
 
-export default function Profile({ user: propUser }) {
-  const [user, setUser] = useState(propUser);
+export default function Profile() {
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (tgUser) {
-      setUser({
-        id: tgUser.id,
-        name: `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
-        username: tgUser.username,
-        photo: tgUser.photo_url,
-      });
+    async function loadUser() {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`);
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user data", err);
+      }
     }
+    loadUser();
   }, []);
 
   const tabs = [
@@ -33,14 +34,9 @@ export default function Profile({ user: propUser }) {
     return (
       <div
         onClick={() => navigate(to)}
-        onTouchStart={(e) => e.preventDefault()}
         className={`flex items-center gap-4 w-full px-5 py-3 rounded-xl text-base font-semibold transition-all duration-200
-          ${isActive ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'}
-          select-none pointer-events-auto`}
+          ${isActive ? 'bg-white text-black dark:bg-[#2e2e40] dark:text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#1f1f2e] dark:text-gray-300 hover:dark:bg-[#2e2e3e]'} select-none`}
         role="button"
-        tabIndex={0}
-        onContextMenu={(e) => e.preventDefault()}
-        draggable={false}
       >
         <div className={`w-9 h-9 flex items-center justify-center rounded-md ${color} text-white`}>
           <Icon size={18} />
@@ -56,8 +52,8 @@ export default function Profile({ user: propUser }) {
         <h1 className="text-3xl font-bold tracking-wide">Viber</h1>
       </div>
 
-      <div className="mt-2 w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-10 bg-white dark:bg-[#1e1e2f] select-none">
-        <div className="relative w-24 h-24 shrink-0 pointer-events-none">
+      <div className="mt-2 w-full flex items-center gap-5 rounded-2xl p-5 shadow-lg mb-10 bg-white dark:bg-[#1e1e2f]">
+        <div className="relative w-24 h-24">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 blur-md opacity-50 animate-pulse" />
           <div className="absolute inset-0 flex items-center justify-center animate-spinSlow">
             <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
@@ -65,18 +61,17 @@ export default function Profile({ user: propUser }) {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-[92%] h-[92%] rounded-full overflow-hidden bg-gray-100 dark:bg-black">
               <img
-                src={user?.photo || 'https://placehold.co/150x150'}
+                src={user?.profile_pic || 'https://placehold.co/150x150'}
                 alt="Profile"
-                className="w-full h-full object-cover rounded-full pointer-events-none select-none"
-                draggable={false}
+                className="w-full h-full object-cover rounded-full"
               />
             </div>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div>
           <h2 className="text-2xl font-bold">{user?.name || 'Viber'}</h2>
           <p className="text-gray-600 dark:text-violet-400 text-sm">
-            {user?.username ? `@${user.username}` : 'Welcome back, Viber!'}
+            {user?.username ? `@${user.username}` : 'Welcome back!'}
           </p>
         </div>
       </div>

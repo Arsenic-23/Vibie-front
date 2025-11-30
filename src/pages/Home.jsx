@@ -34,7 +34,7 @@ export default function Home() {
     if (vibiePhoto) {
       setUserPhoto(vibiePhoto);
     } else {
-      setUserPhoto("https://placehold.co/thumbnail");
+      setUserPhoto(null);
     }
 
     // Restore like/dislike state

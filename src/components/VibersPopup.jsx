@@ -1,33 +1,35 @@
-import React, { useEffect } from 'react';
-import { useWebSocket } from '../context/WebSocketContext';
+// src/components/VibersPopup.jsx
+import React, { useEffect } from "react";
+import { useRealtime } from "../context/RealtimeContext";
 
 export default function VibersPopup({ onClose, streamId }) {
-  const { vibers, connectToStream, disconnect } = useWebSocket();
+  const { vibers, connectToStream, disconnect } = useRealtime();
 
   useEffect(() => {
-    const id = streamId || localStorage.getItem('stream_id');
+    const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
     connectToStream(id);
-    return () => disconnect();
+    return () => {
+      disconnect();
+    };
   }, [streamId]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-
-      <div className="relative z-50 w-64 bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-3 mt-16 ml-2 animate-slideInSmall">
+      <div className="relative z-50 w-72 bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-3 mt-16 ml-2 animate-slideInSmall">
         <h3 className="text-base font-semibold mb-3 text-black dark:text-white">Vibers</h3>
         <ul className="space-y-2 max-h-72 overflow-auto">
           {vibers.length === 0 ? (
             <li className="text-sm text-gray-400">No one joined yet</li>
           ) : (
-            vibers.map((viber) => (
-              <li key={viber.user_id} className="flex items-center space-x-3">
-                <img src={viber.profile_pic || 'https://placehold.co/80x80'} alt={viber.name}
-                     className="w-8 h-8 rounded-full border border-white dark:border-gray-700 shadow-sm" />
+            vibers.map((v) => (
+              <li key={v.user_id} className="flex items-center space-x-3">
+                <img src={v.profile_pic || 'https://placehold.co/80x80'} alt={v.name}
+                     className="w-10 h-10 rounded-full border border-white dark:border-gray-700 shadow-sm" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-black dark:text-white">{viber.name || 'Unknown'}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{viber.username ? `@${viber.username}` : ''}</span>
+                  <span className="text-sm font-medium text-black dark:text-white">{v.name || 'Unknown'}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{v.username ? `@${v.username}` : ''}</span>
                 </div>
               </li>
             ))
@@ -39,4 +41,3 @@ export default function VibersPopup({ onClose, streamId }) {
     </div>
   );
 }
-

@@ -73,6 +73,7 @@ export function RealtimeProvider({ children }) {
 
     try {
       wsRef.current = new WebSocket(url);
+      window.__ACTIVE_WS__ = wsRef.current; 
     } catch (e) {
       console.warn("Failed opening WS", e);
       _startPollingFallback(streamId);

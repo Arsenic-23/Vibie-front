@@ -48,28 +48,7 @@ export default function Profile() {
     load();
   }, []);
 
-  async function handleEditName(newName) {
-    const updated = { ...user, name: newName };
-    setUser(updated);
-
-    await sendProfileUpdate({
-      name: newName,
-      username: user.username,
-      profile_pic: user.profile_pic,
-    });
-
-    localStorage.setItem(
-      "profile",
-      JSON.stringify({
-        uid: user.user_id,
-        name: newName,
-        username: user.username,
-        photo: user.profile_pic,
-      })
-    );
-  }
-
-  // UI TABS (same as your sample design)
+  // UI TABS
   const tabs = [
     { to: "/profile/history", icon: History, color: "bg-blue-500", label: "History" },
     { to: "/profile/statistics", icon: BarChart2, color: "bg-green-500", label: "Statistics" },
@@ -133,13 +112,6 @@ export default function Profile() {
           <p className="text-gray-600 dark:text-violet-400 text-sm">
             {user?.username ? `@${user.username}` : "Welcome back!"}
           </p>
-
-          {/* Name input below username */}
-          <input
-            defaultValue={user?.name || ""}
-            className="mt-3 px-3 py-2 w-full border border-gray-300 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-[#2e2e40]"
-            onBlur={(e) => handleEditName(e.target.value)}
-          />
         </div>
       </div>
 

@@ -6,7 +6,6 @@ export default function VibersPopup({ onClose, streamId }) {
   const { vibers, connectToStream, disconnect } = useRealtime();
   const [participants, setParticipants] = useState([]);
 
-  // Normalize vibers coming from Realtime WS or Poll fallback
   function normalize(list) {
     return (list || []).map((v) => ({
       user_id: v.user_id,
@@ -17,17 +16,28 @@ export default function VibersPopup({ onClose, streamId }) {
     }));
   }
 
-  // Sync popup state with realtime vibers
   useEffect(() => {
     setParticipants(normalize(vibers));
   }, [vibers]);
 
-  // Connect to stream on open
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
 
-    connectToStream(id);
+    async function connect() {
+      await connectToStream(id);
+
+      setTimeout(() => {
+        try {
+          const ws = window.__ACTIVE_WS__;
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "request_full_state" }));
+          }
+        } catch (_) {}
+      }, 150);
+    }
+
+    connect();
 
     return () => {
       disconnect();
@@ -48,10 +58,7 @@ export default function VibersPopup({ onClose, streamId }) {
             <li className="text-sm text-gray-400">No one joined yet</li>
           ) : (
             participants.map((v) => (
-              <li
-                key={v.user_id}
-                className="flex items-center space-x-3"
-              >
+              <li key={v.user_id} className="flex items-center space-x-3">
                 <img
                   src={v.profile_pic || "https://placehold.co/80x80"}
                   alt={v.name}
@@ -62,7 +69,6 @@ export default function VibersPopup({ onClose, streamId }) {
                   <span className="text-sm font-medium text-black dark:text-white">
                     {v.name || "Unknown"}
                   </span>
-
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {v.username ? `@${v.username}` : ""}
                   </span>

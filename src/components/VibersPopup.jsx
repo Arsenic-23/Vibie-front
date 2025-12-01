@@ -1,6 +1,7 @@
 // src/components/VibersPopup.jsx
 import React, { useEffect, useState } from "react";
 import { useRealtime } from "../context/RealtimeContext";
+import { getFirebaseToken } from "../utils/auth";
 
 export default function VibersPopup({ onClose, streamId }) {
   const { vibers, connectToStream, disconnect } = useRealtime();
@@ -15,22 +16,20 @@ export default function VibersPopup({ onClose, streamId }) {
       is_admin: v.is_admin || false,
     }));
   }
-
-  // ---------------------------------------------------------------------------------------
-  // 1) Load participants immediately from backend analytics API
-  // ---------------------------------------------------------------------------------------
+  
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
 
     async function load() {
       try {
-        const fbUser = window.auth?.currentUser;
-        const token = fbUser ? await fbUser.getIdToken(true) : null;
+        const token = await getFirebaseToken().catch(() => null);
 
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
-          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+          token
+            ? { headers: { Authorization: `Bearer ${token}` } }
+            : {}
         );
 
         const data = await res.json();
@@ -38,23 +37,25 @@ export default function VibersPopup({ onClose, streamId }) {
           setParticipants(normalize(data.participants));
         }
       } catch (e) {
-        console.log("Failed loading analytics participants", e);
+        console.log("Failed analytics participants:", e);
       }
     }
 
     load();
   }, [streamId]);
 
-  // ---------------------------------------------------------------------------------------
-  // 2) Sync WS vibers
-  // ---------------------------------------------------------------------------------------
+  // ----------------------------------------------------------
+  // 2) Sync participants with realtime WS updates
+  // ----------------------------------------------------------
   useEffect(() => {
-    setParticipants(normalize(vibers));
+    if (vibers?.length > 0) {
+      setParticipants(normalize(vibers));
+    }
   }, [vibers]);
 
-  // ---------------------------------------------------------------------------------------
-  // 3) Connect + request full WS state
-  // ---------------------------------------------------------------------------------------
+  // ----------------------------------------------------------
+  // 3) Connect to WS + request full realtime state
+  // ----------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
@@ -76,13 +77,17 @@ export default function VibersPopup({ onClose, streamId }) {
     return () => disconnect();
   }, [streamId]);
 
-  // UI Rendering
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2 select-none">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
       <div className="relative z-50 w-72 bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-3 mt-16 ml-2 animate-slideInSmall">
-        <h3 className="text-base font-semibold mb-3 text-black dark:text-white">Vibers</h3>
+        <h3 className="text-base font-semibold mb-3 text-black dark:text-white">
+          Vibers
+        </h3>
 
         <ul className="space-y-2 max-h-72 overflow-auto">
           {participants.length === 0 ? (
@@ -112,10 +117,18 @@ export default function VibersPopup({ onClose, streamId }) {
 
       <style jsx>{`
         @keyframes slideInSmall {
-          0% { transform: translateX(-15px); opacity: 0 }
-          100% { transform: translateX(0); opacity: 1 }
+          0% {
+            transform: translateX(-15px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
-        .animate-slideInSmall { animation: slideInSmall 0.25s ease-out }
+        .animate-slideInSmall {
+          animation: slideInSmall 0.25s ease-out;
+        }
       `}</style>
     </div>
   );

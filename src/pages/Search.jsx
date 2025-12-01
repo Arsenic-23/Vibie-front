@@ -16,25 +16,31 @@ export default function Search() {
   const [showWave, setShowWave] = useState(false);
 
   const recognitionRef = useRef(null);
-  const observer = useRef();
+  const observerRef = useRef(null);
   const siriWaveRef = useRef(null);
+
+  // Prevent duplicate API calls
+  const fetchingRef = useRef(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
 
-  // Infinite scroll observer (smooth & glitch-free)
+  // Infinite scroll observer with fetch-lock protection
   const lastSongElementRef = useCallback(
     (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            setPage((prev) => prev + 1);
-          }
-        },
-        { threshold: 0.3 }
-      );
-      if (node) observer.current.observe(node);
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loading &&
+          !fetchingRef.current &&
+          hasMore
+        ) {
+          setPage((p) => p + 1);
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
     },
     [loading, hasMore]
   );
@@ -42,12 +48,18 @@ export default function Search() {
   // Fetch search results
   useEffect(() => {
     if (!query) return;
+
     const fetchResults = async () => {
+      if (fetchingRef.current) return; // *** Stop duplicate calls ***
+
+      fetchingRef.current = true;
       setLoading(true);
+
       try {
         const res = await axios.get(`${backendUrl}/search/`, {
           params: { q: query, page },
         });
+
         const newResults = res.data.results || [];
 
         const normalized = newResults.map((r) => ({
@@ -61,18 +73,21 @@ export default function Search() {
         setResults((prev) => (page === 1 ? normalized : [...prev, ...normalized]));
         setHasMore(normalized.length > 0);
       } catch (err) {
-        console.error('Error fetching search results:', err);
+        console.error('Search error:', err);
         setHasMore(false);
       } finally {
+        fetchingRef.current = false;
         setLoading(false);
       }
     };
+
     fetchResults();
   }, [query, page, backendUrl]);
 
   // Voice recognition setup
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
@@ -83,20 +98,23 @@ export default function Search() {
       setIsListening(true);
       setShowWave(true);
     };
+
     recognition.onerror = recognition.onend = () => {
       setIsListening(false);
       setShowWave(false);
       siriWaveRef.current?.stop();
     };
+
     recognition.onresult = (event) => {
-      let finalTranscript = '';
+      let finalText = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalTranscript += transcript;
-        else setInput(transcript);
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t;
+        else setInput(t);
       }
-      if (finalTranscript) {
-        const trimmed = finalTranscript.trim();
+
+      if (finalText) {
+        const trimmed = finalText.trim();
         setInput(trimmed);
         handleSubmitSearch(trimmed);
       }
@@ -108,7 +126,7 @@ export default function Search() {
   // SiriWave animation
   useEffect(() => {
     if (!showWave) return;
-    const tryInit = () => {
+    const init = () => {
       const container = document.querySelector('.siri-voice-visualizer');
       if (window.SiriWave && container && !siriWaveRef.current) {
         siriWaveRef.current = new window.SiriWave({
@@ -120,24 +138,24 @@ export default function Search() {
           style: 'ios',
           autostart: true,
         });
-      } else requestAnimationFrame(tryInit);
+      } else requestAnimationFrame(init);
     };
-    tryInit();
+    init();
+
     return () => {
       siriWaveRef.current?.stop();
       siriWaveRef.current = null;
     };
   }, [showWave]);
 
-  // Search submit handlers
-  const handleSubmitSearch = (searchValue) => {
-    setQuery(searchValue);
+  // Submit search
+  const handleSubmitSearch = (value) => {
+    setQuery(value);
     setSearchSubmitted(true);
     setResults([]);
     setPage(1);
     setHasMore(true);
-    setShowWave(false);
-    siriWaveRef.current?.stop();
+    fetchingRef.current = false;
   };
 
   const handleSearch = () => {
@@ -147,19 +165,15 @@ export default function Search() {
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
 
   const handleMicClick = () => {
-    if (!recognitionRef.current) {
-      alert('Voice recognition not supported in this browser');
-      return;
-    }
+    if (!recognitionRef.current) return alert('Voice recognition not supported');
     if (isListening) recognitionRef.current.stop();
     else {
-      if (navigator.vibrate) navigator.vibrate(80);
+      if (navigator.vibrate) navigator.vibrate(60);
       setInput('');
       setSearchSubmitted(false);
       setResults([]);
       setPage(1);
       setQuery('');
-      setShowWave(true);
       recognitionRef.current.start();
     }
   };
@@ -182,17 +196,12 @@ export default function Search() {
             placeholder="Find your vibe..."
             className="w-full p-3 pl-11 pr-12 rounded-full shadow-lg bg-gray-100 dark:bg-neutral-900 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
           />
-          <SearchIcon
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-            size={18}
-          />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
             <motion.button
               onClick={handleMicClick}
-              className={`relative p-2 rounded-full ${
-                isListening
-                  ? 'bg-purple-600 text-white shadow-lg animate-pulse'
-                  : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-300'
+              className={`p-2 rounded-full ${
+                isListening ? 'bg-purple-600 text-white animate-pulse' : 'bg-gray-200 dark:bg-neutral-800 dark:text-gray-300'
               }`}
               whileTap={{ scale: 0.9 }}
             >
@@ -201,34 +210,37 @@ export default function Search() {
           </div>
         </div>
 
-        {/* Suggestions */}
-        {input.trim() && !searchSubmitted && <Suggestions query={input} onSelect={handleSubmitSearch} />}
+        {input.trim() && !searchSubmitted && (
+          <Suggestions query={input} onSelect={handleSubmitSearch} />
+        )}
 
-        {/* Results grid */}
+        {/* Results */}
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto px-2">
             {results.map((song, i) => {
-              const isLast = results.length === i + 1;
+              const isLast = i === results.length - 1;
               return (
                 <motion.div
-                  ref={isLast ? lastSongElementRef : null}
                   key={song.id}
+                  ref={isLast ? lastSongElementRef : null}
                   whileHover={{ scale: 1.03 }}
                   transition={{ type: 'spring', stiffness: 250, damping: 20 }}
                   className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                 >
-                  <div className="relative w-full h-36 overflow-hidden">
+                  <div className="relative w-full h-36">
                     <img
                       src={song.thumbnail || '/placeholder.jpg'}
-                      alt={song.title}
-                      className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => (e.target.src = '/placeholder.jpg')}
+                      alt={song.title}
+                      className="object-cover w-full h-full group-hover:scale-110 transition-all"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent" />
                   </div>
                   <div className="p-3 text-sm">
-                    <h2 className="font-semibold truncate text-gray-900 dark:text-white">{song.title}</h2>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{song.channel}</p>
+                    <h2 className="font-semibold truncate">{song.title}</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {song.channel}
+                    </p>
                     {song.duration && (
                       <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>
                     )}
@@ -239,24 +251,23 @@ export default function Search() {
           </div>
         )}
 
-        {!loading && searchSubmitted && results.length === 0 && page === 1 && (
-          <div className="text-center mt-10 text-sm text-gray-500 dark:text-gray-400">
-            No results found. Try a different vibe!
-          </div>
+        {!loading && searchSubmitted && results.length === 0 && (
+          <div className="text-center mt-10 text-sm text-gray-400">No results found. Try another vibe!</div>
         )}
 
-        {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
+        {loading && (
+          <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>
+        )}
       </div>
 
-      {/* SiriWave visualizer */}
+      {/* SiriWave */}
       <AnimatePresence>
         {showWave && (
           <motion.div
             key="siriwave"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50, transition: { duration: 0.5 } }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-14 left-0 w-full flex justify-center z-50"
           >
             <div className="siri-voice-visualizer w-[250px] h-[60px]" />
@@ -264,9 +275,9 @@ export default function Search() {
         )}
       </AnimatePresence>
 
-      <div className="mt-12 -mb-0.5 flex justify-center items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+      <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
         <span className="font-semibold">Vibie</span>
-      </div>
+      </footer>
     </div>
   );
 }

@@ -18,9 +18,6 @@ const RealtimeContext = createContext({
   vibers: [],
   connectToStream: async () => {},
   disconnect: () => {},
-  sendProfileUpdate: async () => {},
-  nowPlaying: null,
-  queue: [],
 });
 
 export function RealtimeProvider({ children }) {
@@ -29,9 +26,10 @@ export function RealtimeProvider({ children }) {
   const streamRef = useRef(null);
   const shouldReconnect = useRef(false);
   const reconnectTimer = useRef(null);
+  const pingInterval = useRef(null);
 
   // --------------------------------------------------------------
-  // Build WebSocket URL safely for all environments
+  // Build WebSocket URL
   // --------------------------------------------------------------
   async function buildWsUrl(streamId) {
     const token = await getFirebaseToken().catch(() => null);
@@ -48,7 +46,7 @@ export function RealtimeProvider({ children }) {
   }
 
   // --------------------------------------------------------------
-  // Normalize participants
+  // Normalize
   // --------------------------------------------------------------
   const normalize = (list = []) =>
     list.map((v) => ({
@@ -62,7 +60,7 @@ export function RealtimeProvider({ children }) {
     }));
 
   // --------------------------------------------------------------
-  // Handle WS messages
+  // Handle incoming WS messages
   // --------------------------------------------------------------
   function handleMessage(payload) {
     if (!payload?.type) return;
@@ -109,10 +107,17 @@ export function RealtimeProvider({ children }) {
 
     const ws = new WebSocket(url);
     wsRef.current = ws;
-    window.__ACTIVE_WS__ = ws; // Debug helper
+    window.__ACTIVE_WS__ = ws; // debug helper
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: "request_full_state" }));
+
+      // **Start ping interval**
+      pingInterval.current = setInterval(() => {
+        try {
+          ws.send(JSON.stringify({ type: "ping" }));
+        } catch {}
+      }, 20000);
     };
 
     ws.onmessage = (ev) => {
@@ -128,6 +133,8 @@ export function RealtimeProvider({ children }) {
     };
 
     ws.onclose = () => {
+      if (pingInterval.current) clearInterval(pingInterval.current);
+
       if (!shouldReconnect.current) return;
 
       reconnectTimer.current = setTimeout(() => {
@@ -137,7 +144,7 @@ export function RealtimeProvider({ children }) {
   }
 
   // --------------------------------------------------------------
-  // Public connect
+  // Public: Connect to stream
   // --------------------------------------------------------------
   async function connectToStream(streamId) {
     if (!streamId) return;
@@ -163,10 +170,12 @@ export function RealtimeProvider({ children }) {
   }
 
   // --------------------------------------------------------------
-  // Public disconnect
+  // Public: Disconnect
   // --------------------------------------------------------------
   function disconnect() {
     shouldReconnect.current = false;
+
+    if (pingInterval.current) clearInterval(pingInterval.current);
     if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
 
     if (wsRef.current) {
@@ -174,12 +183,11 @@ export function RealtimeProvider({ children }) {
         wsRef.current.close();
       } catch {}
     }
-    wsRef.current = null;
 
+    wsRef.current = null;
     setVibers([]);
   }
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => disconnect();
   }, []);

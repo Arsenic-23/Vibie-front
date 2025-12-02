@@ -1,123 +1,63 @@
-// src/context/RealtimeContext.jsx
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+// src/context/WebSocketContext.jsx
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getFirebaseToken } from "../utils/auth";
 
 const API = import.meta.env.VITE_BACKEND_URL;
-const WS_PATH = "/realtime/stream";
+const WS_PATH = "/realtime/stream"; // same path backend expects
 
-const RECONNECT_BASE_MS = 800;
-const RECONNECT_MAX_MS = 12000;
-
-const RealtimeContext = createContext({
-  vibers: [],
-  connectToStream: async () => {},
+export const WebSocketContext = createContext({
+  ws: null,
+  isConnected: false,
+  connectToStream: () => {},
   disconnect: () => {},
-  sendProfileUpdate: async () => {},
-  nowPlaying: null,
-  queue: [],
+  send: () => {},
 });
 
-export function RealtimeProvider({ children }) {
-  const [vibers, setVibers] = useState([]);
+export function WebSocketProvider({ streamId, children }) {
+  const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef(null);
-  const streamRef = useRef(null);
-  const shouldReconnect = useRef(false);
+  const reconnectRef = useRef(true);
   const reconnectTimer = useRef(null);
+  const streamRef = useRef(null);
 
-  // --------------------------------------------------------------
-  // Build WebSocket URL safely for all environments
-  // --------------------------------------------------------------
-  async function buildWsUrl(streamId) {
+  // ----------------------------------------------------------
+  // Build WebSocket URL safely
+  // ----------------------------------------------------------
+  async function buildWsUrl(id) {
     const token = await getFirebaseToken().catch(() => null);
 
     let url = API.replace(/^https/, "wss").replace(/^http/, "ws");
-    url += `${WS_PATH}/${streamId}`;
+    url += `${WS_PATH}/${id}`;
 
     if (token) return `${url}?token=${encodeURIComponent(token)}`;
 
-    const profile = JSON.parse(localStorage.getItem("profile") || "null");
-    if (profile?.uid) return `${url}?user_id=${encodeURIComponent(profile.uid)}`;
+    const local = JSON.parse(localStorage.getItem("profile") || "null");
+    if (local?.uid) return `${url}?user_id=${encodeURIComponent(local.uid)}`;
 
     return url;
   }
 
-  // --------------------------------------------------------------
-  // Normalize participants
-  // --------------------------------------------------------------
-  const normalize = (list = []) =>
-    list.map((v) => ({
-      user_id: v.user_id,
-      name: v.name,
-      username: v.username,
-      profile_pic: v.profile_pic,
-      is_admin: !!v.is_admin,
-      joined_at: v.joined_at,
-      last_seen_at: v.last_seen_at,
-    }));
-
-  // --------------------------------------------------------------
-  // Handle WS messages
-  // --------------------------------------------------------------
-  function handleMessage(payload) {
-    if (!payload?.type) return;
-
-    switch (payload.type) {
-      case "full_state":
-        setVibers(normalize(payload.participants || []));
-        break;
-
-      case "join":
-        setVibers((prev) => {
-          const p = normalize([payload.participant])[0];
-          if (!p) return prev;
-          const exists = prev.some((x) => x.user_id === p.user_id);
-          return exists
-            ? prev.map((x) => (x.user_id === p.user_id ? p : x))
-            : [p, ...prev];
-        });
-        break;
-
-      case "leave":
-        setVibers((prev) =>
-          prev.filter((x) => x.user_id !== payload.user_id)
-        );
-        break;
-
-      case "update":
-        const u = normalize([payload.user])[0];
-        setVibers((prev) =>
-          prev.map((x) => (x.user_id === u.user_id ? u : x))
-        );
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  // --------------------------------------------------------------
+  // ----------------------------------------------------------
   // Open WebSocket
-  // --------------------------------------------------------------
-  async function openWS(streamId) {
-    const url = await buildWsUrl(streamId);
-
+  // ----------------------------------------------------------
+  async function openWS(id) {
+    const url = await buildWsUrl(id);
     const ws = new WebSocket(url);
+
     wsRef.current = ws;
-    window.__ACTIVE_WS__ = ws; // Debug helper
+    window.__CHAT_WS__ = ws; // debug helper
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "request_full_state" }));
+      setIsConnected(true);
     };
 
     ws.onmessage = (ev) => {
+      // WebSocketContext is not responsible for vibers/chat storage.
+      // That is handled by RealtimeContext & ChatContext.
+      // We only forward messages if needed.
       try {
-        handleMessage(JSON.parse(ev.data));
+        const data = JSON.parse(ev.data);
+        console.log("WS message:", data);
       } catch {}
     };
 
@@ -128,30 +68,24 @@ export function RealtimeProvider({ children }) {
     };
 
     ws.onclose = () => {
-      if (!shouldReconnect.current) return;
+      setIsConnected(false);
+
+      if (!reconnectRef.current) return;
 
       reconnectTimer.current = setTimeout(() => {
-        if (shouldReconnect.current) openWS(streamId);
-      }, Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * 1.8));
+        if (reconnectRef.current) openWS(id);
+      }, 1200);
     };
   }
 
-  // --------------------------------------------------------------
-  // Public connect
-  // --------------------------------------------------------------
-  async function connectToStream(streamId) {
-    if (!streamId) return;
+  // ----------------------------------------------------------
+  // Public: connect
+  // ----------------------------------------------------------
+  async function connectToStream(id) {
+    if (!id) return;
 
-    if (
-      wsRef.current &&
-      wsRef.current.readyState === WebSocket.OPEN &&
-      streamRef.current === streamId
-    ) {
-      return;
-    }
-
-    streamRef.current = streamId;
-    shouldReconnect.current = true;
+    streamRef.current = id;
+    reconnectRef.current = true;
 
     if (wsRef.current) {
       try {
@@ -159,14 +93,15 @@ export function RealtimeProvider({ children }) {
       } catch {}
     }
 
-    await openWS(streamId);
+    await openWS(id);
   }
 
-  // --------------------------------------------------------------
-  // Public disconnect
-  // --------------------------------------------------------------
+  // ----------------------------------------------------------
+  // Public: disconnect
+  // ----------------------------------------------------------
   function disconnect() {
-    shouldReconnect.current = false;
+    reconnectRef.current = false;
+
     if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
 
     if (wsRef.current) {
@@ -174,27 +109,37 @@ export function RealtimeProvider({ children }) {
         wsRef.current.close();
       } catch {}
     }
-    wsRef.current = null;
 
-    setVibers([]);
+    wsRef.current = null;
+    setIsConnected(false);
   }
 
-  // Cleanup on unmount
+  // Auto-clean on unmount
   useEffect(() => {
     return () => disconnect();
   }, []);
 
+  // ----------------------------------------------------------
+  // Safe send helper
+  // ----------------------------------------------------------
+  function send(obj) {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify(obj));
+  }
+
   return (
-    <RealtimeContext.Provider
+    <WebSocketContext.Provider
       value={{
-        vibers,
+        ws: wsRef.current,
+        isConnected,
         connectToStream,
         disconnect,
+        send,
       }}
     >
       {children}
-    </RealtimeContext.Provider>
+    </WebSocketContext.Provider>
   );
 }
 
-export const useRealtime = () => useContext(RealtimeContext);
+export const useWebSocket = () => useContext(WebSocketContext);

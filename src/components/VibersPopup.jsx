@@ -4,7 +4,7 @@ import { useRealtime } from "../context/RealtimeContext";
 import { getFirebaseToken } from "../utils/auth";
 
 export default function VibersPopup({ onClose, streamId }) {
-  const { vibers, connectToStream } = useRealtime();
+  const { vibers } = useRealtime();
   const [initialSnapshot, setInitialSnapshot] = useState([]);
 
   const normalize = (list) =>
@@ -17,7 +17,7 @@ export default function VibersPopup({ onClose, streamId }) {
     }));
 
   // --------------------------------------------------------------
-  // 1. Initial fetch so popup is never empty
+  // Initial fetch so popup is never empty
   // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
@@ -41,16 +41,7 @@ export default function VibersPopup({ onClose, streamId }) {
   }, [streamId]);
 
   // --------------------------------------------------------------
-  // 2. Ensure realtime WS is connected
-  // --------------------------------------------------------------
-  useEffect(() => {
-    const id = streamId || localStorage.getItem("stream_id");
-    if (!id) return;
-    connectToStream(id);
-  }, [streamId]);
-
-  // --------------------------------------------------------------
-  // 3. Realtime vibers override initial snapshot
+  // Realtime vibers override snapshot
   // --------------------------------------------------------------
   const participants =
     vibers.length > 0 ? normalize(vibers) : initialSnapshot;
@@ -101,7 +92,7 @@ export default function VibersPopup({ onClose, streamId }) {
           }
           100% {
             transform: translateX(0);
-            opacity: 1;
+            opacity: 1);
           }
         }
         .animate-slideInSmall {

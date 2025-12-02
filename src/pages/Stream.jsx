@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Radio, Lock, Zap, ArrowRight, Copy, Check } from "lucide-react";
 import { getFirebaseToken } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
+import { useRealtime } from "../context/RealtimeContext";   // ✅ ADDED
 
 const API = import.meta.env.VITE_BACKEND_URL;
 
@@ -51,6 +52,29 @@ export default function StreamChoice() {
 
   const navigate = useNavigate();
 
+  // ✅ ADD REALTIME CONTEXT
+  const { connectToStream, disconnect } = useRealtime();
+
+  /* -------------------------------------------------------------
+     AUTO CONNECT WHEN A STREAM IS CREATED OR JOINED
+  ------------------------------------------------------------- */
+  useEffect(() => {
+    if (createdCode) {
+      connectToStream(createdCode);   // 🔥 Connect right after creation
+    }
+  }, [createdCode]);
+
+  useEffect(() => {
+    if (localStorage.getItem("stream_id")) {
+      connectToStream(localStorage.getItem("stream_id"));  // 🔥 Auto connect
+    }
+
+    return () => disconnect(); // Clean on exit
+  }, []);
+
+  /* -------------------------------------------------------------
+     COPY CODE BTN
+  ------------------------------------------------------------- */
   const handleCopyCode = () => {
     navigator.clipboard.writeText(createdCode);
     setCopied(true);
@@ -82,6 +106,10 @@ export default function StreamChoice() {
       if (!res.ok) throw new Error(data.detail || "Failed to create stream.");
 
       setCreatedCode(data.stream_id);
+
+      // 🔥 Connect immediately
+      connectToStream(data.stream_id);
+
     } catch (err) {
       alert(err.message);
     } finally {
@@ -114,7 +142,12 @@ export default function StreamChoice() {
       if (!res.ok) throw new Error(data.detail || "Join failed");
 
       localStorage.setItem("stream_id", code);
+
+      // 🔥 Connect websocket instantly
+      connectToStream(code);
+
       navigate("/home");
+
     } catch (err) {
       alert(err.message);
     } finally {

@@ -1,23 +1,24 @@
 // src/components/VibersPopup.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRealtime } from "../context/RealtimeContext";
 import { getFirebaseToken } from "../utils/auth";
 
 export default function VibersPopup({ onClose, streamId }) {
   const { vibers, connectToStream } = useRealtime();
-  const [participants, setParticipants] = useState([]);
+  const [initialSnapshot, setInitialSnapshot] = useState([]);
 
-  function normalize(list) {
-    return (list || []).map((v) => ({
+  const normalize = (list) =>
+    list.map((v) => ({
       user_id: v.user_id,
       name: v.name,
       username: v.username,
       profile_pic: v.profile_pic,
       is_admin: v.is_admin || false,
     }));
-  }
 
-  // 1) Initial snapshot via HTTP so popup is never blank
+  // --------------------------------------------------------------
+  // 1. Initial fetch so popup is never empty
+  // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
@@ -28,44 +29,31 @@ export default function VibersPopup({ onClose, streamId }) {
 
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
-          token
-            ? { headers: { Authorization: `Bearer ${token}` } }
-            : {}
+          token ? { headers: { Authorization: `Bearer ${token}` } } : {}
         );
 
-        if (!res.ok) {
-          console.warn("Failed to fetch participants", res.status);
-          return;
-        }
-
         const data = await res.json();
-        if (data.participants) {
-          setParticipants(normalize(data.participants));
-        }
-      } catch (e) {
-        console.log("Failed analytics participants:", e);
-      }
+        setInitialSnapshot(normalize(data.participants || []));
+      } catch {}
     }
 
     load();
   }, [streamId]);
 
-  // 2) Connect to WebSocket for realtime updates
+  // --------------------------------------------------------------
+  // 2. Ensure realtime WS is connected
+  // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
-
     connectToStream(id);
-  }, [streamId, connectToStream]);
+  }, [streamId]);
 
-  // 3) Whenever realtime vibers has data, use that as the source of truth
-  useEffect(() => {
-    if (vibers && vibers.length > 0) {
-      setParticipants(normalize(vibers));
-    }
-  }, [vibers]);
-
-  const hasParticipants = participants && participants.length > 0;
+  // --------------------------------------------------------------
+  // 3. Realtime vibers override initial snapshot
+  // --------------------------------------------------------------
+  const participants =
+    vibers.length > 0 ? normalize(vibers) : initialSnapshot;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2 select-none">
@@ -80,23 +68,23 @@ export default function VibersPopup({ onClose, streamId }) {
         </h3>
 
         <ul className="space-y-2 max-h-72 overflow-auto">
-          {!hasParticipants ? (
+          {participants.length === 0 ? (
             <li className="text-sm text-gray-400">No one joined yet</li>
           ) : (
             participants.map((v) => (
               <li key={v.user_id} className="flex items-center space-x-3">
                 <img
                   src={v.profile_pic || "https://placehold.co/80x80"}
-                  alt={v.name || v.username || "Viber"}
-                  className="w-10 h-10 rounded-full border border-white dark:border-gray-700 shadow-sm object-cover"
+                  alt={v.name}
+                  className="w-10 h-10 rounded-full object-cover border border-white dark:border-gray-700 shadow-sm"
                 />
 
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="text-sm font-medium">
                     {v.name || "Unknown"}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {v.username ? `@${v.username}` : ""}
+                    {v.username ? "@" + v.username : ""}
                   </span>
                 </div>
               </li>

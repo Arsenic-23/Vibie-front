@@ -1,7 +1,6 @@
 // src/components/VibersPopup.jsx
 import React, { useEffect, useState } from "react";
 import { useRealtime } from "../context/RealtimeContext";
-import { getFirebaseToken } from "../utils/auth";
 
 export default function VibersPopup({ onClose, streamId }) {
   const { vibers, connectToStream } = useRealtime();
@@ -16,20 +15,14 @@ export default function VibersPopup({ onClose, streamId }) {
       is_admin: v.is_admin || false,
     }));
 
-  // --------------------------------------------------------------
-  // 1. Initial fetch so popup is never empty
-  // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
 
     async function load() {
       try {
-        const token = await getFirebaseToken().catch(() => null);
-
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
-          token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+          `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`
         );
 
         const data = await res.json();
@@ -40,18 +33,12 @@ export default function VibersPopup({ onClose, streamId }) {
     load();
   }, [streamId]);
 
-  // --------------------------------------------------------------
-  // 2. Ensure realtime WS is connected
-  // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
     connectToStream(id);
   }, [streamId]);
 
-  // --------------------------------------------------------------
-  // 3. Realtime vibers override initial snapshot
-  // --------------------------------------------------------------
   const participants =
     vibers.length > 0 ? normalize(vibers) : initialSnapshot;
 

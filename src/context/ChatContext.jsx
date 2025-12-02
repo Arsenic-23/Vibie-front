@@ -1,17 +1,19 @@
+// src/context/ChatContext.jsx
+
 import { createContext, useContext, useEffect, useState } from "react";
-import { db } from "../firebase"; 
+import { db } from "../firebase";
 import {
   collection,
-  addDoc,
   query,
   orderBy,
   onSnapshot,
+  addDoc,
   serverTimestamp,
 } from "firebase/firestore";
 
 export const ChatContext = createContext();
 
-export const ChatProvider = ({ streamId, user, children }) => {
+export function ChatProvider({ streamId, user, children }) {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -23,28 +25,35 @@ export const ChatProvider = ({ streamId, user, children }) => {
     );
 
     const unsub = onSnapshot(q, (snapshot) => {
-      setMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      const list = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setMessages(list);
     });
 
     return () => unsub();
   }, [streamId]);
 
-  const sendMessage = async (text) => {
-    if (!text.trim()) return;
+  async function sendMessage(text) {
+    if (!text.trim() || !streamId || !user) return;
 
     await addDoc(collection(db, "streams", streamId, "messages"), {
       text,
-      userId: user?.user_id,
-      name: user?.name,
+      sender_id: user.uid,
+      sender_name: user.name,
+      sender_pic: user.profile_pic || null,
       timestamp: serverTimestamp(),
     });
-  };
+  }
 
   return (
     <ChatContext.Provider value={{ messages, sendMessage }}>
       {children}
     </ChatContext.Provider>
   );
-};
+}
 
-export const useChat = () => useContext(ChatContext);
+export function useChat() {
+  return useContext(ChatContext);
+}

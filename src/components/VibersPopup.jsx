@@ -1,81 +1,28 @@
 // src/components/VibersPopup.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useRealtime } from "../context/RealtimeContext";
-import { getFirebaseToken } from "../utils/auth";
 
 export default function VibersPopup({ onClose, streamId }) {
-  const { vibers, connectToStream, disconnect } = useRealtime();
-  const [participants, setParticipants] = useState([]);
+  const { vibers, connectToStream } = useRealtime();
 
-  function normalize(list) {
-    return (list || []).map((v) => ({
-      user_id: v.user_id,
-      name: v.name,
-      username: v.username,
-      profile_pic: v.profile_pic,
-      is_admin: v.is_admin || false,
-    }));
-  }
-  
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
 
-    async function load() {
-      try {
-        const token = await getFirebaseToken().catch(() => null);
+    connectToStream(id);
+  }, [streamId, connectToStream]);
 
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
-          token
-            ? { headers: { Authorization: `Bearer ${token}` } }
-            : {}
-        );
-
-        const data = await res.json();
-        if (data.participants) {
-          setParticipants(normalize(data.participants));
-        }
-      } catch (e) {
-        console.log("Failed analytics participants:", e);
-      }
-    }
-
-    load();
-  }, [streamId]);
-
-  // ----------------------------------------------------------
-  // 2) Sync participants with realtime WS updates
-  // ----------------------------------------------------------
-  useEffect(() => {
-    if (vibers?.length > 0) {
-      setParticipants(normalize(vibers));
-    }
-  }, [vibers]);
-
-  // ----------------------------------------------------------
-  // 3) Connect to WS + request full realtime state
-  // ----------------------------------------------------------
-  useEffect(() => {
-    const id = streamId || localStorage.getItem("stream_id");
-    if (!id) return;
-
-    async function connect() {
-      await connectToStream(id);
-
-      setTimeout(() => {
-        try {
-          const ws = window.__ACTIVE_WS__;
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "request_full_state" }));
-          }
-        } catch (_) {}
-      }, 200);
-    }
-
-    connect();
-    return () => disconnect();
-  }, [streamId]);
+  const participants = useMemo(
+    () =>
+      (vibers || []).map((v) => ({
+        user_id: v.user_id,
+        name: v.name,
+        username: v.username,
+        profile_pic: v.profile_pic,
+        is_admin: !!v.is_admin,
+      })),
+    [vibers]
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2 select-none">
@@ -97,7 +44,7 @@ export default function VibersPopup({ onClose, streamId }) {
               <li key={v.user_id} className="flex items-center space-x-3">
                 <img
                   src={v.profile_pic || "https://placehold.co/80x80"}
-                  alt={v.name}
+                  alt={v.name || v.username || "Viber"}
                   className="w-10 h-10 rounded-full border border-white dark:border-gray-700 shadow-sm object-cover"
                 />
 

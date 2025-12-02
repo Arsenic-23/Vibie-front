@@ -1,9 +1,16 @@
 // src/context/RealtimeContext.jsx
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { getFirebaseToken } from "../utils/auth";
 
 const API = import.meta.env.VITE_BACKEND_URL;
 const WS_PATH = "/realtime/stream";
+
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
 
@@ -24,164 +31,171 @@ export function RealtimeProvider({ children }) {
   const wsRef = useRef(null);
   const streamRef = useRef(null);
   const backoffRef = useRef(RECONNECT_BASE_MS);
-  const shouldReconnect = useRef(true);
+  const shouldReconnectRef = useRef(true);
+  const pingTimerRef = useRef(null);
 
   // -------------------------
-  // Correct WebSocket URL builder
+  // WebSocket URL builder
   // -------------------------
-  async function _buildWsUrl(streamId) {
+  async function buildWsUrl(streamId) {
     const token = await getFirebaseToken().catch(() => null);
 
     let url = API.replace(/^http/, "ws");
     url += `${WS_PATH}/${streamId}`;
 
-    if (token) return `${url}?token=${encodeURIComponent(token)}`;
+    if (token) {
+      return `${url}?token=${encodeURIComponent(token)}`;
+    }
 
     const profile = JSON.parse(localStorage.getItem("profile") || "null");
-    if (profile?.uid) return `${url}?user_id=${encodeURIComponent(profile.uid)}`;
+    if (profile?.uid) {
+      return `${url}?user_id=${encodeURIComponent(profile.uid)}`;
+    }
 
     return url;
   }
 
   // -------------------------
-  // Normalize participants always
+  // Normalize participants
   // -------------------------
-  function normalize(list = []) {
+  function normalizeParticipants(list = []) {
     return list.map((v) => ({
       user_id: v.user_id,
       name: v.name,
       username: v.username,
       profile_pic: v.profile_pic,
-      is_admin: v.is_admin || false,
+      is_admin: !!v.is_admin,
       joined_at: v.joined_at || null,
       last_seen_at: v.last_seen_at || null,
     }));
   }
 
   // -------------------------
-  // WebSocket message handler
+  // Message handler
   // -------------------------
-  function _handleMessage(payload) {
+  function handleMessage(payload) {
     const type = payload.type;
 
     if (type === "full_state") {
-      setVibers(normalize(payload.participants));
-      if (payload.now_playing) setNowPlaying(payload.now_playing);
-      if (payload.queue) setQueue(payload.queue);
-    }
-
-    else if (type === "join") {
-      const p = normalize([payload.participant])[0];
+      setVibers(normalizeParticipants(payload.participants || []));
+      if (payload.now_playing !== undefined) {
+        setNowPlaying(payload.now_playing);
+      }
+      if (payload.queue !== undefined) {
+        setQueue(payload.queue || []);
+      }
+    } else if (type === "join") {
+      const p = normalizeParticipants([payload.participant])[0];
       setVibers((prev) => {
-        if (prev.some((x) => x.user_id === p.user_id)) {
+        if (!p) return prev;
+        const exists = prev.some((x) => x.user_id === p.user_id);
+        if (exists) {
           return prev.map((x) => (x.user_id === p.user_id ? p : x));
         }
         return [p, ...prev];
       });
-    }
-
-    else if (type === "leave") {
+    } else if (type === "leave") {
       setVibers((prev) => prev.filter((p) => p.user_id !== payload.user_id));
-    }
-
-    else if (type === "update") {
-      const u = normalize([payload.user])[0];
-      setVibers((prev) => prev.map((p) => (p.user_id === u.user_id ? u : p)));
-    }
-
-    else if (type === "queue") {
+    } else if (type === "update") {
+      const u = normalizeParticipants([payload.user])[0];
+      if (!u) return;
+      setVibers((prev) =>
+        prev.map((p) => (p.user_id === u.user_id ? { ...p, ...u } : p))
+      );
+    } else if (type === "queue") {
       setQueue(payload.queue || []);
     }
   }
 
   // -------------------------
-  // WebSocket Connection
+  // Open WebSocket for a given streamId
   // -------------------------
-  async function _connect(streamId) {
+  async function openWebSocket(streamId) {
     if (!streamId) return;
 
-    streamRef.current = streamId;
-
-    const url = await _buildWsUrl(streamId);
+    const url = await buildWsUrl(streamId);
 
     try {
-      wsRef.current = new WebSocket(url);
-      window.__ACTIVE_WS__ = wsRef.current;
-    } catch (e) {
-      console.warn("WS failed, starting fallback", e);
-      _startPollingFallback(streamId);
-      return;
-    }
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
 
-    wsRef.current.onopen = () => {
-      backoffRef.current = RECONNECT_BASE_MS;
+      ws.onopen = () => {
+        backoffRef.current = RECONNECT_BASE_MS;
 
-      wsRef.current.send(JSON.stringify({ type: "request_full_state" }));
+        // ask for current state immediately
+        ws.send(JSON.stringify({ type: "request_full_state" }));
 
-      const local = JSON.parse(localStorage.getItem("profile") || "null");
-      if (local) {
-        wsRef.current.send(JSON.stringify({
-          type: "update_profile",
-          profile: {
-            name: local.name,
-            profile_pic: local.photo,
-            username: local.username,
+        // send profile once if we have it
+        const local = JSON.parse(localStorage.getItem("profile") || "null");
+        if (local) {
+          ws.send(
+            JSON.stringify({
+              type: "update_profile",
+              profile: {
+                name: local.name,
+                profile_pic: local.photo,
+                username: local.username,
+              },
+            })
+          );
+        }
+
+        // start ping to keep connection alive
+        if (pingTimerRef.current) {
+          clearInterval(pingTimerRef.current);
+        }
+        pingTimerRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "ping" }));
           }
-        }));
-      }
-    };
+        }, 25000);
+      };
 
-    wsRef.current.onmessage = (ev) => {
-      const payload = JSON.parse(ev.data);
-      _handleMessage(payload);
-    };
+      ws.onmessage = (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          handleMessage(payload);
+        } catch {
+          // ignore malformed payloads
+        }
+      };
 
-    wsRef.current.onerror = () => {
-      try { wsRef.current.close(); } catch {}
-    };
+      ws.onerror = () => {
+        try {
+          ws.close();
+        } catch {
+          // ignore
+        }
+      };
 
-    wsRef.current.onclose = () => {
-      wsRef.current = null;
-      if (shouldReconnect.current) {
-        const delay = backoffRef.current;
-        backoffRef.current = Math.min(delay * 1.8, RECONNECT_MAX_MS);
-        setTimeout(() => _connect(streamId), delay);
-      } else {
-        setVibers([]);
-      }
-    };
-  }
+      ws.onclose = () => {
+        if (pingTimerRef.current) {
+          clearInterval(pingTimerRef.current);
+          pingTimerRef.current = null;
+        }
 
-  // -------------------------
-  // Fallback Polling
-  // -------------------------
-  let pollTimer = useRef(null);
+        // if we changed stream or explicitly disconnected, do not reconnect
+        if (!shouldReconnectRef.current) {
+          return;
+        }
 
-  function _startPollingFallback(streamId) {
-    _stopPolling();
-
-    async function tick() {
-      try {
-        const token = await getFirebaseToken().catch(() => null);
-        const res = await fetch(`${API}/analytics/stream/${streamId}/participants`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
-        const data = await res.json();
-        setVibers(normalize(data.participants || []));
-      } catch (e) {
-        console.warn("poll failed", e);
-      }
-    }
-
-    tick();
-    pollTimer.current = setInterval(tick, 5000);
-  }
-
-  function _stopPolling() {
-    if (pollTimer.current) {
-      clearInterval(pollTimer.current);
-      pollTimer.current = null;
+        // reconnect only if this close belongs to current stream
+        if (streamRef.current === streamId) {
+          const delay = backoffRef.current;
+          backoffRef.current = Math.min(
+            backoffRef.current * 1.8,
+            RECONNECT_MAX_MS
+          );
+          setTimeout(() => {
+            // still same stream and still want reconnection
+            if (shouldReconnectRef.current && streamRef.current === streamId) {
+              openWebSocket(streamId);
+            }
+          }, delay);
+        }
+      };
+    } catch (e) {
+      console.warn("WebSocket connect failed:", e);
     }
   }
 
@@ -189,59 +203,93 @@ export function RealtimeProvider({ children }) {
   // Public API
   // -------------------------
   async function connectToStream(streamId) {
-    if (streamRef.current === streamId && wsRef.current) return;
+    if (!streamId) return;
 
-    shouldReconnect.current = true;
-    _stopPolling();
+    // same stream and ws is open: nothing to do
+    if (
+      streamRef.current === streamId &&
+      wsRef.current &&
+      wsRef.current.readyState === WebSocket.OPEN
+    ) {
+      return;
+    }
 
+    // switch to new stream
+    streamRef.current = streamId;
+    shouldReconnectRef.current = true;
+
+    // close previous socket if any
     if (wsRef.current) {
-      try { wsRef.current.close(); } catch {}
+      try {
+        wsRef.current.close();
+      } catch {
+        // ignore
+      }
       wsRef.current = null;
     }
 
-    await _connect(streamId);
+    await openWebSocket(streamId);
   }
 
   function disconnect() {
-    shouldReconnect.current = false;
-    _stopPolling();
+    shouldReconnectRef.current = false;
+
+    if (pingTimerRef.current) {
+      clearInterval(pingTimerRef.current);
+      pingTimerRef.current = null;
+    }
 
     if (wsRef.current) {
-      try { wsRef.current.send(JSON.stringify({ type: "leave" })); } catch {}
-      try { wsRef.current.close(); } catch {}
+      try {
+        wsRef.current.close();
+      } catch {
+        // ignore
+      }
       wsRef.current = null;
     }
 
-    setVibers([]);
     streamRef.current = null;
+    setVibers([]);
+    setNowPlaying(null);
+    setQueue([]);
   }
 
   // -------------------------
-  // Auto leave on page unload
+  // Auto cleanup on unmount / page unload
   // -------------------------
   useEffect(() => {
     function handleUnload() {
       try {
-        if (wsRef.current) wsRef.current.send(JSON.stringify({ type: "leave" }));
-      } catch {}
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.close();
+        }
+      } catch {
+        // ignore
+      }
     }
 
     window.addEventListener("beforeunload", handleUnload);
+
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // -------------------------
-  // Update profile
+  // Profile update API
   // -------------------------
   async function sendProfileUpdate(profile) {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "update_profile", profile }));
+    const ws = wsRef.current;
+
+    // prefer WebSocket update
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "update_profile", profile }));
       return;
     }
 
+    // fallback to HTTP if needed
     try {
       const token = await getFirebaseToken();
       await fetch(`${API}/user/update_profile`, {
@@ -253,19 +301,21 @@ export function RealtimeProvider({ children }) {
         body: JSON.stringify(profile),
       });
     } catch (e) {
-      console.warn("profile update failed", e);
+      console.warn("profile update fallback failed", e);
     }
   }
 
   return (
-    <RealtimeContext.Provider value={{
-      vibers,
-      connectToStream,
-      disconnect,
-      sendProfileUpdate,
-      nowPlaying,
-      queue,
-    }}>
+    <RealtimeContext.Provider
+      value={{
+        vibers,
+        connectToStream,
+        disconnect,
+        sendProfileUpdate,
+        nowPlaying,
+        queue,
+      }}
+    >
       {children}
     </RealtimeContext.Provider>
   );

@@ -3,7 +3,6 @@ import { auth, db } from "../firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-// LOGIN WITH GOOGLE
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
 
@@ -35,15 +34,18 @@ export async function loginWithGoogle() {
   return profile;
 }
 
-// FOR STREAM AUTH
 export async function getFirebaseToken() {
   const user = auth.currentUser;
   if (!user) throw new Error("User not logged in");
 
-  return await user.getIdToken(true);
+  try {
+    return await user.getIdToken(true);
+  } catch (e) {
+    await new Promise((res) => setTimeout(res, 200));
+    return await user.getIdToken(true);
+  }
 }
 
-// GET FIREBASE USER (SAFE, WAITING FOR AUTH INIT)
 export async function getFirebaseUser() {
   if (auth.currentUser) return auth.currentUser;
 
@@ -55,7 +57,9 @@ export async function getFirebaseUser() {
     });
 
     setTimeout(() => {
-      try { unsub(); } catch (_) {}
+      try {
+        unsub();
+      } catch (_) {}
       reject(new Error("auth timeout"));
     }, 3000);
   });

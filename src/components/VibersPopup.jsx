@@ -16,9 +16,6 @@ export default function VibersPopup({ onClose, streamId }) {
       is_admin: v.is_admin || false,
     }));
 
-  // --------------------------------------------------------------
-  // Initial fetch so popup is never empty
-  // --------------------------------------------------------------
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
@@ -40,9 +37,6 @@ export default function VibersPopup({ onClose, streamId }) {
     load();
   }, [streamId]);
 
-  // --------------------------------------------------------------
-  // Realtime vibers override snapshot
-  // --------------------------------------------------------------
   const participants =
     vibers.length > 0 ? normalize(vibers) : initialSnapshot;
 
@@ -92,7 +86,7 @@ export default function VibersPopup({ onClose, streamId }) {
           }
           100% {
             transform: translateX(0);
-            opacity: 1);
+            opacity: 1;
           }
         }
         .animate-slideInSmall {

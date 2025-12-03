@@ -3,6 +3,7 @@ import { auth, db } from "../firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
+// LOGIN WITH GOOGLE
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
 
@@ -34,6 +35,7 @@ export async function loginWithGoogle() {
   return profile;
 }
 
+// FOR STREAM AUTH - always force-refresh token and retry once
 export async function getFirebaseToken() {
   const user = auth.currentUser;
   if (!user) throw new Error("User not logged in");
@@ -41,11 +43,13 @@ export async function getFirebaseToken() {
   try {
     return await user.getIdToken(true);
   } catch (e) {
+    // transient retry
     await new Promise((res) => setTimeout(res, 200));
     return await user.getIdToken(true);
   }
 }
 
+// GET FIREBASE USER (SAFE, WAITING FOR AUTH INIT)
 export async function getFirebaseUser() {
   if (auth.currentUser) return auth.currentUser;
 

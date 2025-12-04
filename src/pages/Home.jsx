@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ListMusic, Mic2, Play, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Users, ListMusic, Mic2, Play, Pause, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useUIContext } from '../context/UIContext';
 import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
-import PlayPauseButton from '../components/PlayPauseButton';
 import { AnimatedThumb } from '../components/ThumbAnimation';
 import { useAudio } from '../context/AudioProvider';
 
@@ -16,25 +15,22 @@ export default function Home() {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const [userPhoto, setUserPhoto] = useState(null);
+  const [progress, setProgress] = useState(0);
+
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
-  const vibersBtnRef = useRef(null);
-  const queueBtnRef = useRef(null);
+  const { currentSong, isPlaying, setIsPlaying } = useAudio();
 
-  const { currentSong, isPlaying, togglePlay, progress, seek } = useAudio();
-
-  /* ------------------------------
-     LOAD PROFILE AND LIKE/DISLIKE STATE
-  ------------------------------ */
+  /* Load profile */
   useEffect(() => {
-    const cached = JSON.parse(localStorage.getItem("profile") || "null");
+    const cached = JSON.parse(localStorage.getItem('profile') || 'null');
     setUserPhoto(cached?.photo || null);
 
-    const storedLiked = localStorage.getItem('liked') === 'true';
-    const storedDisliked = localStorage.getItem('disliked') === 'true';
-    setLiked(storedLiked);
-    setDisliked(storedDisliked);
+    const l = localStorage.getItem('liked');
+    const d = localStorage.getItem('disliked');
+    if (l === 'true') setLiked(true);
+    if (d === 'true') setDisliked(true);
   }, []);
 
   useEffect(() => {
@@ -42,33 +38,14 @@ export default function Home() {
     localStorage.setItem('disliked', disliked);
   }, [liked, disliked]);
 
-  const fetchLyrics = async () => {
-    if (!currentSong) return alert('No song is playing.');
-    try {
-      const res = await fetch('https://vibie-backend.onrender.com/lyrics', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
-      });
-      const data = await res.json();
-      alert(data.lyrics || 'Lyrics not found.');
-    } catch {
-      alert('Failed to fetch lyrics.');
-    }
-  };
-
-  const progressColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'white' : 'black';
-  const popupVisible = showQueue || showVibers;
-
   return (
-    <div className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300">
-      <style>{`* { -webkit-tap-highlight-color: transparent; }`}</style>
+    <div className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white">
 
-      {/* --------------------- TOP BAR --------------------- */}
+      {/* TOP BAR */}
       <div className="flex items-center justify-between mb-5">
         <button
-          ref={vibersBtnRef}
           className="p-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-lg"
           onClick={() => {
-            navigator.vibrate?.([70, 30, 70]);
             setShowVibers(true);
             setIsVibersPopupOpen(true);
           }}
@@ -81,14 +58,13 @@ export default function Home() {
           <span className="text-base font-semibold">Vibie</span>
         </div>
 
-        {/* PROFILE PICTURE */}
+        {/* Profile */}
         <div className="relative">
           <div className="w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full">
             <img
               src={userPhoto}
-              alt="Profile"
-              className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
               onClick={() => setShowProfilePopup(true)}
+              className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
             />
           </div>
 
@@ -103,132 +79,63 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ------------------- POPUPS ------------------- */}
-      {showVibers && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowVibers(false);
-            setIsVibersPopupOpen(false);
-          }} />
-          <VibersPopup onClose={() => { setShowVibers(false); setIsVibersPopupOpen(false); }} />
-        </div>
-      )}
-
-      {showQueue && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
-            setShowQueue(false);
-            setIsSongQueueOpen(false);
-          }} />
-          <SongQueue onClose={() => { setShowQueue(false); setIsSongQueueOpen(false); }} />
-        </div>
-      )}
-
-      {/* ------------------- SONG ART ------------------- */}
-      <div className="flex flex-col items-center mt-2">
+      {/* SONG ART */}
+      <div className="flex flex-col items-center mt-4">
         <div
           className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-3"
           style={{ width: 'min(80vw, 320px)', height: 'min(80vw, 320px)' }}
         >
           <img
-            src={currentSong?.thumbnail_url || 'https://placehold.co/thumbnail'}
-            alt={currentSong?.title || 'Now Playing'}
+            src={currentSong?.thumbnail_url ?? "https://placehold.co/300x300"}
             className="w-full h-full object-cover"
           />
         </div>
 
+        {/* Metadata */}
         <div className="w-full flex flex-col items-start px-2 mb-3">
-          <h2 className="text-xl font-bold truncate">{currentSong?.title || 'Song Title'}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{currentSong?.artist || 'Artist Name'}</p>
+          <h2 className="text-xl font-bold">{currentSong?.title ?? "No song playing"}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {currentSong?.artist ?? ""}
+          </p>
 
           <div className="flex items-center gap-4 mt-2">
-            <button
-              onClick={() => {
-                setLiked(!liked);
-                if (disliked) setDisliked(false);
-              }}
-              className="p-2 rounded-full transition-all duration-200"
-            >
+            <button onClick={() => { setLiked(!liked); if (disliked) setDisliked(false); }}>
               <AnimatedThumb active={liked}>
-                <ThumbsUp size={20} className={`${liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`} />
+                <ThumbsUp size={20} className={liked ? "text-blue-600" : "text-gray-500"} />
               </AnimatedThumb>
             </button>
 
-            <button
-              onClick={() => {
-                setDisliked(!disliked);
-                if (liked) setLiked(false);
-              }}
-              className="p-2 rounded-full transition-all duration-200"
-            >
+            <button onClick={() => { setDisliked(!disliked); if (liked) setLiked(false); }}>
               <AnimatedThumb active={disliked}>
-                <ThumbsDown size={20} className={`${disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`} />
+                <ThumbsDown size={20} className={disliked ? "text-red-600" : "text-gray-500"} />
               </AnimatedThumb>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ------------------- SLIDER ------------------- */}
-      <div className="w-full px-4 mt-2">
-        <input
-          type="range"
-          min="0"
-          max={currentSong?.duration || 100}
-          value={progress}
-          onChange={(e) => seek(Number(e.target.value))}
-          className="w-full appearance-none"
-          style={{
-            background: `linear-gradient(to right, ${progressColor} ${currentSong ? (progress / currentSong.duration) * 100 : progress}%, rgba(128,128,128,0.2) ${currentSong ? (progress / currentSong.duration) * 100 : progress}%)`,
-            height: '4px',
-            borderRadius: '999px',
-          }}
-        />
-        <style>{`
-          input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            margin-top: -5px;
-            background: ${progressColor};
-            border-radius: 50%;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
-          }
-          input[type="range"]::-webkit-slider-runnable-track {
-            height: 4px;
-            background: transparent;
-          }
-        `}</style>
-
-        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
-          <span>{currentSong ? `${Math.floor(progress / 60)}:${String(Math.floor(progress % 60)).padStart(2,'0')}` : '0:00'}</span>
-          <span>{currentSong ? `${Math.floor(currentSong.duration / 60)}:${String(Math.floor(currentSong.duration % 60)).padStart(2,'0')}` : '0:00'}</span>
-        </div>
-      </div>
-
-      {/* ------------------- PLAYER CONTROLS ------------------- */}
-      <div className="mt-10 flex items-center justify-center gap-6">
-        <button onClick={fetchLyrics} className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md">
+      {/* PLAYER CONTROLS */}
+      <div className="mt-6 flex items-center justify-center gap-6">
+        <button className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md">
           <Mic2 size={20} />
         </button>
 
-        <PlayPauseButton isPlaying={isPlaying} onClick={togglePlay} />
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="p-4 rounded-full bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white shadow-lg"
+        >
+          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+        </button>
 
         <button
-          ref={queueBtnRef}
-          onClick={() => {
-            navigator.vibrate?.([70, 30, 70]);
-            setShowQueue(true);
-            setIsSongQueueOpen(true);
-          }}
+          onClick={() => { setShowQueue(true); setIsSongQueueOpen(true); }}
           className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
         >
           <ListMusic size={20} />
         </button>
       </div>
 
-      {!popupVisible && <NavigationBar />}
+      {!showQueue && !showVibers && <NavigationBar />}
     </div>
   );
 }

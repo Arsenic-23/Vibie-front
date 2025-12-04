@@ -1,3 +1,4 @@
+// src/context/RealtimeContext.jsx
 import React, {
   createContext,
   useContext,
@@ -12,7 +13,7 @@ const WS_PATH = "/realtime/stream";
 
 const RECONNECT_BASE = 350;
 const RECONNECT_MAX = 15000;
-const WATCHDOG_INTERVAL = 14000; // ensure liveness
+const WATCHDOG_INTERVAL = 14000;
 const CLIENT_PING_INTERVAL = 20000;
 
 const RealtimeContext = createContext({
@@ -38,14 +39,14 @@ export function RealtimeProvider({ children }) {
   const backoff = useRef(0);
 
   /* -------------------------------------------------
-     TOKEN + URL
+     TOKEN + URL (Option-C)
   -------------------------------------------------- */
   async function buildWsUrl(streamId) {
     await getFirebaseToken().catch(() => null);
     const token = await getFirebaseToken().catch(() => null);
 
     let url = API.replace(/^https/, "wss").replace(/^http/, "ws");
-    url += `${WS_PATH}/${streamId}`;
+    url += `${WS_PATH}/${streamId}`; // <--- PERFECT Option-C URL
 
     if (token) return `${url}?token=${encodeURIComponent(token)}`;
 
@@ -92,24 +93,30 @@ export function RealtimeProvider({ children }) {
 
     switch (msg.type) {
       case "full_state":
-        setVibers((msg.participants || []).map(p => ({ ...p })));
+        setVibers((msg.participants || []).map((p) => ({ ...p })));
         break;
 
       case "join":
-        setVibers(prev => {
-          const exists = prev.some(x => x.user_id === msg.participant.user_id);
+        setVibers((prev) => {
+          const exists = prev.some((x) => x.user_id === msg.participant.user_id);
           if (!exists) return [msg.participant, ...prev];
-          return prev.map(x => x.user_id === msg.participant.user_id ? msg.participant : x);
+          return prev.map((x) =>
+            x.user_id === msg.participant.user_id ? msg.participant : x
+          );
         });
         break;
 
       case "leave":
-        setVibers(prev => prev.filter(x => x.user_id !== msg.user_id));
+        setVibers((prev) =>
+          prev.filter((x) => x.user_id !== msg.user_id)
+        );
         break;
 
       case "update":
-        setVibers(prev =>
-          prev.map(x => (x.user_id === msg.user.user_id ? msg.user : x))
+        setVibers((prev) =>
+          prev.map((x) =>
+            x.user_id === msg.user.user_id ? msg.user : x
+          )
         );
         break;
 
@@ -120,7 +127,7 @@ export function RealtimeProvider({ children }) {
   }
 
   /* -------------------------------------------------
-     WATCHDOG — DETECT GHOST SOCKETS
+     WATCHDOG
   -------------------------------------------------- */
   function startWatchdog() {
     if (watchdogTimer.current) clearInterval(watchdogTimer.current);
@@ -129,9 +136,7 @@ export function RealtimeProvider({ children }) {
       const ws = wsRef.current;
 
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        if (shouldReconnect.current && streamRef.current) {
-          open(streamRef.current);
-        }
+        if (shouldReconnect.current && streamRef.current) open(streamRef.current);
         return;
       }
 
@@ -193,7 +198,7 @@ export function RealtimeProvider({ children }) {
         startWatchdog();
       };
 
-      ws.onmessage = e => {
+      ws.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
           handleMessage(data);
@@ -201,7 +206,9 @@ export function RealtimeProvider({ children }) {
       };
 
       ws.onerror = () => {
-        try { ws.close(); } catch {}
+        try {
+          ws.close();
+        } catch {}
       };
 
       ws.onclose = () => {
@@ -236,13 +243,20 @@ export function RealtimeProvider({ children }) {
   async function connectToStream(id) {
     if (!id) return;
 
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && streamRef.current === id) return;
+    if (
+      wsRef.current &&
+      wsRef.current.readyState === WebSocket.OPEN &&
+      streamRef.current === id
+    )
+      return;
 
     streamRef.current = id;
     shouldReconnect.current = true;
 
     if (wsRef.current) {
-      try { wsRef.current.close(); } catch {}
+      try {
+        wsRef.current.close();
+      } catch {}
     }
 
     open(id);
@@ -256,7 +270,9 @@ export function RealtimeProvider({ children }) {
     if (watchdogTimer.current) clearInterval(watchdogTimer.current);
 
     if (wsRef.current) {
-      try { wsRef.current.close(); } catch {}
+      try {
+        wsRef.current.close();
+      } catch {}
     }
 
     wsRef.current = null;
@@ -270,33 +286,33 @@ export function RealtimeProvider({ children }) {
      VISIBILITY + NETWORK RECOVERY
   -------------------------------------------------- */
   useEffect(() => {
-    const handleVisibility = () => {
+    const onVisible = () => {
       if (document.visibilityState === "visible") {
         const ws = wsRef.current;
 
-        // ghost socket detection
         if (!ws || ws.readyState !== WebSocket.OPEN) {
           setTimeout(() => {
-            if (shouldReconnect.current && streamRef.current) open(streamRef.current);
+            if (shouldReconnect.current && streamRef.current)
+              open(streamRef.current);
           }, 100);
         } else {
-          try { ws.send(JSON.stringify({ type: "ping" })); } catch {}
+          try {
+            ws.send(JSON.stringify({ type: "ping" }));
+          } catch {}
         }
       }
     };
 
-    const handleOnline = () => {
-      if (shouldReconnect.current && streamRef.current) {
-        open(streamRef.current);
-      }
+    const onOnline = () => {
+      if (shouldReconnect.current && streamRef.current) open(streamRef.current);
     };
 
-    window.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("online", handleOnline);
+    window.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
 
     return () => {
-      window.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
     };
   }, []);
 

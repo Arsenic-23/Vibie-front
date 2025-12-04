@@ -6,6 +6,7 @@ import { getFirebaseToken } from "../utils/auth";
 export default function VibersPopup({ onClose, streamId }) {
   const { vibers } = useRealtime();
   const [initialSnapshot, setInitialSnapshot] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const normalize = (list) =>
     list.map((v) => ({
@@ -16,41 +17,57 @@ export default function VibersPopup({ onClose, streamId }) {
       is_admin: v.is_admin || false,
     }));
 
+  async function fetchSnapshot(id) {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const token = await getFirebaseToken().catch(() => null);
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
+        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+      );
+      const data = await res.json();
+      setInitialSnapshot(normalize(data.participants || []));
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
+    // fetch initial snapshot once when popup mounts
+    fetchSnapshot(id);
 
-    async function load() {
-      try {
-        const token = await getFirebaseToken().catch(() => null);
-
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/analytics/stream/${id}/participants`,
-          token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-        );
-
-        const data = await res.json();
-        setInitialSnapshot(normalize(data.participants || []));
-      } catch {}
-    }
-
-    load();
+    // optionally: refetch after a short delay to catch join races
+    const t = setTimeout(() => fetchSnapshot(id), 700);
+    return () => clearTimeout(t);
   }, [streamId]);
 
-  const participants =
-    vibers.length > 0 ? normalize(vibers) : initialSnapshot;
+  const participants = vibers.length > 0 ? normalize(vibers) : initialSnapshot;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2 select-none">
-      <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative z-50 w-72 bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-3 mt-16 ml-2 animate-slideInSmall">
-        <h3 className="text-base font-semibold mb-3 text-black dark:text-white">
-          Vibers
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-semibold text-black dark:text-white">Vibers</h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const id = streamId || localStorage.getItem("stream_id");
+                fetchSnapshot(id);
+              }}
+              className="text-xs text-zinc-500 hover:text-zinc-700"
+            >
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+            <button onClick={onClose} className="text-xs text-zinc-400">Close</button>
+          </div>
+        </div>
 
         <ul className="space-y-2 max-h-72 overflow-auto">
           {participants.length === 0 ? (
@@ -64,9 +81,7 @@ export default function VibersPopup({ onClose, streamId }) {
                   className="w-10 h-10 rounded-full object-cover border border-white dark:border-gray-700 shadow-sm"
                 />
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">
-                    {v.name || "Unknown"}
-                  </span>
+                  <span className="text-sm font-medium">{v.name || "Unknown"}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {v.username ? "@" + v.username : ""}
                   </span>
@@ -79,18 +94,10 @@ export default function VibersPopup({ onClose, streamId }) {
 
       <style jsx>{`
         @keyframes slideInSmall {
-          0% {
-            transform: translateX(-15px);
-            opacity: 0;
-          }
-          100% {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          0% { transform: translateX(-15px); opacity: 0; }
+          100% { transform: translateX(0); opacity: 1; }
         }
-        .animate-slideInSmall {
-          animation: slideInSmall 0.25s ease-out;
-        }
+        .animate-slideInSmall { animation: slideInSmall 0.25s ease-out; }
       `}</style>
     </div>
   );

@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import axios from 'axios';
 
 const AudioContext = createContext({});
-
 export const useAudio = () => useContext(AudioContext);
 
 export const AudioProvider = ({ children }) => {
@@ -14,51 +13,56 @@ export const AudioProvider = ({ children }) => {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Initialize Audio element
   useEffect(() => {
     if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
 
-    const handleEnded = async () => {
-      // Play next song in queue
-      await playNext();
-    };
+    const handleEnded = () => playNext();
+    audioRef.current.addEventListener('ended', handleEnded);
 
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
+    return () => audioRef.current.removeEventListener('ended', handleEnded);
   }, []);
 
-  // Play/Pause effect
+  // Sync play/pause
   useEffect(() => {
-    if (!audioRef.current || !currentSong) return;
-    if (isPlaying) audioRef.current.play().catch(() => setIsPlaying(false));
-    else audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio || !currentSong) return;
+
+    if (isPlaying) audio.play().catch(() => setIsPlaying(false));
+    else audio.pause();
   }, [isPlaying, currentSong]);
 
+  // Get audio URL from backend
   const fetchAudioUrl = async (videoId) => {
-    const res = await axios.get(`${backendUrl}/audio/fetch`, { params: { video_id: videoId } });
+    const res = await axios.get(`${backendUrl}/audio/audio/fetch`, {
+      params: { video_id: videoId },
+    });
+
     return res.data.audioUrl;
   };
 
   const playSong = async (song) => {
+    if (!song) {
+      setIsPlaying(false);
+      audioRef.current.pause();
+      return;
+    }
+
     if (!song.audio_url) {
       const url = await fetchAudioUrl(song.song_id);
       song.audio_url = url;
     }
+
     setCurrentSong(song);
     audioRef.current.src = song.audio_url;
     setIsPlaying(true);
   };
 
-  const addToQueue = async (song) => {
-    // Add song to backend queue
-    await axios.post(`${backendUrl}/queue/add`, song);
+  const addToQueue = (song) => {
     setQueue((prev) => [...prev, song]);
   };
 
-  const removeFromQueue = async (songId) => {
+  const removeFromQueue = (songId) => {
     setQueue((prev) => prev.filter((s) => s.song_id !== songId));
-    // TODO: call backend to remove if needed
   };
 
   const playNext = async () => {
@@ -71,7 +75,9 @@ export const AudioProvider = ({ children }) => {
     const nextSong = queue[0];
     setQueue((prev) => prev.slice(1));
 
-    if (!nextSong.audio_url) nextSong.audio_url = await fetchAudioUrl(nextSong.song_id);
+    if (!nextSong.audio_url) {
+      nextSong.audio_url = await fetchAudioUrl(nextSong.song_id);
+    }
 
     setCurrentSong(nextSong);
     audioRef.current.src = nextSong.audio_url;
@@ -85,9 +91,9 @@ export const AudioProvider = ({ children }) => {
         queue,
         isPlaying,
         setIsPlaying,
+        playSong,
         addToQueue,
         removeFromQueue,
-        playSong,
         playNext,
       }}
     >

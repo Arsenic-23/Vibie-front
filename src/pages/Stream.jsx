@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 import { Plus, Radio, Lock, Zap, ArrowRight, Copy, Check } from "lucide-react";
 import { getFirebaseToken } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
-import { useRealtime } from "../context/RealtimeContext";   // ✅ ADDED
+import { useRealtime } from "../context/RealtimeContext";
 
 const API = import.meta.env.VITE_BACKEND_URL;
 
 /* -------------------------------------------------------------
-   Reusable Components
+   Reusable UI Components
 ------------------------------------------------------------- */
 function Button({ children, onClick, disabled, className = "" }) {
   return (
@@ -52,28 +52,21 @@ export default function StreamChoice() {
 
   const navigate = useNavigate();
 
-  // ✅ ADD REALTIME CONTEXT
+  // RealtimeContext Hooks
   const { connectToStream, disconnect } = useRealtime();
 
   /* -------------------------------------------------------------
-     AUTO CONNECT WHEN A STREAM IS CREATED OR JOINED
+     AUTO CONNECT IF USER ALREADY IN A STREAM
   ------------------------------------------------------------- */
   useEffect(() => {
-    if (createdCode) {
-      connectToStream(createdCode);   // 🔥 Connect right after creation
-    }
-  }, [createdCode]);
+    const existing = localStorage.getItem("stream_id");
+    if (existing) connectToStream(existing);
 
-  useEffect(() => {
-    if (localStorage.getItem("stream_id")) {
-      connectToStream(localStorage.getItem("stream_id"));  // 🔥 Auto connect
-    }
-
-    return () => disconnect(); // Clean on exit
+    return () => disconnect();
   }, []);
 
   /* -------------------------------------------------------------
-     COPY CODE BTN
+     COPY STREAM CODE
   ------------------------------------------------------------- */
   const handleCopyCode = () => {
     navigator.clipboard.writeText(createdCode);
@@ -82,7 +75,7 @@ export default function StreamChoice() {
   };
 
   /* -------------------------------------------------------------
-     CREATE STREAM 
+     CREATE STREAM + CONNECT
   ------------------------------------------------------------- */
   const handleCreateStream = async () => {
     try {
@@ -106,8 +99,9 @@ export default function StreamChoice() {
       if (!res.ok) throw new Error(data.detail || "Failed to create stream.");
 
       setCreatedCode(data.stream_id);
+      localStorage.setItem("stream_id", data.stream_id);
 
-      // 🔥 Connect immediately
+      // Connect WebSocket immediately
       connectToStream(data.stream_id);
 
     } catch (err) {
@@ -143,9 +137,10 @@ export default function StreamChoice() {
 
       localStorage.setItem("stream_id", code);
 
-      // 🔥 Connect websocket instantly
+      // Connect websocket
       connectToStream(code);
 
+      // Move to app home
       navigate("/home");
 
     } catch (err) {
@@ -196,15 +191,17 @@ export default function StreamChoice() {
             Choose Your Session
           </motion.h1>
 
-          <p className="text-zinc-500">Create a new stream or join an existing one</p>
+          <p className="text-zinc-500">
+            Create a new stream or join an existing one
+          </p>
         </motion.div>
 
-        {/* CARDS */}
+        {/* CARDS SECTION */}
         <motion.div
           variants={fadeUp}
           className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16"
         >
-          {/* CREATE STREAM */}
+          {/* CREATE STREAM CARD */}
           <motion.div
             variants={fadeUp}
             whileHover={{ y: -6, scale: 1.01 }}
@@ -268,7 +265,7 @@ export default function StreamChoice() {
             </div>
           </motion.div>
 
-          {/* JOIN STREAM */}
+          {/* JOIN STREAM CARD */}
           <motion.div
             variants={fadeUp}
             whileHover={{ y: -6, scale: 1.01 }}
@@ -296,10 +293,7 @@ export default function StreamChoice() {
         </motion.div>
 
         {/* FEATURES */}
-        <motion.div
-          variants={fadeUp}
-          className="flex gap-4 mt-10 text-zinc-600"
-        >
+        <motion.div variants={fadeUp} className="flex gap-4 mt-10 text-zinc-600">
           <FeaturePill icon={<Radio size={16} />} text="Real-time Sync" />
           <FeaturePill icon={<Lock size={16} />} text="Private Sessions" />
           <FeaturePill icon={<Zap size={16} />} text="Instant Reactions" />

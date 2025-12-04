@@ -52,17 +52,16 @@ export default function StreamChoice() {
 
   const navigate = useNavigate();
 
-  // RealtimeContext Hooks
-  const { connectToStream, disconnect } = useRealtime();
+  // 🔥 Persistent WebSocket Context
+  const { connectToStream } = useRealtime();
 
   /* -------------------------------------------------------------
      AUTO CONNECT IF USER ALREADY IN A STREAM
+     (Persistent WebSocket — no disconnect on unmount)
   ------------------------------------------------------------- */
   useEffect(() => {
     const existing = localStorage.getItem("stream_id");
     if (existing) connectToStream(existing);
-
-    return () => disconnect();
   }, []);
 
   /* -------------------------------------------------------------
@@ -75,7 +74,7 @@ export default function StreamChoice() {
   };
 
   /* -------------------------------------------------------------
-     CREATE STREAM + CONNECT
+     CREATE STREAM → JOIN → WS CONNECT
   ------------------------------------------------------------- */
   const handleCreateStream = async () => {
     try {
@@ -101,7 +100,7 @@ export default function StreamChoice() {
       setCreatedCode(data.stream_id);
       localStorage.setItem("stream_id", data.stream_id);
 
-      // Connect WebSocket immediately
+      // 🔥 Connect persistent WebSocket
       connectToStream(data.stream_id);
 
     } catch (err) {
@@ -112,7 +111,7 @@ export default function StreamChoice() {
   };
 
   /* -------------------------------------------------------------
-     JOIN STREAM
+     JOIN STREAM → WS CONNECT → NAVIGATE
   ------------------------------------------------------------- */
   const handleJoinStream = async (codeArg = null) => {
     const code = (codeArg || streamCode).trim();
@@ -137,10 +136,10 @@ export default function StreamChoice() {
 
       localStorage.setItem("stream_id", code);
 
-      // Connect websocket
+      // 🔥 Connect persistent WebSocket
       connectToStream(code);
 
-      // Move to app home
+      // Move to home screen
       navigate("/home");
 
     } catch (err) {
@@ -196,12 +195,12 @@ export default function StreamChoice() {
           </p>
         </motion.div>
 
-        {/* CARDS SECTION */}
+        {/* STREAM CARDS */}
         <motion.div
           variants={fadeUp}
           className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16"
         >
-          {/* CREATE STREAM CARD */}
+          {/* CREATE STREAM */}
           <motion.div
             variants={fadeUp}
             whileHover={{ y: -6, scale: 1.01 }}
@@ -265,7 +264,7 @@ export default function StreamChoice() {
             </div>
           </motion.div>
 
-          {/* JOIN STREAM CARD */}
+          {/* JOIN STREAM */}
           <motion.div
             variants={fadeUp}
             whileHover={{ y: -6, scale: 1.01 }}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SearchIcon, Mic } from 'lucide-react';
+import { SearchIcon, Mic, Play, Pause } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Suggestions from '../components/Suggestions';
@@ -13,12 +13,21 @@ export default function Search() {
   const [isListening, setIsListening] = useState(false);
   const [showWave, setShowWave] = useState(false);
 
+  const [playingId, setPlayingId] = useState(null); // NEW
+
   const recognitionRef = useRef(null);
   const siriWaveRef = useRef(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
 
-  // Fetch search results - ONE CALL ONLY
+  const handlePlayPause = (song) => {
+    if (playingId === song.id) {
+      setPlayingId(null);
+    } else {
+      setPlayingId(song.id);
+    }
+  };
+
   const fetchResults = useCallback(async (searchValue) => {
     if (!searchValue) return;
 
@@ -49,7 +58,6 @@ export default function Search() {
     }
   }, [backendUrl]);
 
-  // Submit search
   const handleSubmitSearch = (value) => {
     setQuery(value);
     fetchResults(value);
@@ -63,7 +71,6 @@ export default function Search() {
 
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
 
-  // Voice recognition
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
 
@@ -102,7 +109,7 @@ export default function Search() {
     recognitionRef.current = recognition;
   }, []);
 
-  // SiriWave animation
+  // SiriWave
   useEffect(() => {
     if (!showWave) return;
     const init = () => {
@@ -143,7 +150,6 @@ export default function Search() {
   return (
     <div className="min-h-screen px-4 pt-6 pb-28 bg-white dark:bg-neutral-950 dark:text-white flex flex-col justify-between">
 
-      {/* Title */}
       <div>
         <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Search Vibes</h1>
 
@@ -180,7 +186,7 @@ export default function Search() {
           <Suggestions query={input} onSelect={handleSubmitSearch} />
         )}
 
-        {/* Results (single call only) */}
+        {/* Results */}
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {results.map((song) => (
@@ -197,6 +203,25 @@ export default function Search() {
                     alt={song.title}
                     className="object-cover w-full h-full group-hover:scale-110 transition-all"
                   />
+
+                  {/* PLAY BUTTON (Mobile always visible, Desktop only on hover) */}
+                  <button
+                    onClick={() => handlePlayPause(song)}
+                    className="
+                      absolute bottom-2 right-2 z-20
+                      p-2 rounded-full shadow-lg
+                      bg-white/80 dark:bg-neutral-900/80 backdrop-blur
+                      transition-all
+                      md:opacity-0 md:group-hover:opacity-100
+                    "
+                  >
+                    {playingId === song.id ? (
+                      <Pause size={18} className="text-black dark:text-white" />
+                    ) : (
+                      <Play size={18} className="text-black dark:text-white" />
+                    )}
+                  </button>
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent" />
                 </div>
 

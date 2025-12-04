@@ -1,11 +1,5 @@
 // src/context/RealtimeContext.jsx
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getFirebaseToken } from "../utils/auth";
 
 const API = import.meta.env.VITE_BACKEND_URL;
@@ -15,36 +9,43 @@ const RECONNECT_BASE = 350;
 const RECONNECT_MAX = 15000;
 const WATCHDOG_INTERVAL = 14000;
 const CLIENT_PING_INTERVAL = 20000;
-const MIN_RECONNECT_DELAY = 500;
+const MIN_RECONNECT_DELAY = 500; // safety floor
 
 const RealtimeContext = createContext({
   vibers: [],
-  connectToStream: () => {},
-  disconnect: () => {},
-  send: () => {},
+  connectToStream: (id) => {},
+  disconnect: (force = true) => {},
+  send: (obj) => {},
   leaveStream: () => {},
   currentStreamId: null,
   isConnected: false,
 });
 
+function dedupeList(list) {
+  const map = new Map();
+  for (const v of list || []) {
+    if (!v?.user_id) continue;
+    map.set(v.user_id, { ...map.get(v.user_id), ...v });
+  }
+  return Array.from(map.values());
+}
+
 export function RealtimeProvider({ children }) {
   const [vibers, setVibers] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
-
   const wsRef = useRef(null);
-  const streamRef = useRef(null);
-  const shouldReconnect = useRef(false);
-  const manualDisconnect = useRef(false);
-
+  const streamRef = useRef(null); // current stream id we want to be in
+  const shouldReconnect = useRef(false); // whether to auto-reconnect
+  const manualDisconnect = useRef(false); // explicit user-initiated disconnect
   const reconnectTimer = useRef(null);
   const pingTimer = useRef(null);
   const watchdogTimer = useRef(null);
-  const connecting = useRef(false);
   const outgoingQueue = useRef([]);
+  const connecting = useRef(false);
   const backoff = useRef(0);
 
   /* -------------------------
-     Build WebSocket URL
+     Build WS URL (with token fallback)
   --------------------------*/
   async function buildWsUrl(streamId) {
     await getFirebaseToken().catch(() => null);
@@ -66,19 +67,15 @@ export function RealtimeProvider({ children }) {
   --------------------------*/
   function nextDelay() {
     backoff.current = Math.min(backoff.current + 1, 12);
-    const base = Math.max(
-      RECONNECT_BASE * Math.pow(1.6, backoff.current),
-      MIN_RECONNECT_DELAY
-    );
+    const base = Math.max(RECONNECT_BASE * Math.pow(1.6, backoff.current), MIN_RECONNECT_DELAY);
     return Math.min(base + Math.random() * 450, RECONNECT_MAX);
   }
-
   function resetBackoff() {
     backoff.current = 0;
   }
 
   /* -------------------------
-     Send wrapper (with queue)
+     Send wrapper + outgoing queue
   --------------------------*/
   function send(obj) {
     const ws = wsRef.current;
@@ -92,229 +89,303 @@ export function RealtimeProvider({ children }) {
         outgoingQueue.current.push(payload);
         return false;
       }
+    } else {
+      outgoingQueue.current.push(payload);
+      if (outgoingQueue.current.length > 500) outgoingQueue.current.shift();
+      return false;
     }
-
-    outgoingQueue.current.push(payload);
-    if (outgoingQueue.current.length > 500) outgoingQueue.current.shift();
-    return false;
   }
 
   /* -------------------------
-     Perfect message handler
+     Message handler
   --------------------------*/
   function handleMessage(msg) {
     if (!msg?.type) return;
 
     switch (msg.type) {
-      /* --------------------------------
-         FULL STATE (initial hydration)
-      --------------------------------*/
-      case "full_state":
-        setVibers(msg.participants || []);
-        return;
+      case "full_state": {
+        const list = Array.isArray(msg.participants) ? msg.participants : [];
+        setVibers(dedupeList(list));
+        break;
+      }
 
-      /* --------------------------------
-         JOIN / LEAVE
-      --------------------------------*/
       case "join": {
         const p = msg.participant;
-        if (!p) return;
-
+        if (!p?.user_id) return;
         setVibers((prev) => {
-          if (prev.some((x) => x.user_id === p.user_id)) return prev;
-          return [...prev, p];
+          if (prev.some((x) => x.user_id === p.user_id)) {
+            // update existing
+            return prev.map((x) => (x.user_id === p.user_id ? { ...x, ...p } : x));
+          }
+          return dedupeList([...prev, p]);
         });
-        return;
+        break;
       }
 
       case "leave": {
         const userId = msg.user_id;
         if (!userId) return;
-
         setVibers((prev) => prev.filter((v) => v.user_id !== userId));
-        return;
-      }
-
-      /* --------------------------------
-         USER PROFILE UPDATE
-      --------------------------------*/
-      case "update": {
-        const user = msg.user;
-        if (!user) return;
-
-        setVibers((prev) =>
-          prev.map((v) =>
-            v.user_id === user.user_id
-              ? { ...v, ...user }
-              : v
-          )
-        );
-        return;
-      }
-
-      /* --------------------------------
-         PING -> update watchdog
-      --------------------------------*/
-      case "pong":
-        return;
-
-      /* --------------------------------
-         Unknown -> ignore
-      --------------------------------*/
-      default:
-        return;
-    }
-  }
-
-  /* -------------------------
-     Flush queued messages
-  --------------------------*/
-  function flushQueue() {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-
-    while (outgoingQueue.current.length > 0) {
-      const p = outgoingQueue.current.shift();
-      try {
-        ws.send(p);
-      } catch {
         break;
       }
+
+      case "update": {
+        const user = msg.user;
+        if (!user?.user_id) return;
+        setVibers((prev) => prev.map((v) => (v.user_id === user.user_id ? { ...v, ...user } : v)));
+        break;
+      }
+
+      case "pong":
+        // backend pong - no UI action required
+        break;
+
+      default:
+        // forward other messages (chat/playback) to app
+        window.dispatchEvent(new CustomEvent("vibie:ws", { detail: msg }));
+        break;
     }
   }
 
   /* -------------------------
-     Setup WebSocket
+     Watchdog & Ping
   --------------------------*/
-  async function connectToStream(streamId) {
-    if (!streamId) return;
+  function startWatchdog() {
+    if (watchdogTimer.current) clearInterval(watchdogTimer.current);
 
-    manualDisconnect.current = false;
-    shouldReconnect.current = true;
-    streamRef.current = streamId;
+    watchdogTimer.current = setInterval(() => {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        if (shouldReconnect.current && streamRef.current) {
+          scheduleReconnect(0);
+        }
+        return;
+      }
 
-    await openWs(streamId);
+      try {
+        ws.send(JSON.stringify({ type: "ping" }));
+      } catch {
+        try { ws.close(); } catch {}
+      }
+    }, WATCHDOG_INTERVAL);
+  }
+
+  function startClientPing() {
+    if (pingTimer.current) clearInterval(pingTimer.current);
+    pingTimer.current = setInterval(() => {
+      try {
+        send({ type: "ping" });
+      } catch {}
+    }, CLIENT_PING_INTERVAL);
   }
 
   /* -------------------------
-     Open WebSocket (core)
+     Open websocket
   --------------------------*/
-  async function openWs(streamId) {
+  async function open(streamId) {
+    if (!streamId) return;
+
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN && streamRef.current === streamId) {
+      setIsConnected(true);
+      return;
+    }
+
     if (connecting.current) return;
     connecting.current = true;
 
-    const wsUrl = await buildWsUrl(streamId);
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    try {
+      const url = await buildWsUrl(streamId);
+      const socket = new WebSocket(url);
+      wsRef.current = socket;
 
-    ws.onopen = () => {
-      connecting.current = false;
-      resetBackoff();
-      setIsConnected(true);
+      socket.onopen = () => {
+        connecting.current = false;
+        resetBackoff();
+        setIsConnected(true);
 
-      flushQueue();
+        send({
+          type: "resume",
+          client_time: Date.now(),
+          local_snapshot: {
+            last_known_playback_time: window.__LAST_PLAYBACK_TIME__ || 0,
+            last_playback_state: window.__LAST_PLAYBACK_STATE__ || "paused",
+            profile: JSON.parse(localStorage.getItem("profile") || "null"),
+          },
+        });
+        send({ type: "request_full_state" });
 
-      pingTimer.current = setInterval(() => {
-        send({ type: "ping" });
-      }, CLIENT_PING_INTERVAL);
-
-      watchdogTimer.current = setInterval(() => {
-        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-          forceReconnect();
+        // flush queue
+        while (outgoingQueue.current.length && socket.readyState === WebSocket.OPEN) {
+          try {
+            socket.send(outgoingQueue.current.shift());
+          } catch {
+            break;
+          }
         }
-      }, WATCHDOG_INTERVAL);
-    };
 
-    ws.onmessage = (ev) => {
-      try {
-        const msg = JSON.parse(ev.data);
-        handleMessage(msg);
-      } catch {}
-    };
+        startClientPing();
+        startWatchdog();
+      };
 
-    ws.onclose = () => {
-      cleanup();
-      if (!manualDisconnect.current) scheduleReconnect();
-    };
+      socket.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          handleMessage(data);
+        } catch {}
+      };
 
-    ws.onerror = () => {
-      cleanup();
-      if (!manualDisconnect.current) scheduleReconnect();
-    };
-  }
+      socket.onerror = () => {
+        try { socket.close(); } catch {}
+      };
 
-  /* -------------------------
-     Cleanup connection
-  --------------------------*/
-  function cleanup() {
-    setIsConnected(false);
+      socket.onclose = () => {
+        wsRef.current = null;
+        connecting.current = false;
+        setIsConnected(false);
 
-    if (wsRef.current) {
-      try {
-        wsRef.current.close();
-      } catch {}
+        if (pingTimer.current) {
+          clearInterval(pingTimer.current);
+          pingTimer.current = null;
+        }
+        if (watchdogTimer.current) {
+          clearInterval(watchdogTimer.current);
+          watchdogTimer.current = null;
+        }
+
+        if (shouldReconnect.current && !manualDisconnect.current && streamRef.current) {
+          scheduleReconnect();
+        }
+      };
+    } finally {
+      connecting.current = false;
     }
-
-    wsRef.current = null;
-
-    if (pingTimer.current) clearInterval(pingTimer.current);
-    if (watchdogTimer.current) clearInterval(watchdogTimer.current);
-    pingTimer.current = null;
-    watchdogTimer.current = null;
   }
 
-  /* -------------------------
-     Reconnect logic
-  --------------------------*/
-  function scheduleReconnect() {
-    if (!shouldReconnect.current) return;
+  function scheduleReconnect(immediateDelay = null) {
     if (reconnectTimer.current) return;
-
-    const delay = nextDelay();
+    const delay = immediateDelay !== null ? immediateDelay : nextDelay();
     reconnectTimer.current = setTimeout(() => {
       reconnectTimer.current = null;
-      if (shouldReconnect.current && streamRef.current) {
-        openWs(streamRef.current);
+      if (shouldReconnect.current && !manualDisconnect.current && streamRef.current) {
+        open(streamRef.current);
       }
     }, delay);
   }
 
-  function forceReconnect() {
-    cleanup();
-    scheduleReconnect();
-  }
-
   /* -------------------------
-     Manual disconnect
+     Public API: connectToStream
+     - If switching streams, first attempt to leave the previous stream via REST (best-effort)
   --------------------------*/
-  function disconnect(force = true) {
-    manualDisconnect.current = true;
-    shouldReconnect.current = false;
+  async function connectToStream(streamId) {
+    if (!streamId) return;
 
-    cleanup();
+    // if same stream and already open, no-op
+    if (streamRef.current === streamId && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
+
+    const prev = streamRef.current || localStorage.getItem("stream_id");
+
+    // If switching streams, attempt to leave previous (best-effort)
+    if (prev && prev !== streamId) {
+      try {
+        // optimistic UI removal
+        setVibers([]);
+        const token = await getFirebaseToken().catch(() => null);
+        await fetch(`${API}/stream/leave`, {
+          method: "POST",
+          headers: token ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` } : { "Content-Type": "application/json" },
+          body: JSON.stringify({ stream_id: prev }),
+        }).catch(() => {});
+      } catch {}
+    }
+
+    // set desired stream
+    streamRef.current = streamId;
+    localStorage.setItem("stream_id", streamId);
+    shouldReconnect.current = true;
+    manualDisconnect.current = false;
 
     if (reconnectTimer.current) {
       clearTimeout(reconnectTimer.current);
       reconnectTimer.current = null;
     }
 
-    if (force) setVibers([]);
+    await open(streamId);
   }
 
   /* -------------------------
-     Leave stream (clear state)
+     Manual disconnect (user triggered)
   --------------------------*/
-  function leaveStream() {
-    disconnect(true);
-    streamRef.current = null;
+  function disconnect(force = true) {
+    if (force) {
+      manualDisconnect.current = true;
+      shouldReconnect.current = false;
+    }
+
+    if (reconnectTimer.current) {
+      clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = null;
+    }
+    if (pingTimer.current) {
+      clearInterval(pingTimer.current);
+      pingTimer.current = null;
+    }
+    if (watchdogTimer.current) {
+      clearInterval(watchdogTimer.current);
+      watchdogTimer.current = null;
+    }
+
+    try {
+      if (wsRef.current) wsRef.current.close();
+    } catch {}
+    wsRef.current = null;
+    setIsConnected(false);
   }
 
   /* -------------------------
-     Cleanup on unmount
+     leaveStream
+  --------------------------*/
+  async function leaveStream() {
+    const id = streamRef.current || localStorage.getItem("stream_id");
+    if (!id) return;
+
+    try {
+      const token = await getFirebaseToken().catch(() => null);
+      await fetch(`${API}/stream/leave`, {
+        method: "POST",
+        headers: token ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` } : { "Content-Type": "application/json" },
+        body: JSON.stringify({ stream_id: id }),
+      }).catch(() => {});
+    } catch {}
+    localStorage.removeItem("stream_id");
+    streamRef.current = null;
+    setVibers([]);
+    disconnect(true);
+  }
+
+  /* -------------------------
+     Auto-connect on app load if stream_id exists
   --------------------------*/
   useEffect(() => {
+    const id = localStorage.getItem("stream_id");
+    if (id) {
+      setTimeout(() => connectToStream(id), 120);
+    }
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && shouldReconnect.current && streamRef.current) scheduleReconnect(50);
+    };
+    const onOnline = () => {
+      if (shouldReconnect.current && streamRef.current) scheduleReconnect(50);
+    };
+
+    window.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
+
     return () => {
-      disconnect(true);
+      window.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
+      // Provider is app-level; do not disconnect here
     };
   }, []);
 
@@ -324,8 +395,8 @@ export function RealtimeProvider({ children }) {
         vibers,
         connectToStream,
         disconnect,
-        leaveStream,
         send,
+        leaveStream,
         currentStreamId: streamRef.current,
         isConnected,
       }}
@@ -335,6 +406,4 @@ export function RealtimeProvider({ children }) {
   );
 }
 
-export function useRealtime() {
-  return useContext(RealtimeContext);
-}
+export const useRealtime = () => useContext(RealtimeContext);

@@ -14,33 +14,30 @@ export default function Search() {
   const [isListening, setIsListening] = useState(false);
   const [showWave, setShowWave] = useState(false);
 
+  const { currentSong, playSong } = useAudio();
   const recognitionRef = useRef(null);
   const siriWaveRef = useRef(null);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const { currentSong, playSong } = useAudio();
-
-  // Play / Pause logic
   const handlePlayPause = (song) => {
     if (currentSong?.song_id === song.id) {
-      playSong(null); // pause
+      playSong(null);
     } else {
       playSong({
         song_id: song.id,
         title: song.title,
         artist: song.channel,
-        audio_url: song.audio_url || '',
+        audio_url: song.audio_url,
         thumbnail_url: song.thumbnail,
         duration: song.duration || 0,
       });
     }
   };
 
-  // Fetch results
+  // Search fetch
   const fetchResults = useCallback(async (searchValue) => {
     if (!searchValue) return;
-
     setLoading(true);
     setSearchSubmitted(true);
     setResults([]);
@@ -51,16 +48,16 @@ export default function Search() {
 
       const normalized = newResults.map((r) => ({
         id: r.id ?? r.video_id ?? r.videoId,
-        title: r.title ?? r.name ?? 'Unknown title',
-        channel: r.channel ?? r.artist ?? '',
-        thumbnail: r.thumbnail ?? r.thumb ?? '/placeholder.jpg',
+        title: r.title ?? 'Unknown title',
+        channel: r.channel ?? '',
+        thumbnail: r.thumbnail ?? '/placeholder.jpg',
         duration: r.duration,
-        audio_url: r.audio_url ?? r.stream_url ?? '',
+        audio_url: null,
       }));
 
       setResults(normalized);
     } catch (err) {
-      console.error('Error fetching search results:', err);
+      console.error('search error:', err);
     } finally {
       setLoading(false);
     }
@@ -73,73 +70,47 @@ export default function Search() {
     siriWaveRef.current?.stop();
   };
 
-  const handleSearch = () => {
-    if (input.trim()) handleSubmitSearch(input.trim());
-  };
-
-  const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
+  const handleKeyDown = (e) => e.key === 'Enter' && handleSubmitSearch(input.trim());
 
   // Voice recognition
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SR();
     recognition.lang = 'en-IN';
     recognition.interimResults = true;
     recognition.continuous = false;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-      setShowWave(true);
-    };
+    recognition.onstart = () => { setIsListening(true); setShowWave(true); };
     recognition.onerror = recognition.onend = () => {
       setIsListening(false);
       setShowWave(false);
       siriWaveRef.current?.stop();
     };
+
     recognition.onresult = (event) => {
       let finalText = '';
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
         if (event.results[i].isFinal) finalText += t;
         else setInput(t);
       }
-      if (finalText) {
-        const trimmed = finalText.trim();
-        setInput(trimmed);
-        handleSubmitSearch(trimmed);
+
+      if (finalText.trim()) {
+        const q = finalText.trim();
+        setInput(q);
+        handleSubmitSearch(q);
       }
     };
+
     recognitionRef.current = recognition;
   }, []);
 
-  // SiriWave
-  useEffect(() => {
-    if (!showWave) return;
-    const init = () => {
-      const container = document.querySelector('.siri-voice-visualizer');
-      if (window.SiriWave && container && !siriWaveRef.current) {
-        siriWaveRef.current = new window.SiriWave({
-          container,
-          width: 270,
-          height: 70,
-          speed: 0.13,
-          amplitude: 2.5,
-          style: 'ios',
-          autostart: true,
-        });
-      } else requestAnimationFrame(init);
-    };
-    init();
-    return () => {
-      siriWaveRef.current?.stop();
-      siriWaveRef.current = null;
-    };
-  }, [showWave]);
-
   const handleMicClick = () => {
-    if (!recognitionRef.current) return alert('Voice recognition not supported');
+    if (!recognitionRef.current) return alert('No voice recognition support');
+
     if (isListening) recognitionRef.current.stop();
     else {
       navigator.vibrate?.(60);
@@ -155,7 +126,7 @@ export default function Search() {
       <div>
         <h1 className="text-3xl font-bold text-center mb-6 tracking-tight">Search Vibes</h1>
 
-        {/* Search bar */}
+        {/* search bar */}
         <div className="relative max-w-xl mx-auto">
           <input
             type="text"
@@ -177,10 +148,10 @@ export default function Search() {
           </div>
         </div>
 
-        {/* Suggestions */}
+        {/* suggestions */}
         {input.trim() && !searchSubmitted && <Suggestions query={input} onSelect={handleSubmitSearch} />}
 
-        {/* Results */}
+        {/* results */}
         {!loading && results.length > 0 && (
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {results.map((song) => (
@@ -191,33 +162,55 @@ export default function Search() {
                 className="group relative rounded-2xl bg-white/30 dark:bg-neutral-800/40 backdrop-blur-lg border border-white/10 shadow-lg overflow-hidden"
               >
                 <div className="relative w-full h-36">
-                  <img src={song.thumbnail || '/placeholder.jpg'} onError={(e) => (e.target.src = '/placeholder.jpg')} alt={song.title} className="object-cover w-full h-full group-hover:scale-110 transition-all" />
+                  <img
+                    src={song.thumbnail}
+                    onError={(e) => (e.target.src = '/placeholder.jpg')}
+                    className="object-cover w-full h-full group-hover:scale-110 transition-all"
+                  />
+
+                  {/* PLAY BUTTON */}
                   <button
                     onClick={() => handlePlayPause(song)}
-                    className="absolute bottom-2 right-2 z-20 p-2 rounded-full shadow-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white transition-all md:opacity-0 md:group-hover:opacity-100"
+                    className="absolute bottom-2 right-2 z-20 p-2 rounded-full shadow-lg
+                      bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500
+                      text-white transition-all md:opacity-0 md:group-hover:opacity-100"
                   >
                     {currentSong?.song_id === song.id ? <Pause size={18} /> : <Play size={18} />}
                   </button>
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent" />
                 </div>
+
                 <div className="p-3 text-sm">
                   <h2 className="font-semibold truncate">{song.title}</h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{song.channel}</p>
-                  {song.duration && <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{song.duration}</p>}
+                  {song.duration && (
+                    <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
+                      {song.duration}s
+                    </p>
+                  )}
                 </div>
               </motion.div>
             ))}
           </div>
         )}
 
-        {!loading && searchSubmitted && results.length === 0 && <div className="text-center mt-10 text-sm text-gray-400">No results found. Try another vibe!</div>}
         {loading && <div className="text-center mt-6 text-sm text-gray-400">Loading...</div>}
+        {!loading && searchSubmitted && results.length === 0 && (
+          <div className="text-center mt-10 text-sm text-gray-400">No results found</div>
+        )}
       </div>
 
-      {/* SiriWave */}
+      {/* wave */}
       <AnimatePresence>
         {showWave && (
-          <motion.div key="siriwave" initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="fixed bottom-14 left-0 w-full flex justify-center z-50">
+          <motion.div
+            key="siriwave"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-14 left-0 w-full flex justify-center z-50"
+          >
             <div className="siri-voice-visualizer w-[250px] h-[60px]" />
           </motion.div>
         )}

@@ -63,7 +63,6 @@ export default function VibersPopup({ onClose, streamId }) {
                   alt={v.name}
                   className="w-10 h-10 rounded-full object-cover border border-white dark:border-gray-700 shadow-sm"
                 />
-
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">
                     {v.name || "Unknown"}

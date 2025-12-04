@@ -12,14 +12,14 @@ export default function Search() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showWave, setShowWave] = useState(false);
-
-  const [playingId, setPlayingId] = useState(null); // NEW
+  const [playingId, setPlayingId] = useState(null);
 
   const recognitionRef = useRef(null);
   const siriWaveRef = useRef(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
 
+  // Play logic
   const handlePlayPause = (song) => {
     if (playingId === song.id) {
       setPlayingId(null);
@@ -28,6 +28,7 @@ export default function Search() {
     }
   };
 
+  // Fetch results
   const fetchResults = useCallback(async (searchValue) => {
     if (!searchValue) return;
 
@@ -58,6 +59,7 @@ export default function Search() {
     }
   }, [backendUrl]);
 
+  // Submit search
   const handleSubmitSearch = (value) => {
     setQuery(value);
     fetchResults(value);
@@ -71,6 +73,7 @@ export default function Search() {
 
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
 
+  // Voice recognition
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
 
@@ -210,15 +213,16 @@ export default function Search() {
                     className="
                       absolute bottom-2 right-2 z-20
                       p-2 rounded-full shadow-lg
-                      bg-white/80 dark:bg-neutral-900/80 backdrop-blur
+                      bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500
+                      text-white
                       transition-all
                       md:opacity-0 md:group-hover:opacity-100
                     "
                   >
                     {playingId === song.id ? (
-                      <Pause size={18} className="text-black dark:text-white" />
+                      <Pause size={18} className="text-white" />
                     ) : (
-                      <Play size={18} className="text-black dark:text-white" />
+                      <Play size={18} className="text-white" />
                     )}
                   </button>
 

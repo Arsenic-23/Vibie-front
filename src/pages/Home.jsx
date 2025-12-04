@@ -7,6 +7,7 @@ import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
 import PlayPauseButton from '../components/PlayPauseButton';
 import { AnimatedThumb } from '../components/ThumbAnimation';
+import { useAudio } from '../context/AudioProvider';
 
 export default function Home() {
   const { setIsSongQueueOpen, setIsVibersPopupOpen } = useUIContext();
@@ -15,33 +16,25 @@ export default function Home() {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const [userPhoto, setUserPhoto] = useState(null);
-  const [progress, setProgress] = useState(40);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
+  const { currentSong, isPlaying, togglePlay, progress, seek } = useAudio();
+
   /* ------------------------------
-     LOAD PROFILE PICTURE CORRECTLY
+     LOAD PROFILE AND LIKE/DISLIKE STATE
   ------------------------------ */
   useEffect(() => {
-    // Vibie App Profile Cache only
     const cached = JSON.parse(localStorage.getItem("profile") || "null");
-    const vibiePhoto = cached?.photo;
+    setUserPhoto(cached?.photo || null);
 
-    if (vibiePhoto) {
-      setUserPhoto(vibiePhoto);
-    } else {
-      setUserPhoto(null);
-    }
-
-    // Restore like/dislike state
-    const storedLiked = localStorage.getItem('liked');
-    const storedDisliked = localStorage.getItem('disliked');
-    if (storedLiked === 'true') setLiked(true);
-    if (storedDisliked === 'true') setDisliked(true);
+    const storedLiked = localStorage.getItem('liked') === 'true';
+    const storedDisliked = localStorage.getItem('disliked') === 'true';
+    setLiked(storedLiked);
+    setDisliked(storedDisliked);
   }, []);
 
   useEffect(() => {
@@ -50,6 +43,7 @@ export default function Home() {
   }, [liked, disliked]);
 
   const fetchLyrics = async () => {
+    if (!currentSong) return alert('No song is playing.');
     try {
       const res = await fetch('https://vibie-backend.onrender.com/lyrics', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
@@ -65,10 +59,7 @@ export default function Home() {
   const popupVisible = showQueue || showVibers;
 
   return (
-    <div
-      className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
-      style={{ overscrollBehavior: 'none', touchAction: 'none', WebkitTapHighlightColor: 'transparent' }}
-    >
+    <div className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300">
       <style>{`* { -webkit-tap-highlight-color: transparent; }`}</style>
 
       {/* --------------------- TOP BAR --------------------- */}
@@ -90,7 +81,7 @@ export default function Home() {
           <span className="text-base font-semibold">Vibie</span>
         </div>
 
-        {/* PROFILE PICTURE (UPDATED + SYNced) */}
+        {/* PROFILE PICTURE */}
         <div className="relative">
           <div className="w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full">
             <img
@@ -115,37 +106,21 @@ export default function Home() {
       {/* ------------------- POPUPS ------------------- */}
       {showVibers && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
-          <VibersPopup
-            onClose={() => {
-              setShowVibers(false);
-              setIsVibersPopupOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowVibers(false);
+            setIsVibersPopupOpen(false);
+          }} />
+          <VibersPopup onClose={() => { setShowVibers(false); setIsVibersPopupOpen(false); }} />
         </div>
       )}
 
       {showQueue && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
-          <SongQueue
-            onClose={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
+          <SongQueue onClose={() => { setShowQueue(false); setIsSongQueueOpen(false); }} />
         </div>
       )}
 
@@ -155,12 +130,16 @@ export default function Home() {
           className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-3"
           style={{ width: 'min(80vw, 320px)', height: 'min(80vw, 320px)' }}
         >
-          <img src="https://placehold.co/thumbnail" alt="Now Playing" className="w-full h-full object-cover" />
+          <img
+            src={currentSong?.thumbnail_url || 'https://placehold.co/thumbnail'}
+            alt={currentSong?.title || 'Now Playing'}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <div className="w-full flex flex-col items-start px-2 mb-3">
-          <h2 className="text-xl font-bold">Song Title</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Artist Name</p>
+          <h2 className="text-xl font-bold truncate">{currentSong?.title || 'Song Title'}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{currentSong?.artist || 'Artist Name'}</p>
 
           <div className="flex items-center gap-4 mt-2">
             <button
@@ -171,10 +150,7 @@ export default function Home() {
               className="p-2 rounded-full transition-all duration-200"
             >
               <AnimatedThumb active={liked}>
-                <ThumbsUp
-                  size={20}
-                  className={`${liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`}
-                />
+                <ThumbsUp size={20} className={`${liked ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`} />
               </AnimatedThumb>
             </button>
 
@@ -186,10 +162,7 @@ export default function Home() {
               className="p-2 rounded-full transition-all duration-200"
             >
               <AnimatedThumb active={disliked}>
-                <ThumbsDown
-                  size={20}
-                  className={`${disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}
-                />
+                <ThumbsDown size={20} className={`${disliked ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`} />
               </AnimatedThumb>
             </button>
           </div>
@@ -201,12 +174,12 @@ export default function Home() {
         <input
           type="range"
           min="0"
-          max="100"
+          max={currentSong?.duration || 100}
           value={progress}
-          onChange={(e) => setProgress(e.target.value)}
+          onChange={(e) => seek(Number(e.target.value))}
           className="w-full appearance-none"
           style={{
-            background: `linear-gradient(to right, ${progressColor} ${progress}%, rgba(128,128,128,0.2) ${progress}%)`,
+            background: `linear-gradient(to right, ${progressColor} ${currentSong ? (progress / currentSong.duration) * 100 : progress}%, rgba(128,128,128,0.2) ${currentSong ? (progress / currentSong.duration) * 100 : progress}%)`,
             height: '4px',
             borderRadius: '999px',
           }}
@@ -229,11 +202,8 @@ export default function Home() {
         `}</style>
 
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
-          <span>
-            {Math.floor((progress / 100) * 3.75)}:
-            {String(Math.floor(((progress / 100) * 3.75 * 60) % 60)).padStart(2, '0')}
-          </span>
-          <span>3:45</span>
+          <span>{currentSong ? `${Math.floor(progress / 60)}:${String(Math.floor(progress % 60)).padStart(2,'0')}` : '0:00'}</span>
+          <span>{currentSong ? `${Math.floor(currentSong.duration / 60)}:${String(Math.floor(currentSong.duration % 60)).padStart(2,'0')}` : '0:00'}</span>
         </div>
       </div>
 
@@ -243,7 +213,7 @@ export default function Home() {
           <Mic2 size={20} />
         </button>
 
-        <PlayPauseButton isPlaying={isPlaying} onClick={() => setIsPlaying(!isPlaying)} />
+        <PlayPauseButton isPlaying={isPlaying} onClick={togglePlay} />
 
         <button
           ref={queueBtnRef}

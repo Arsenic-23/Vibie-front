@@ -5,7 +5,6 @@ import NavigationBar from '../components/NavigationBar';
 import SongQueue from '../components/SongQueue';
 import VibersPopup from '../components/VibersPopup';
 import ProfilePopup from '../components/ProfilePopup';
-import PlayPauseButton from '../components/PlayPauseButton';
 import { AnimatedThumb } from '../components/ThumbAnimation';
 import { useAudio } from '../context/AudioProvider';
 
@@ -17,20 +16,26 @@ export default function Home() {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const [userPhoto, setUserPhoto] = useState(null);
-
-  const [progress, setProgress] = useState(0);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
   const vibersBtnRef = useRef(null);
   const queueBtnRef = useRef(null);
 
-  /** ------------------------------
-   *   GLOBAL AUDIO PROVIDER
-   *  ------------------------------ */
-  const { currentSong, isPlaying, setIsPlaying } = useAudio();
+  /** AUDIO PROVIDER */
+  const {
+    currentSong,
+    isPlaying,
+    setIsPlaying,
+    currentTime,
+    duration,
+    seekTo
+  } = useAudio();
 
-  /** Load profile & like states */
+  /** Progress % */
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  /** Load profile + likes */
   useEffect(() => {
     const cached = JSON.parse(localStorage.getItem("profile") || "null");
     setUserPhoto(cached?.photo || null);
@@ -58,17 +63,24 @@ export default function Home() {
     }
   };
 
-  const progressColor = window.matchMedia("(prefers-color-scheme: dark)").matches ? "white" : "black";
+  const progressColor = window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "white"
+    : "black";
+
   const popupVisible = showQueue || showVibers;
 
-  return (
-    <div
-      className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300"
-      style={{ overscrollBehavior: "none", touchAction: "none", WebkitTapHighlightColor: "transparent" }}
-    >
-      <style>{`* { -webkit-tap-highlight-color: transparent; }`}</style>
+  /* Convert time to MM:SS */
+  const formatTime = (sec) => {
+    if (!sec || isNaN(sec)) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
 
-      {/* --------------------- TOP BAR --------------------- */}
+  return (
+    <div className="min-h-screen w-full pb-36 px-4 pt-4 bg-white dark:bg-black text-black dark:text-white overflow-hidden transition-colors duration-300">
+
+      {/* ------------ TOP BAR ------------ */}
       <div className="flex items-center justify-between mb-5">
         <button
           ref={vibersBtnRef}
@@ -92,7 +104,6 @@ export default function Home() {
           <div className="w-12 h-12 p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full">
             <img
               src={userPhoto}
-              alt="Profile"
               onClick={() => setShowProfilePopup(true)}
               className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800 cursor-pointer"
             />
@@ -109,11 +120,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ------------------- POPUPS ------------------- */}
+      {/* ------------ POPUPS ------------ */}
       {showVibers && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+        <div className="fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60"
             onClick={() => {
               setShowVibers(false);
               setIsVibersPopupOpen(false);
@@ -127,37 +138,34 @@ export default function Home() {
       )}
 
       {showQueue && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+        <div className="fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60"
             onClick={() => {
               setShowQueue(false);
               setIsSongQueueOpen(false);
             }}
           />
-          <SongQueue
-            onClose={() => {
-              setShowQueue(false);
-              setIsSongQueueOpen(false);
-            }}
-          />
+          <SongQueue onClose={() => {
+            setShowQueue(false);
+            setIsSongQueueOpen(false);
+          }} />
         </div>
       )}
 
-      {/* ------------------- SONG ART + METADATA ------------------- */}
-      <div className="flex flex-col items-center mt-2">
+      {/* ------------ SONG ART & META ------------ */}
+      <div className="flex flex-col items-center mt-3">
         <div
-          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800 mb-3"
+          className="rounded-3xl overflow-hidden shadow-2xl bg-gray-300 dark:bg-gray-800"
           style={{ width: "min(80vw, 320px)", height: "min(80vw, 320px)" }}
         >
           <img
-            src={currentSong?.thumbnail_url ?? "https://placehold.co/thumbnail"}
-            alt="Now Playing"
+            src={currentSong?.thumbnail_url ?? "https://placehold.co/300"}
             className="w-full h-full object-cover"
           />
         </div>
 
-        <div className="w-full flex flex-col items-start px-2 mb-3">
+        <div className="w-full mt-4 px-2 flex flex-col items-start">
           <h2 className="text-xl font-bold">
             {currentSong?.title ?? "No song playing"}
           </h2>
@@ -166,49 +174,31 @@ export default function Home() {
             {currentSong?.artist ?? ""}
           </p>
 
-          {/* Like / Dislike */}
-          <div className="flex items-center gap-4 mt-2">
-            <button
-              onClick={() => {
-                setLiked(!liked);
-                if (disliked) setDisliked(false);
-              }}
-              className="p-2 rounded-full transition-all duration-200"
-            >
+          {/* LIKE / DISLIKE */}
+          <div className="flex items-center gap-4 mt-3">
+            <button onClick={() => { setLiked(!liked); if (disliked) setDisliked(false); }}>
               <AnimatedThumb active={liked}>
-                <ThumbsUp
-                  size={20}
-                  className={liked ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"}
-                />
+                <ThumbsUp size={20} className={liked ? "text-blue-600" : "text-gray-500"} />
               </AnimatedThumb>
             </button>
 
-            <button
-              onClick={() => {
-                setDisliked(!disliked);
-                if (liked) setLiked(false);
-              }}
-              className="p-2 rounded-full transition-all duration-200"
-            >
+            <button onClick={() => { setDisliked(!disliked); if (liked) setLiked(false); }}>
               <AnimatedThumb active={disliked}>
-                <ThumbsDown
-                  size={20}
-                  className={disliked ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-300"}
-                />
+                <ThumbsDown size={20} className={disliked ? "text-red-600" : "text-gray-500"} />
               </AnimatedThumb>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ------------------- SLIDER ------------------- */}
-      <div className="w-full px-4 mt-2">
+      {/* ------------ PROGRESS BAR ------------ */}
+      <div className="w-full px-4 mt-4">
         <input
           type="range"
           min="0"
           max="100"
           value={progress}
-          onChange={(e) => setProgress(e.target.value)}
+          onChange={(e) => seekTo(Number(e.target.value))}
           className="w-full appearance-none"
           style={{
             background: `linear-gradient(to right, ${progressColor} ${progress}%, rgba(128,128,128,0.2) ${progress}%)`,
@@ -217,7 +207,6 @@ export default function Home() {
           }}
         />
 
-        {/* thumb styling */}
         <style>{`
           input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -226,24 +215,24 @@ export default function Home() {
             margin-top: -5px;
             background: ${progressColor};
             border-radius: 50%;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
           }
         `}</style>
 
-        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
-          <span>0:00</span>
-          <span>{currentSong?.duration ? `${Math.floor(currentSong.duration / 60)}:${String(currentSong.duration % 60).padStart(2, "0")}` : "0:00"}</span>
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
       </div>
 
-      {/* ------------------- PLAYER CONTROLS ------------------- */}
+      {/* ------------ PLAYER CONTROLS ------------ */}
       <div className="mt-10 flex items-center justify-center gap-6">
-        <button onClick={fetchLyrics} className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md">
+        <button
+          onClick={fetchLyrics}
+          className="p-3 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md"
+        >
           <Mic2 size={20} />
         </button>
 
-        {/* GLOBAL PLAYER BUTTON */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
           className="p-4 rounded-full bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white shadow-lg"

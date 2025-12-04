@@ -8,14 +8,20 @@ export default function VibersPopup({ onClose, streamId }) {
   const [initialSnapshot, setInitialSnapshot] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const normalize = (list) =>
-    list.map((v) => ({
-      user_id: v.user_id,
-      name: v.name,
-      username: v.username,
-      profile_pic: v.profile_pic,
-      is_admin: v.is_admin || false,
-    }));
+  const normalize = (list) => {
+    const map = new Map();
+    for (const v of list || []) {
+      if (!v?.user_id) continue;
+      map.set(v.user_id, {
+        user_id: v.user_id,
+        name: v.name,
+        username: v.username,
+        profile_pic: v.profile_pic,
+        is_admin: v.is_admin || false,
+      });
+    }
+    return Array.from(map.values());
+  };
 
   async function fetchSnapshot(id) {
     if (!id) return;
@@ -38,15 +44,13 @@ export default function VibersPopup({ onClose, streamId }) {
   useEffect(() => {
     const id = streamId || localStorage.getItem("stream_id");
     if (!id) return;
-    // fetch initial snapshot once when popup mounts
     fetchSnapshot(id);
-
-    // optionally: refetch after a short delay to catch join races
     const t = setTimeout(() => fetchSnapshot(id), 700);
     return () => clearTimeout(t);
   }, [streamId]);
 
-  const participants = vibers.length > 0 ? normalize(vibers) : initialSnapshot;
+  // prefer live vibers (deduped), else snapshot
+  const participants = (vibers && vibers.length > 0) ? normalize(vibers) : initialSnapshot;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-start p-2 select-none">

@@ -9,47 +9,63 @@ export const AudioProvider = ({ children }) => {
   const [currentSong, setCurrentSong] = useState(null);
   const [queue, setQueue] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
 
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const audioRef = useRef(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+  /* Initialize */
   useEffect(() => {
     if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
 
-    const handleEnded = () => playNext();
-    audioRef.current.addEventListener('ended', handleEnded);
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const loaded = () => setDuration(audio.duration);
+    const ended = () => playNext();
 
-    return () => audioRef.current.removeEventListener('ended', handleEnded);
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("loadedmetadata", loaded);
+    audio.addEventListener("ended", ended);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("loadedmetadata", loaded);
+      audio.removeEventListener("ended", ended);
+    };
   }, []);
 
-  // Sync play/pause
+  /* Sync play/pause */
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
 
-    if (isPlaying) audio.play().catch(() => setIsPlaying(false));
-    else audio.pause();
+    if (isPlaying) {
+      audio.play().catch(() => setIsPlaying(false));
+    } else {
+      audio.pause();
+    }
   }, [isPlaying, currentSong]);
 
-  // Get audio URL from backend
+  /* Fetch audio URL */
   const fetchAudioUrl = async (videoId) => {
     const res = await axios.get(`${backendUrl}/audio/audio/fetch`, {
       params: { video_id: videoId },
     });
-
     return res.data.audioUrl;
   };
 
+  /* Play a song */
   const playSong = async (song) => {
     if (!song) {
-      setIsPlaying(false);
       audioRef.current.pause();
+      setIsPlaying(false);
       return;
     }
 
     if (!song.audio_url) {
-      const url = await fetchAudioUrl(song.song_id);
-      song.audio_url = url;
+      song.audio_url = await fetchAudioUrl(song.song_id);
     }
 
     setCurrentSong(song);
@@ -57,14 +73,11 @@ export const AudioProvider = ({ children }) => {
     setIsPlaying(true);
   };
 
-  const addToQueue = (song) => {
-    setQueue((prev) => [...prev, song]);
-  };
+  /* Queue handling */
+  const addToQueue = (song) => setQueue((prev) => [...prev, song]);
+  const removeFromQueue = (songId) => setQueue((prev) => prev.filter((s) => s.song_id !== songId));
 
-  const removeFromQueue = (songId) => {
-    setQueue((prev) => prev.filter((s) => s.song_id !== songId));
-  };
-
+  /* Play next */
   const playNext = async () => {
     if (queue.length === 0) {
       setCurrentSong(null);
@@ -72,16 +85,22 @@ export const AudioProvider = ({ children }) => {
       return;
     }
 
-    const nextSong = queue[0];
+    const next = queue[0];
     setQueue((prev) => prev.slice(1));
 
-    if (!nextSong.audio_url) {
-      nextSong.audio_url = await fetchAudioUrl(nextSong.song_id);
-    }
+    if (!next.audio_url) next.audio_url = await fetchAudioUrl(next.song_id);
 
-    setCurrentSong(nextSong);
-    audioRef.current.src = nextSong.audio_url;
+    setCurrentSong(next);
+    audioRef.current.src = next.audio_url;
     setIsPlaying(true);
+  };
+
+  /* Seek */
+  const seekTo = (percent) => {
+    if (!audioRef.current || !duration) return;
+    const newTime = (percent / 100) * duration;
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   return (
@@ -95,6 +114,10 @@ export const AudioProvider = ({ children }) => {
         addToQueue,
         removeFromQueue,
         playNext,
+
+        currentTime,
+        duration,
+        seekTo,
       }}
     >
       {children}
